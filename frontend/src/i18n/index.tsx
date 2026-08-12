@@ -33,7 +33,7 @@ function readInitialLocale(): Locale {
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(readInitialLocale)
-  const dir = locale === 'ar' ? 'rtl' : 'ltr'
+  const dir: 'ltr' | 'rtl' = locale === 'ar' ? 'rtl' : 'ltr'
 
   useEffect(() => {
     document.documentElement.lang = locale

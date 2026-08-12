@@ -66,13 +66,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // A refresh failure anywhere in the app drops the session here too.
-  useEffect(
-    () =>
-      onAuthChange((authenticated) => {
-        if (!authenticated) setUser(null)
-      }),
-    [],
-  )
+  useEffect(() => {
+    const unsubscribe = onAuthChange((authenticated) => {
+      if (!authenticated) setUser(null)
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   const signIn = useCallback(
     async (email: string, password: string) => {
