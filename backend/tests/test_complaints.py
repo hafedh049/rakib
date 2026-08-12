@@ -17,33 +17,6 @@ BODY = (
 )
 
 
-@pytest.fixture
-async def agent_headers(client, make_user, login, departments):
-    """An agent who actually belongs to a department, as in production."""
-    await make_user(
-        email="agent@rakib.tn", password="Password123!", role=Role.AGENT,
-        department_id=departments["FACTURATION"].id,
-    )
-    return await login(client, "agent@rakib.tn", "Password123!")
-
-
-@pytest.fixture
-def routed_complaint(client):
-    """Create a complaint and route it, the way the triage worker will."""
-
-    async def _create(category: str = Category.FACTURATION) -> dict:
-        from app.services import complaint_service
-
-        created = (await client.post(COMPLAINTS, json=payload())).json()
-        complaint = await Complaint.get(created["id"])
-        complaint.analysis.category = category
-        await complaint_service.route_to_category_department(complaint, category)
-        await complaint.save()
-        return created
-
-    return _create
-
-
 def payload(**overrides):
     base = {
         "subject": "Facture anormalement elevee",

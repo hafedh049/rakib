@@ -63,7 +63,9 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "ASYNC", "RUF"]
+# BLE: blind `except Exception` must carry a noqa explaining why swallowing is
+# correct. Several are (publish, notifiers, health probes) — but each is a choice.
+select = ["E", "F", "I", "UP", "B", "ASYNC", "RUF", "BLE"]
 # B008: FastAPI's Depends() in defaults is the framework idiom.
 # RUF012: Beanie's `class Settings: indexes = [...]` is its documented convention.
 # RUF001-003: "ambiguous unicode" fires on every Arabic letter. This system

@@ -4,7 +4,9 @@ from fastapi import APIRouter, Response, status
 
 from app import db
 from app.config import settings
+from app.events import bus
 from app.intelligence.text import language as lid
+from app.notifiers.sse import broker
 from app.services import triage
 
 router = APIRouter(tags=["health"])
@@ -23,17 +25,20 @@ async def ready(response: Response) -> dict[str, Any]:
     Deleting `ml_artifacts/` and restarting must still yield a working system —
     and that state has to be visible here rather than inferred.
     """
-    mongo_ok = await db.ping()
     engine = triage.health()
 
-    checks = {"mongo": mongo_ok}
+    # Redis backs notifications, not the request path — it is reported but does
+    # not make the service unready.
+    checks = {"mongo": await db.ping()}
+    optional = {"redis": await bus.health()}
     ready_now = all(checks.values())
     if not ready_now:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
 
     return {
         "status": "ready" if ready_now else "not-ready",
-        "checks": checks,
+        "checks": {**checks, **optional},
+        "sse_clients": broker.subscriber_count,
         "engine": {
             "configured_backend": settings.triage_backend,
             "active_engine": engine.name,

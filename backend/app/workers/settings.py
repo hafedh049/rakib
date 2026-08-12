@@ -1,0 +1,39 @@
+"""arq worker configuration.
+
+Background jobs and cron live here: triage (phase 6), SLA sweeps (phase 7) and
+retraining (phase 9) are registered as they land. The event-stream consumer is a
+separate process (workers/notify_worker.py) because it is a stream consumer, not
+a job queue.
+"""
+
+from typing import Any
+
+from arq.connections import RedisSettings
+
+from app.config import settings
+from app.core.logging import configure_logging, get_logger
+from app.db import close_db, init_db
+
+log = get_logger(__name__)
+
+
+async def startup(ctx: dict[str, Any]) -> None:
+    configure_logging()
+    await init_db()
+    log.info("worker.started")
+
+
+async def shutdown(ctx: dict[str, Any]) -> None:
+    await close_db()
+    log.info("worker.stopped")
+
+
+class WorkerSettings:
+    redis_settings = RedisSettings.from_dsn(settings.redis_url)
+    on_startup = startup
+    on_shutdown = shutdown
+    functions: list = []
+    cron_jobs: list = []
+    max_jobs = 10
+    job_timeout = 120
+    keep_result = 3600

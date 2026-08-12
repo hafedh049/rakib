@@ -11,17 +11,27 @@ services:
       timeout: 5s
       retries: 20
 
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
   tests:
     build:
       context: ./backend
       dockerfile: Dockerfile.test
     environment:
       MONGO_URI: mongodb://mongo:27017/rakib_test
+      REDIS_URL: redis://redis:6379/0
       ENVIRONMENT: test
       JWT_SECRET: test-secret-at-least-32-bytes-long-ok
       TRACKING_TOKEN_SECRET: test-tracking-secret-at-least-32-bytes
     depends_on:
       mongo: {condition: service_healthy}
+      redis: {condition: service_healthy}
     volumes:
       - ./backend/app:/app/app
       - ./backend/tests:/app/tests

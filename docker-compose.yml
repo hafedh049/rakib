@@ -73,6 +73,18 @@ services:
       api: {condition: service_started}
     command: ["arq", "app.workers.settings.WorkerSettings"]
 
+  # Stream consumer, not a job queue — hence its own process rather than arq.
+  notifier:
+    build: ./backend
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      MONGO_URI: mongodb://mongo:27017/reclamations
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      api: {condition: service_started}
+    command: ["python", "-m", "app.workers.notify_worker"]
+
 volumes:
   mongo_data:
   redis_data:

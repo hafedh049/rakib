@@ -15,6 +15,8 @@ os.environ.setdefault(
 
 from app import db
 from app.core.security import hash_password
+from app.events import bus
+from app.events.types import STREAM_KEY
 from app.main import app
 from app.models import ALL_DOCUMENTS
 from app.models.department import Department
@@ -45,6 +47,10 @@ async def _clean_collections() -> AsyncIterator[None]:
     await seed_departments()
     await seed_rules()
     await triage.refresh_rules()
+    try:
+        await bus.get_redis().delete(STREAM_KEY)
+    except Exception:  # noqa: BLE001 — Redis is optional for most tests
+        pass
     yield
 
 
@@ -79,6 +85,46 @@ def make_user():
         return user
 
     return _make
+
+
+@pytest.fixture
+async def agent_headers(client, make_user, login, departments):
+    """An agent who actually belongs to a department, as in production."""
+    await make_user(
+        email="agent@rakib.tn", password="Password123!", role=Role.AGENT,
+        department_id=departments["FACTURATION"].id,
+    )
+    return await login(client, "agent@rakib.tn", "Password123!")
+
+
+@pytest.fixture
+def routed_complaint(client):
+    """Create a complaint and route it, the way the triage worker will."""
+
+    async def _create(category: str = "FACTURATION") -> dict:
+        from app.models.complaint import Complaint
+        from app.services import complaint_service
+
+        created = (
+            await client.post(
+                "/api/v1/complaints",
+                json={
+                    "subject": "Facture anormalement elevee",
+                    "body": "Ma facture de janvier s'eleve a 187 dinars alors que "
+                            "mon forfait est a 45 dinars. Merci de verifier.",
+                    "claimant": {
+                        "full_name": "Fatma Ben Ali", "email": "fatma@example.tn"
+                    },
+                },
+            )
+        ).json()
+        complaint = await Complaint.get(created["id"])
+        complaint.analysis.category = category
+        await complaint_service.route_to_category_department(complaint, category)
+        await complaint.save()
+        return created
+
+    return _create
 
 
 @pytest.fixture

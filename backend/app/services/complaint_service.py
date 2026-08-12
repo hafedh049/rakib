@@ -20,6 +20,8 @@ from app.domain.taxonomy import (
     GENERAL_DEPARTMENT_CODE,
     department_for_category,
 )
+from app.events.bus import publish
+from app.events.types import EventName
 from app.models.complaint import (
     CLOSED_STATUSES,
     Assignment,
@@ -42,6 +44,27 @@ log = get_logger(__name__)
 #: Until triage runs, a complaint gets the "normal" budget so it can never sit
 #: on the SLA board with no clock at all. Triage overwrites this (spec 5.6).
 PROVISIONAL_PRIORITY = 3
+
+
+def event_payload(complaint: Complaint, **extra: Any) -> dict[str, Any]:
+    """The shared shape every notifier reads. Kept flat so it survives JSON."""
+    payload: dict[str, Any] = {
+        "complaint_id": str(complaint.id),
+        "ref": complaint.ref,
+        "subject": complaint.subject,
+        "status": str(complaint.status),
+        "channel": str(complaint.channel),
+        "priority": complaint.analysis.priority,
+        "category": complaint.analysis.category,
+        "claimant_name": complaint.claimant.full_name,
+        "claimant_email": complaint.claimant.email,
+        "department": (
+            complaint.assignment.department_code if complaint.assignment else None
+        ),
+        "due_at": complaint.sla.due_at.isoformat() if complaint.sla.due_at else None,
+    }
+    payload.update(extra)
+    return payload
 
 
 # ------------------------------------------------------------------------- creation
@@ -74,11 +97,15 @@ async def create_complaint(
     )
     await complaint.insert()
 
+    url = tracking_url(complaint)
+    await publish(
+        EventName.COMPLAINT_CREATED, event_payload(complaint, tracking_url=url)
+    )
     log.info(
         "complaint.created", ref=complaint.ref, channel=str(payload.channel),
         authenticated=actor is not None,
     )
-    return complaint, tracking_url(complaint)
+    return complaint, url
 
 
 def tracking_url(complaint: Complaint) -> str:
@@ -259,6 +286,22 @@ async def patch_complaint(
     )
     complaint.touch()
     await complaint.save()
+
+    await publish(
+        EventName.COMPLAINT_UPDATED,
+        event_payload(complaint, changed=list(changed), actor_id=str(actor.id)),
+    )
+    if "category" in changed or "department" in changed:
+        # The training signal for phase 9: a human disagreed with the engine.
+        await publish(
+            EventName.TRIAGE_CORRECTED,
+            event_payload(
+                complaint,
+                previous_category=changed.get("category", (None, None))[0],
+                new_category=complaint.analysis.category,
+                corrected_by=str(actor.id),
+            ),
+        )
     log.info("complaint.updated", ref=complaint.ref, fields=list(changed))
     return complaint
 
@@ -331,6 +374,14 @@ async def add_message(
         complaint.status = Status.IN_PROGRESS
     complaint.touch()
     await complaint.save()
+
+    if not internal:
+        await publish(
+            EventName.COMPLAINT_REPLIED,
+            event_payload(
+                complaint, message=message.body, tracking_url=tracking_url(complaint)
+            ),
+        )
     return message
 
 
@@ -357,6 +408,15 @@ async def resolve(complaint: Complaint, resolution: str, actor: User) -> Complai
     complaint.log("complaint.resolved", actor_type="agent", actor_id=str(actor.id))
     complaint.touch()
     await complaint.save()
+
+    await publish(
+        EventName.COMPLAINT_RESOLVED,
+        event_payload(
+            complaint,
+            resolution=resolution,
+            satisfaction_url=satisfaction_url(complaint),
+        ),
+    )
     return complaint
 
 

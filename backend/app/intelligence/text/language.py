@@ -61,7 +61,7 @@ def _load_model() -> Any | None:
 
         # fastText prints a deprecation banner to stderr on load; harmless.
         return fasttext.load_model(path)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — LID must never break triage
         log.error("lid.load_failed", path=path, error=str(exc))
         return None
 
@@ -96,7 +96,7 @@ def _fasttext_verdict(text: str) -> LanguageResult | None:
         return None
     try:
         labels, scores = model.predict(text.replace("\n", " "), k=1)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 — fall back to the heuristic instead
         log.warning("lid.predict_failed", error=str(exc))
         return None
     code = labels[0].replace("__label__", "")

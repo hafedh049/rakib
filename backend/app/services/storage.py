@@ -83,6 +83,6 @@ async def health() -> bool:
     try:
         async with _client() as s3:
             await s3.head_bucket(Bucket=settings.s3_bucket)
-    except Exception:
+    except Exception:  # noqa: BLE001 — a health probe must never raise
         return False
     return True

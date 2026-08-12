@@ -41,7 +41,7 @@ async def get_optional_user(
         return None
     try:
         payload = decode_access_token(credentials.credentials)
-    except Exception:
+    except Exception:  # noqa: BLE001 — a bad token on a public route means anonymous
         return None
     user = await User.get(PydanticObjectId(payload["sub"]))
     return user if user and user.is_active else None

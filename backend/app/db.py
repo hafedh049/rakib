@@ -43,6 +43,6 @@ async def close_db() -> None:
 async def ping() -> bool:
     try:
         await get_client().admin.command("ping")
-    except Exception:
+    except Exception:  # noqa: BLE001 — a health probe must never raise
         return False
     return True
