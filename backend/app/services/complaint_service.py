@@ -295,7 +295,16 @@ async def patch_complaint(
         event_payload(complaint, changed=list(changed), actor_id=str(actor.id)),
     )
     if "category" in changed or "department" in changed:
-        # The training signal for phase 9: a human disagreed with the engine.
+        # A human disagreed with the engine — capture it as a labelled sample.
+        from app.services import learning_service
+
+        if complaint.analysis.category:
+            await learning_service.record_correction(
+                complaint,
+                new_category=complaint.analysis.category,
+                previous_category=changed.get("category", (None, None))[0],
+                actor=actor,
+            )
         await publish(
             EventName.TRIAGE_CORRECTED,
             event_payload(

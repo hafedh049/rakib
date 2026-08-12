@@ -1,8 +1,18 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, complaints, departments, events, kb, rules, users
+from app.api.v1 import (
+    admin_ml,
+    auth,
+    complaints,
+    departments,
+    events,
+    kb,
+    rules,
+    users,
+)
 
 api_router = APIRouter()
+api_router.include_router(admin_ml.router)
 api_router.include_router(auth.router)
 api_router.include_router(complaints.router)
 api_router.include_router(departments.router)

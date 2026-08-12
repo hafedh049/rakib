@@ -11,8 +11,10 @@ from app.models.complaint import Complaint
 from app.models.counter import Counter
 from app.models.department import Department
 from app.models.kb_article import KBArticle
+from app.models.model_version import ModelVersion
 from app.models.refresh_token import RefreshToken
 from app.models.rule import Rule
+from app.models.training_sample import TrainingSample
 from app.models.user import Role, User, role_at_least
 
 ALL_DOCUMENTS: list[type[Document]] = [
@@ -24,6 +26,8 @@ ALL_DOCUMENTS: list[type[Document]] = [
     Rule,
     AnalysisTrace,
     KBArticle,
+    TrainingSample,
+    ModelVersion,
 ]
 
 __all__ = [
@@ -33,9 +37,11 @@ __all__ = [
     "Counter",
     "Department",
     "KBArticle",
+    "ModelVersion",
     "RefreshToken",
     "Role",
     "Rule",
+    "TrainingSample",
     "User",
     "role_at_least",
 ]
