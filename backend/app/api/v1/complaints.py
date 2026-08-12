@@ -6,13 +6,19 @@ from beanie import PydanticObjectId
 from fastapi import APIRouter, File, Query, UploadFile, status
 
 from app.config import settings
-from app.core.errors import NotFound, PermissionDenied, ValidationError
+from app.core.errors import (
+    AuthenticationError,
+    NotFound,
+    PermissionDenied,
+    ValidationError,
+)
 from app.core.ids import doc_id
 from app.core.pagination import Page
 from app.core.security import verify_tracking_token
 from app.deps import AgentUser, CurrentUser, OptionalUser, SupervisorUser
 from app.models.analysis_trace import AnalysisTrace
 from app.models.complaint import Attachment, Complaint, Status
+from app.models.user import User
 from app.schemas.complaint import (
     ComplaintCreate,
     ComplaintCreated,
@@ -158,10 +164,17 @@ async def resolve_complaint(
 )
 async def upload_attachment(
     complaint_id: PydanticObjectId,
-    user: CurrentUser,
+    user: OptionalUser,
     file: Annotated[UploadFile, File()],
+    token: Annotated[str | None, Query()] = None,
 ) -> Complaint:
-    complaint = await complaint_service.get_for_user(complaint_id, user)
+    """Attach a file, either as a signed-in user or with a tracking token.
+
+    Anonymous submission is the common case in Tunisia, and a photo of the
+    disputed bill is the most useful thing a claimant can send — so requiring an
+    account here would block the evidence that makes a complaint actionable.
+    """
+    complaint = await _complaint_for_actor(complaint_id, user, token)
 
     content_type = file.content_type or "application/octet-stream"
     if content_type not in storage.ALLOWED_CONTENT_TYPES:
@@ -183,7 +196,9 @@ async def upload_attachment(
             content_type=content_type,
             size=len(data),
             s3_key=key,
-            uploaded_by=user.id,
+            # None on the anonymous path: the token identifies the complaint,
+            # not a person.
+            uploaded_by=user.id if user else None,
         ),
     )
     return complaint
@@ -290,10 +305,13 @@ async def analysis(complaint_id: PydanticObjectId, user: AgentUser) -> dict[str,
 
 @router.get("/{complaint_id}/attachments/{attachment_id}")
 async def attachment_url(
-    complaint_id: PydanticObjectId, attachment_id: str, user: CurrentUser
+    complaint_id: PydanticObjectId,
+    attachment_id: str,
+    user: OptionalUser,
+    token: Annotated[str | None, Query()] = None,
 ) -> dict[str, str]:
     """Hand out a short-lived presigned URL rather than proxying the bytes."""
-    complaint = await complaint_service.get_for_user(complaint_id, user)
+    complaint = await _complaint_for_actor(complaint_id, user, token)
     attachment = next(
         (a for a in complaint.attachments if a.id == attachment_id), None
     )
@@ -303,6 +321,24 @@ async def attachment_url(
 
 
 # ------------------------------------------------------------------------- helpers
+async def _complaint_for_actor(
+    complaint_id: PydanticObjectId, user: User | None, token: str | None
+) -> Complaint:
+    """Resolve a complaint for either an authenticated caller or a token holder.
+
+    The token path is checked first and is strictly scoped to one complaint, so
+    it grants nothing beyond the document it was minted for.
+    """
+    if token:
+        complaint = await _complaint_from_token(token, scope="track")
+        if complaint.id != complaint_id:
+            raise NotFound("Reclamation introuvable")
+        return complaint
+    if user is None:
+        raise AuthenticationError()
+    return await complaint_service.get_for_user(complaint_id, user)
+
+
 async def _complaint_from_token(token: str, scope: str) -> Complaint:
     complaint_id = verify_tracking_token(token, scope=scope)
     complaint = await Complaint.get(PydanticObjectId(complaint_id))

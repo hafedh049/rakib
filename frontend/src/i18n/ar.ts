@@ -61,6 +61,16 @@ export const ar: Partial<Record<TranslationKey, string>> = {
   'portal.newOne': 'تقديم شكوى',
   'portal.account': 'حسابي',
   'portal.backToList': 'العودة إلى شكاواي',
+  'portal.attachments': 'المرفقات',
+  'portal.attachmentsHint':
+    'صورة الفاتورة، لقطة شاشة، وثيقة إثبات. JPG أو PNG أو PDF — 10 ميغا كحد أقصى لكل ملف.',
+  'portal.addFiles': 'إضافة ملفات',
+  'portal.uploading': 'جاري إرسال المرفقات...',
+  'portal.removeFile': 'حذف',
+  'portal.attachmentTooBig': 'الملف كبير جدا (10 ميغا كحد أقصى)',
+  'portal.attachmentBadType': 'نوع الملف غير مقبول',
+  'portal.attachmentsFailed':
+    'تم تسجيل الشكوى، لكن تعذّر إرسال بعض المرفقات.',
   'auth.signOut': 'تسجيل الخروج',
 
   'auth.signIn': 'تسجيل الدخول',

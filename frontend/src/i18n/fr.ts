@@ -57,6 +57,18 @@ export const fr = {
   'portal.newOne': 'Deposer une reclamation',
   'portal.account': 'Mon compte',
   'portal.backToList': 'Retour a mes reclamations',
+  'portal.attachments': 'Pieces jointes',
+  'portal.attachmentsHint':
+    'Photo de la facture, capture d ecran, justificatif. JPG, PNG, PDF — 10 Mo maximum par fichier.',
+  'portal.addFiles': 'Ajouter des fichiers',
+  'portal.uploading': 'Envoi des pieces jointes...',
+  'portal.removeFile': 'Retirer',
+  'portal.attachmentTooBig': 'Fichier trop volumineux (10 Mo maximum)',
+  'portal.attachmentBadType': 'Type de fichier non accepte',
+  'portal.attachmentsFailed':
+    'La reclamation a bien ete enregistree, mais certaines pieces jointes n ont pas pu etre envoyees.',
+  'complaint.noAttachments': 'Aucune piece jointe',
+  'complaint.download': 'Ouvrir',
 
   // ---- auth ---------------------------------------------------------------
   'auth.signIn': 'Connexion',

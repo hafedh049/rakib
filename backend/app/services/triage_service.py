@@ -26,6 +26,7 @@ from app.models.complaint import (
     Complaint,
     RuleHit,
     Status,
+    TimelineEntry,
     TriageState,
 )
 from app.models.department import Department
@@ -194,23 +195,49 @@ async def triage_complaint(complaint: Complaint) -> Complaint:
     complaint.assignment.department_code = department.code if department else None
     complaint.assignment.method = AssignmentMethod.AUTO
 
-    complaint.log(
-        "triage.completed",
-        actor_type="engine",
-        engine=output.engine,
-        model_version=output.model_version,
-        category=output.category,
-        confidence=output.category_confidence,
-        priority=output.priority,
-        latency_ms=output.latency_ms,
-    )
+    entries = [
+        TimelineEntry(
+            action="triage.completed",
+            actor_type="engine",
+            meta={
+                "engine": output.engine,
+                "model_version": output.model_version,
+                "category": output.category,
+                "confidence": output.category_confidence,
+                "priority": output.priority,
+                "latency_ms": output.latency_ms,
+            },
+        )
+    ]
     if output.duplicate_of_id:
         # Flagged only. Auto-closing a duplicate is never allowed (spec 5.5).
-        complaint.log(
-            "duplicate.detected", actor_type="engine",
-            duplicate_of=output.duplicate_of_id, score=output.duplicate_score,
+        entries.append(
+            TimelineEntry(
+                action="duplicate.detected",
+                actor_type="engine",
+                meta={
+                    "duplicate_of": output.duplicate_of_id,
+                    "score": output.duplicate_score,
+                },
+            )
         )
-    await complaint.save()
+
+    # Targeted write: a claimant may have attached a file while the pipeline was
+    # running, and a whole-document save would have thrown it away.
+    await complaint_service.persist_fields(
+        complaint,
+        {
+            "analysis": complaint.analysis.model_dump(),
+            "normalized_text": complaint.normalized_text,
+            "triage_state": str(complaint.triage_state),
+            "status": str(complaint.status),
+            "sla": complaint.sla.model_dump(),
+            "assignment": complaint.assignment.model_dump()
+            if complaint.assignment
+            else None,
+        },
+        entries,
+    )
 
     agent = await _auto_assign(complaint, department, output.category, needs_human)
 
@@ -270,23 +297,43 @@ async def _auto_assign(
 
     if department is None or needs_human:
         assignment.method = AssignmentMethod.QUEUE
-        await complaint.save()
+        await complaint_service.persist_fields(
+            complaint, {"assignment": assignment.model_dump()}
+        )
         return None
 
     agent = await assignment_service.pick_agent(department, category)
     if agent is None:
         assignment.method = AssignmentMethod.QUEUE
-        complaint.log("assignment.queued", actor_type="system", department=department.code)
-        await complaint.save()
+        await complaint_service.persist_fields(
+            complaint,
+            {"assignment": assignment.model_dump()},
+            [
+                TimelineEntry(
+                    action="assignment.queued",
+                    actor_type="system",
+                    meta={"department": department.code},
+                )
+            ],
+        )
         return None
 
     assignment.agent_id = agent.id
     assignment.assigned_at = datetime.now(UTC)
     assignment.method = AssignmentMethod.AUTO
     complaint.status = Status.ASSIGNED
-    complaint.log(
-        "assignment.auto", actor_type="system",
-        agent_id=str(agent.id), department=department.code,
+    await complaint_service.persist_fields(
+        complaint,
+        {
+            "assignment": assignment.model_dump(),
+            "status": str(Status.ASSIGNED),
+        },
+        [
+            TimelineEntry(
+                action="assignment.auto",
+                actor_type="system",
+                meta={"agent_id": str(agent.id), "department": department.code},
+            )
+        ],
     )
-    await complaint.save()
     return agent

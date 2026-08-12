@@ -33,6 +33,7 @@ from app.models.complaint import (
     Message,
     Satisfaction,
     Status,
+    TimelineEntry,
     TriageState,
 )
 from app.models.counter import next_complaint_ref
@@ -373,6 +374,46 @@ async def route_to_category_department(complaint: Complaint, category: str | Non
 
 
 # ------------------------------------------------------------------------- messages
+async def _append(
+    complaint: Complaint, pushes: dict[str, Any], sets: dict[str, Any] | None = None
+) -> None:
+    """Append to arrays with `$push` instead of rewriting the whole document.
+
+    Beanie's `save()` replaces the entire document with the in-memory copy. A
+    worker that fetched the complaint a second earlier will therefore wipe
+    anything appended in between — messages and attachments both went missing
+    this way while triage was in flight. `$push` touches only the array.
+    """
+    now = datetime.now(UTC)
+    complaint.updated_at = now
+    await complaint.get_motor_collection().update_one(
+        {"_id": complaint.id},
+        {"$push": pushes, "$set": {"updated_at": now, **(sets or {})}},
+    )
+
+
+async def persist_fields(
+    complaint: Complaint,
+    fields: dict[str, Any],
+    timeline: list[TimelineEntry] | None = None,
+) -> None:
+    """Write only the fields the caller owns, and append timeline entries.
+
+    Used by triage, which runs concurrently with whatever a claimant or agent is
+    doing. A whole-document save here silently discarded attachments and
+    messages added while the pipeline was running.
+    """
+    now = datetime.now(UTC)
+    complaint.updated_at = now
+    update: dict[str, Any] = {"$set": {**fields, "updated_at": now}}
+    if timeline:
+        complaint.timeline.extend(timeline)
+        update["$push"] = {
+            "timeline": {"$each": [entry.model_dump() for entry in timeline]}
+        }
+    await complaint.get_motor_collection().update_one({"_id": complaint.id}, update)
+
+
 async def add_message(
     complaint: Complaint, body: str, author: User, internal: bool = False
 ) -> Message:
@@ -383,16 +424,24 @@ async def add_message(
         body=body.strip(),
         internal=internal,
     )
-    complaint.messages.append(message)
-    complaint.log(
-        "message.internal" if internal else "message.reply",
+    entry = TimelineEntry(
+        action="message.internal" if internal else "message.reply",
         actor_type="agent" if author.is_staff else "user",
         actor_id=str(author.id),
     )
+
+    sets: dict[str, Any] = {}
     if not internal and complaint.status is Status.ASSIGNED:
         complaint.status = Status.IN_PROGRESS
-    complaint.touch()
-    await complaint.save()
+        sets["status"] = str(Status.IN_PROGRESS)
+
+    complaint.messages.append(message)
+    complaint.timeline.append(entry)
+    await _append(
+        complaint,
+        {"messages": message.model_dump(), "timeline": entry.model_dump()},
+        sets,
+    )
 
     if not internal:
         await publish(
@@ -405,16 +454,18 @@ async def add_message(
 
 
 async def add_attachment(complaint: Complaint, attachment: Attachment) -> Attachment:
-    complaint.attachments.append(attachment)
-    complaint.log(
-        "attachment.added",
+    entry = TimelineEntry(
+        action="attachment.added",
         actor_type="user",
         actor_id=str(attachment.uploaded_by) if attachment.uploaded_by else None,
-        filename=attachment.filename,
-        size=attachment.size,
+        meta={"filename": attachment.filename, "size": attachment.size},
     )
-    complaint.touch()
-    await complaint.save()
+    complaint.attachments.append(attachment)
+    complaint.timeline.append(entry)
+    await _append(
+        complaint,
+        {"attachments": attachment.model_dump(), "timeline": entry.model_dump()},
+    )
     return attachment
 
 

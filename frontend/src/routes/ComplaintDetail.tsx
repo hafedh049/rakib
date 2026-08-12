@@ -220,6 +220,8 @@ export function ComplaintDetail() {
             ))}
           </Panel>
 
+          <Attachments complaintId={id} attachments={data.attachments} />
+
           {!closed && <Composer complaintId={id} onSent={invalidate} />}
 
           <Timeline entries={data.timeline} />
@@ -261,6 +263,54 @@ export function ComplaintDetail() {
         </aside>
       </div>
     </div>
+  )
+}
+
+function Attachments({
+  complaintId,
+  attachments,
+}: {
+  complaintId: string
+  attachments: Complaint['attachments']
+}) {
+  const { t } = useT()
+
+  // Presigned URLs are minted on click rather than up front: they expire, and
+  // pre-fetching one per row would hand out credentials nobody uses.
+  async function open(attachmentId: string) {
+    const { url } = await api.get<{ url: string }>(
+      `/complaints/${complaintId}/attachments/${attachmentId}`,
+    )
+    window.open(url, '_blank', 'noopener')
+  }
+
+  return (
+    <Panel title={t('complaint.attachments')} bodyClassName="p-0">
+      {attachments.length === 0 ? (
+        <p className="px-4 py-3 text-xs text-ink-muted">
+          {t('complaint.noAttachments')}
+        </p>
+      ) : (
+        <ul className="divide-y divide-line">
+          {attachments.map((attachment) => (
+            <li
+              key={attachment.id}
+              className="flex items-center gap-3 px-4 py-2.5"
+            >
+              <span className="min-w-0 flex-1 truncate text-xs">
+                {attachment.filename}
+              </span>
+              <span className="text-2xs tabular text-ink-muted">
+                {(attachment.size / 1024).toFixed(0)} Ko
+              </span>
+              <Button onClick={() => open(attachment.id)}>
+                {t('complaint.download')}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
   )
 }
 
