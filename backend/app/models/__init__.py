@@ -10,6 +10,7 @@ from app.models.complaint import Complaint
 from app.models.counter import Counter
 from app.models.department import Department
 from app.models.refresh_token import RefreshToken
+from app.models.rule import Rule
 from app.models.user import Role, User, role_at_least
 
 ALL_DOCUMENTS: list[type[Document]] = [
@@ -18,6 +19,7 @@ ALL_DOCUMENTS: list[type[Document]] = [
     Department,
     Complaint,
     Counter,
+    Rule,
 ]
 
 __all__ = [
@@ -27,6 +29,7 @@ __all__ = [
     "Department",
     "RefreshToken",
     "Role",
+    "Rule",
     "User",
     "role_at_least",
 ]

@@ -66,7 +66,9 @@ target-version = "py312"
 select = ["E", "F", "I", "UP", "B", "ASYNC", "RUF"]
 # B008: FastAPI's Depends() in defaults is the framework idiom.
 # RUF012: Beanie's `class Settings: indexes = [...]` is its documented convention.
-ignore = ["B008", "RUF012"]
+# RUF001-003: "ambiguous unicode" fires on every Arabic letter. This system
+# processes Arabic and derja by design, so the check is noise here.
+ignore = ["B008", "RUF012", "RUF001", "RUF002", "RUF003"]
 
 [tool.mypy]
 python_version = "3.12"

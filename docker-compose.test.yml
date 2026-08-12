@@ -26,4 +26,5 @@ services:
       - ./backend/app:/app/app
       - ./backend/tests:/app/tests
       - ./backend/scripts:/app/scripts
+      - ./backend/ml_artifacts:/app/ml_artifacts
     command: ["pytest", "-q"]

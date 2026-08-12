@@ -13,7 +13,7 @@ from app.api.v1 import health as health_routes
 from app.config import settings
 from app.core.errors import AppError, app_error_handler
 from app.core.logging import configure_logging, get_logger, request_context_middleware
-from app.services import seed_service, storage
+from app.services import rules_service, seed_service, storage, triage
 
 log = get_logger(__name__)
 
@@ -23,6 +23,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     configure_logging()
     await db.init_db()
     await seed_service.seed_departments()
+    await rules_service.seed_rules()
+    await triage.refresh_rules()
     try:
         await storage.ensure_bucket()
     except Exception as exc:  # object storage must not block startup

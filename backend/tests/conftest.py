@@ -19,6 +19,8 @@ from app.main import app
 from app.models import ALL_DOCUMENTS
 from app.models.department import Department
 from app.models.user import Role, User
+from app.services import triage
+from app.services.rules_service import seed_rules
 from app.services.seed_service import seed_departments
 
 
@@ -41,6 +43,8 @@ async def _clean_collections() -> AsyncIterator[None]:
     for document in ALL_DOCUMENTS:
         await document.get_motor_collection().delete_many({})
     await seed_departments()
+    await seed_rules()
+    await triage.refresh_rules()
     yield
 
 
