@@ -6,12 +6,27 @@ indexes. Later phases append to this list as their models land.
 
 from beanie import Document
 
+from app.models.complaint import Complaint
+from app.models.counter import Counter
+from app.models.department import Department
 from app.models.refresh_token import RefreshToken
 from app.models.user import Role, User, role_at_least
 
 ALL_DOCUMENTS: list[type[Document]] = [
     User,
     RefreshToken,
+    Department,
+    Complaint,
+    Counter,
 ]
 
-__all__ = ["ALL_DOCUMENTS", "RefreshToken", "Role", "User", "role_at_least"]
+__all__ = [
+    "ALL_DOCUMENTS",
+    "Complaint",
+    "Counter",
+    "Department",
+    "RefreshToken",
+    "Role",
+    "User",
+    "role_at_least",
+]

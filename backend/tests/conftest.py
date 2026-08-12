@@ -17,7 +17,9 @@ from app import db
 from app.core.security import hash_password
 from app.main import app
 from app.models import ALL_DOCUMENTS
+from app.models.department import Department
 from app.models.user import Role, User
+from app.services.seed_service import seed_departments
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -30,10 +32,21 @@ async def _database() -> AsyncIterator[None]:
 
 @pytest.fixture(autouse=True)
 async def _clean_collections() -> AsyncIterator[None]:
-    """Each test starts from an empty database — no ordering coupling."""
+    """Each test starts from an empty database plus the seeded catalogue.
+
+    Departments are seeded because the app seeds them at boot and the lifespan
+    does not run under ASGITransport — tests should see the same world the
+    running system does.
+    """
     for document in ALL_DOCUMENTS:
         await document.get_motor_collection().delete_many({})
+    await seed_departments()
     yield
+
+
+@pytest.fixture
+async def departments() -> dict[str, Department]:
+    return {d.code: d for d in await Department.find_all().to_list()}
 
 
 @pytest.fixture
