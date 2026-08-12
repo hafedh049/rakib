@@ -1,0 +1,8 @@
+# Everything ships to Linux (VPS build, k3s runtime). CRLF would break shell
+# scripts and Dockerfiles, so normalise to LF regardless of the checkout host.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.joblib binary
+*.ftz binary
