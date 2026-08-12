@@ -185,6 +185,7 @@ async def triage_complaint(complaint: Complaint) -> Complaint:
     )
     complaint.normalized_text = output.normalized_text
     complaint.triage_state = TriageState.DONE
+    # Same rule for the triaged marker: never resurrect a closed complaint.
     if complaint.status is Status.NEW:
         complaint.status = Status.TRIAGED
 
@@ -321,13 +322,18 @@ async def _auto_assign(
     assignment.agent_id = agent.id
     assignment.assigned_at = datetime.now(UTC)
     assignment.method = AssignmentMethod.AUTO
-    complaint.status = Status.ASSIGNED
+
+    # Only advance a complaint that is still at the start of its life. A
+    # re-triage must never drag a resolved or closed complaint back to
+    # "assigned", nor undo an agent who already moved it to in-progress.
+    fields: dict[str, Any] = {"assignment": assignment.model_dump()}
+    if complaint.status in {Status.NEW, Status.TRIAGED}:
+        complaint.status = Status.ASSIGNED
+        fields["status"] = str(Status.ASSIGNED)
+
     await complaint_service.persist_fields(
         complaint,
-        {
-            "assignment": assignment.model_dump(),
-            "status": str(Status.ASSIGNED),
-        },
+        fields,
         [
             TimelineEntry(
                 action="assignment.auto",

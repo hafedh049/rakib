@@ -40,17 +40,17 @@ OUTAGE_COLLECTIVE = [
 DEFAULT_RULES: list[dict[str, Any]] = [
     # ------------------------------------------------------------------ urgency
     {
-        "code": "URGENCY_LEXICON_FR", "label": "Vocabulaire d'urgence (FR)",
+        "code": "URGENCY_LEXICON_FR", "label": "Vocabulaire d’urgence (FR)",
         "kind": "lexicon", "weight": 15, "order": 10,
         "config": {"terms": URGENCY_FR, "lang": "fr", "cap": 2},
     },
     {
-        "code": "URGENCY_LEXICON_AR", "label": "Vocabulaire d'urgence (AR)",
+        "code": "URGENCY_LEXICON_AR", "label": "Vocabulaire d’urgence (AR)",
         "kind": "lexicon", "weight": 15, "order": 11,
         "config": {"terms": URGENCY_AR, "lang": "ar", "cap": 2},
     },
     {
-        "code": "URGENCY_LEXICON_TN", "label": "Vocabulaire d'urgence (derja)",
+        "code": "URGENCY_LEXICON_TN", "label": "Vocabulaire d’urgence (derja)",
         "kind": "lexicon", "weight": 15, "order": 12,
         "config": {"terms": URGENCY_TN, "lang": "ar-tn", "cap": 2},
     },
@@ -67,18 +67,18 @@ DEFAULT_RULES: list[dict[str, Any]] = [
     },
     # -------------------------------------------------------------------- churn
     {
-        "code": "CHURN_LEXICON_FR", "label": "Risque de resiliation (FR)",
+        "code": "CHURN_LEXICON_FR", "label": "Risque de résiliation (FR)",
         "kind": "lexicon", "weight": 20, "order": 30,
         "config": {"terms": CHURN_FR, "lang": "fr", "cap": 1},
     },
     {
-        "code": "CHURN_LEXICON_AR", "label": "Risque de resiliation (AR/derja)",
+        "code": "CHURN_LEXICON_AR", "label": "Risque de résiliation (AR/derja)",
         "kind": "lexicon", "weight": 20, "order": 31,
         "config": {"terms": CHURN_AR + CHURN_TN, "lang": "ar", "cap": 1},
     },
     # ---------------------------------------------------------------- incidents
     {
-        "code": "OUTAGE_COLLECTIVE", "label": "Panne collective signalee",
+        "code": "OUTAGE_COLLECTIVE", "label": "Panne collective signalée",
         "kind": "lexicon", "weight": 20, "order": 40,
         "config": {"terms": OUTAGE_COLLECTIVE, "cap": 1},
     },
@@ -94,7 +94,7 @@ DEFAULT_RULES: list[dict[str, Any]] = [
         "config": {"path": "claimant_is_vip", "op": "eq", "value": True},
     },
     {
-        "code": "REPEAT_CLAIMANT_30D", "label": "Reclamations repetees (30 jours)",
+        "code": "REPEAT_CLAIMANT_30D", "label": "Réclamations répétées (30 jours)",
         "kind": "history", "weight": 20, "order": 51,
         "config": {"source": "prior_count_30d", "min_count": 3, "window_days": 30},
     },
@@ -115,28 +115,28 @@ DEFAULT_RULES: list[dict[str, Any]] = [
         "config": {"path": "exclamation_count", "op": "gte", "value": 3},
     },
     {
-        "code": "HAS_ATTACHMENT", "label": "Piece jointe fournie",
+        "code": "HAS_ATTACHMENT", "label": "Pièce jointe fournie",
         "kind": "field", "weight": 5, "order": 62,
         "config": {"path": "attachment_count", "op": "gte", "value": 1},
     },
     {
-        "code": "VERY_SHORT", "label": "Message tres court (peu d'information)",
+        "code": "VERY_SHORT", "label": "Message très court (peu d’information)",
         "kind": "length", "weight": -8, "order": 63,
         "config": {"max": 60},
     },
     {
-        "code": "DETAILED_REPORT", "label": "Description detaillee",
+        "code": "DETAILED_REPORT", "label": "Description détaillée",
         "kind": "length", "weight": 5, "order": 64,
         "config": {"min": 800},
     },
     # ------------------------------------------------------------------ patterns
     {
-        "code": "INVOICE_REFERENCE", "label": "Reference de facture citee",
+        "code": "INVOICE_REFERENCE", "label": "Référence de facture citée",
         "kind": "regex", "weight": 5, "order": 70,
         "config": {"pattern": r"\b(?:facture|fact|inv)[\s.:#-]*\d{4,}\b", "flags": "i"},
     },
     {
-        "code": "AMOUNT_IN_DINARS", "label": "Montant conteste en dinars",
+        "code": "AMOUNT_IN_DINARS", "label": "Montant contesté en dinars",
         "kind": "regex", "weight": 8, "order": 71,
         "config": {
             "pattern": r"\b\d{2,5}(?:[.,]\d{1,3})?\s*(?:dinars?|dt|tnd|دينار)\b",
@@ -144,7 +144,7 @@ DEFAULT_RULES: list[dict[str, Any]] = [
         },
     },
     {
-        "code": "DURATION_WEEKS", "label": "Probleme persistant (semaines/mois)",
+        "code": "DURATION_WEEKS", "label": "Problème persistant (semaines/mois)",
         "kind": "regex", "weight": 12, "order": 72,
         "config": {
             "pattern": r"\b(?:depuis|من|men)\s+(?:\d+\s+)?(?:semaines?|mois|"
@@ -154,7 +154,7 @@ DEFAULT_RULES: list[dict[str, Any]] = [
     },
     # ------------------------------------------------------------------ category
     {
-        "code": "CATEGORY_WEIGHTS", "label": "Ponderation par categorie",
+        "code": "CATEGORY_WEIGHTS", "label": "Pondération par catégorie",
         "kind": "category_weight", "weight": 1, "order": 80,
         "config": {
             "map": {

@@ -57,7 +57,33 @@ def test_arabizi_is_labelled_ar_tn():
         normalize(body="3andi mochkla fel internet, 7atta lyoum ma7alouhech, yezzi")
     )
     assert result.code == "ar-tn"
-    assert result.source == "arabizi"
+    assert result.source == "derja"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # No digit substitution at all — the arabizi pattern misses these, and
+        # fastText called them "other" and English-at-0.64 respectively.
+        "el fatoura mte3i hedha chhar 210 dinar w ana ma badeltech fel offre",
+        "nhabet nbadel operateur, 3malt talab fasakh men jomaa",
+        "9adech hedha? barcha flous w el khedma khayba",
+    ],
+)
+def test_plain_derja_is_not_mistaken_for_french_or_english(text):
+    """fastText has no derja label, so a confident verdict on it is confidently
+    wrong. Derja is decided before fastText and regardless of its confidence."""
+    assert lid.detect(normalize(body=text)).code == "ar-tn"
+
+
+def test_french_is_not_swallowed_by_the_derja_rule():
+    """The marker set must not be so greedy that ordinary French trips it."""
+    for text in [
+        "Bonjour, ma facture de janvier est incorrecte et personne ne repond",
+        "Je souhaite resilier mon abonnement et transferer mon numero",
+        "Le technicien n est jamais venu au rendez-vous de jeudi matin",
+    ]:
+        assert lid.detect(normalize(body=text)).code == "fr"
 
 
 def test_language_detection_never_raises_on_empty_text():

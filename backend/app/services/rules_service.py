@@ -14,14 +14,31 @@ log = get_logger(__name__)
 
 
 async def seed_rules() -> int:
-    created = 0
+    """Insert missing rules; refresh the wording and matching terms of existing ones.
+
+    Weight, active and order are the admin's to own and are never overwritten —
+    a redeploy must not silently undo someone's tuning. Label and config are
+    catalogue data, so a corrected label or an added lexicon term does reach an
+    already-seeded install.
+    """
+    created = refreshed = 0
     for definition in DEFAULT_RULES:
-        if await Rule.find_one(Rule.code == definition["code"]):
+        existing = await Rule.find_one(Rule.code == definition["code"])
+        if existing is None:
+            await Rule(**definition, builtin=True).insert()
+            created += 1
             continue
-        await Rule(**definition, builtin=True).insert()
-        created += 1
-    if created:
-        log.info("seed.rules", created=created)
+
+        if not existing.builtin:
+            continue
+        if existing.label != definition["label"] or existing.config != definition["config"]:
+            existing.label = definition["label"]
+            existing.config = definition["config"]
+            await existing.save()
+            refreshed += 1
+
+    if created or refreshed:
+        log.info("seed.rules", created=created, refreshed=refreshed)
     return created
 
 

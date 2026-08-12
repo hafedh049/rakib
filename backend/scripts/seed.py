@@ -21,6 +21,7 @@ from app.models.complaint import (
     Channel,
     Claimant,
     Complaint,
+    Satisfaction,
     Status,
 )
 from app.models.counter import Counter, next_complaint_ref
@@ -181,7 +182,7 @@ STATUS_MIX = (
 CHANNEL_MIX = [Channel.WEB] * 7 + [Channel.PHONE] * 2 + [Channel.AGENCE] * 2 + [Channel.EMAIL]
 
 
-async def main(force: bool = False, count: int = 60) -> None:
+async def main(force: bool = False, count: int = 60, triage: bool = True) -> None:
     random.seed(SEED)
     await db.init_db()
 
@@ -226,9 +227,18 @@ async def main(force: bool = False, count: int = 60) -> None:
     for index in range(count):
         category, subject, body = COMPLAINTS[index % len(COMPLAINTS)]
         name, email, phone, is_vip = CLAIMANTS[index % len(CLAIMANTS)]
-        created_at = now - timedelta(
-            days=random.randint(0, 30), hours=random.randint(0, 23)
-        )
+        status = STATUS_MIX[index % len(STATUS_MIX)]
+
+        # Age follows the status. Spreading every complaint evenly over 30 days
+        # left the whole board breached and red, which demonstrates nothing:
+        # open work is recent, closed work is older.
+        if status in (Status.RESOLVED, Status.CLOSED, Status.REJECTED):
+            age_hours = random.randint(48, 30 * 24)
+        elif status in (Status.NEW, Status.TRIAGED):
+            age_hours = random.randint(0, 6)
+        else:
+            age_hours = random.randint(2, 60)
+        created_at = now - timedelta(hours=age_hours)
 
         complaint = Complaint(
             ref=await next_complaint_ref(created_at),
@@ -238,16 +248,45 @@ async def main(force: bool = False, count: int = 60) -> None:
             ),
             subject=subject,
             body=body,
-            status=STATUS_MIX[index % len(STATUS_MIX)],
+            status=status,
             created_at=created_at,
             updated_at=created_at,
         )
         complaint.sla.hours = settings.sla_hours_p3
         complaint.sla.due_at = created_at + timedelta(hours=settings.sla_hours_p3)
+        if status in (Status.RESOLVED, Status.CLOSED):
+            # Closed within its window, so resolution-time analytics are real.
+            complaint.sla.resolved_at = created_at + timedelta(
+                hours=random.randint(2, 40)
+            )
+            complaint.satisfaction = (
+                Satisfaction(score=random.choice([3, 4, 4, 5, 5, 2]))
+                if random.random() < 0.6
+                else None
+            )
         complaint.log("complaint.created", channel=str(complaint.channel))
         await complaint.insert()
 
     print(f"complaints: {count} created")
+
+    # Run the pipeline over the seeded rows. Without this the demo opens on 60
+    # complaints that all say "analysis pending": no categories, no priorities,
+    # no SLA spread and empty analytics.
+    if triage:
+        from app.services import rules_service, triage_service
+        from app.services import triage as triage_engine
+
+        await rules_service.seed_rules()
+        await triage_engine.refresh_rules()
+
+        done = 0
+        for complaint in await Complaint.find_all().to_list():
+            await triage_service.triage_complaint(complaint)
+            done += 1
+            if done % 20 == 0:
+                print(f"  triaged {done}/{count}")
+        print(f"triage: {done} complaints analysed")
+
     print(f"\nSign in at {settings.frontend_url} — admin@rakib.tn / {DEMO_PASSWORD}")
     await db.close_db()
 
@@ -256,4 +295,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Seed the Rakib demo dataset")
     parser.add_argument("--force", action="store_true", help="wipe and reseed")
     parser.add_argument("--count", type=int, default=60)
+    parser.add_argument(
+        "--no-triage", dest="triage", action="store_false",
+        help="skip running the pipeline over the seeded complaints",
+    )
     asyncio.run(main(**vars(parser.parse_args())))

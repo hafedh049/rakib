@@ -23,12 +23,29 @@ log = get_logger(__name__)
 LID_MODEL_FILENAME = "lid.176.ftz"
 SUPPORTED = {"fr", "ar", "en"}
 
-#: Above this share of arabizi tokens the text is Tunisian derja regardless of
-#: what fastText thinks (spec 5.2).
-ARABIZI_TOKEN_THRESHOLD = 0.15
-#: Below this fastText confidence we do not trust a Latin-script verdict.
-LOW_CONFIDENCE = 0.60
+#: Above this share of derja markers the text is Tunisian, whatever fastText says.
+DERJA_THRESHOLD = 0.15
 ARABIC_SCRIPT_THRESHOLD = 0.50
+
+#: Latin-script derja that carries no digit substitution. The arabizi pattern
+#: alone catches "3andi" and "7atta" but misses "el fatoura mte3i hedha chhar",
+#: which is just as Tunisian. fastText labelled that one "other" and
+#: "nhabet nbadel operateur" as English at 0.64 — it has no derja label, so a
+#: confident verdict on this text is confidently wrong.
+DERJA_MARKERS = {
+    "el", "eli", "hedha", "hedhi", "hakka", "kifeh", "chnowa", "chneya", "chkoun",
+    "wa9tech", "9adech", "barcha", "barsha", "yezzi", "walou", "chwaya", "tawa",
+    "ghodwa", "lyoum", "lbera7", "bech", "nhab", "nhabet", "nheb", "nejjem",
+    "najem", "mte3i", "mte3", "mta3", "mte3ha", "flous", "floussi", "fatoura",
+    "khedma", "labes", "brabi", "sahbi", "chhar", "jom3a", "jomaa", "sbe7",
+    "fel", "fil", "men", "m3a", "3la", "ala", "ken", "kif", "ama", "ama7",
+    "mouch", "mech", "mesh", "manich", "mahouch", "ma", "makch", "famech",
+    "fama", "thama", "andi", "3andi", "3andek", "3andhom", "nemchi", "temchi",
+    "nbadel", "badel", "fasakh", "nsakker", "sakker", "talab", "chariti",
+    "khalast", "khalas", "nkhalas", "3malt", "3mel", "jebt", "jeb", "wsal",
+    "wsalni", "tsakker", "tetsakker", "ye5dem", "yekhdem", "khedem", "mochkla",
+    "mochkel", "moshkel", "3otob", "khayeb", "batee", "sob", "aslema", "slem",
+}
 
 FRENCH_MARKERS = {
     "je", "vous", "nous", "le", "la", "les", "des", "une", "est", "pas", "mon",
@@ -77,32 +94,59 @@ def detect(normalized: NormalizedText) -> LanguageResult:
     if features.arabic_ratio >= ARABIC_SCRIPT_THRESHOLD:
         return LanguageResult("ar", min(1.0, features.arabic_ratio), "script")
 
-    verdict = _fasttext_verdict(normalized.text) or _heuristic_verdict(normalized.text)
+    # Latin-script derja is decided here, BEFORE fastText, and without regard to
+    # its confidence: there is no derja label to be confident about.
+    derja = derja_share(normalized.text)
+    if derja >= DERJA_THRESHOLD:
+        return LanguageResult("ar-tn", round(derja, 3), "derja")
 
-    # Latin-script derja: fastText has no label for it, so we own this decision.
-    if (
-        features.arabizi_token_ratio >= ARABIZI_TOKEN_THRESHOLD
-        and verdict.code in {"fr", "en", "other"}
-        and verdict.confidence < LOW_CONFIDENCE
-    ):
-        return LanguageResult("ar-tn", features.arabizi_token_ratio, "arabizi")
+    return _fasttext_verdict(normalized.text) or _heuristic_verdict(normalized.text)
 
-    return verdict
+
+def derja_share(text: str) -> float:
+    """Fraction of word-like tokens that are arabizi or known derja markers."""
+    from app.intelligence.text.normalize import is_arabizi_token
+
+    tokens = [
+        token.strip(".,;:!?()[]\"'")
+        for token in text.split()
+        if any(character.isalpha() for character in token)
+    ]
+    if not tokens:
+        return 0.0
+    hits = sum(
+        1 for token in tokens if is_arabizi_token(token) or token in DERJA_MARKERS
+    )
+    return hits / len(tokens)
 
 
 def _fasttext_verdict(text: str) -> LanguageResult | None:
     model = _load_model()
     if model is None or not text.strip():
         return None
+
+    # Call the underlying binding rather than model.predict(): the Python
+    # wrapper in fasttext 0.9.2 finishes with `np.array(probs, copy=False)`,
+    # which NumPy 2 refuses outright. Every prediction was raising and silently
+    # dropping the system onto the stopword heuristic. `f.predict` returns plain
+    # (probability, label) tuples and never touches NumPy.
+    cleaned = text.replace("\n", " ")
     try:
-        labels, scores = model.predict(text.replace("\n", " "), k=1)
-    except Exception as exc:  # noqa: BLE001 — fall back to the heuristic instead
-        log.warning("lid.predict_failed", error=str(exc))
-        return None
-    code = labels[0].replace("__label__", "")
-    confidence = float(scores[0])
+        predictions = model.f.predict(cleaned, 1, 0.0, "strict")
+        if not predictions:
+            return None
+        confidence, label = predictions[0]
+    except Exception:  # noqa: BLE001 — last resort, try the wrapper
+        try:
+            labels, scores = model.predict(cleaned, k=1)
+            label, confidence = labels[0], float(scores[0])
+        except Exception as exc:  # noqa: BLE001 — heuristic takes over
+            log.warning("lid.predict_failed", error=str(exc))
+            return None
+
+    code = str(label).replace("__label__", "")
     return LanguageResult(
-        code if code in SUPPORTED else "other", confidence, "fasttext"
+        code if code in SUPPORTED else "other", float(confidence), "fasttext"
     )
 
 

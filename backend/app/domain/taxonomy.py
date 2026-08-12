@@ -33,13 +33,13 @@ ALL_CATEGORIES: list[str] = [c.value for c in Category]
 CATEGORY_LABELS_FR: dict[str, str] = {
     Category.FACTURATION: "Facturation",
     Category.PAIEMENT_RECHARGE: "Paiement et recharge",
-    Category.RESEAU_MOBILE: "Reseau mobile",
+    Category.RESEAU_MOBILE: "Réseau mobile",
     Category.INTERNET_FIXE: "Internet fixe",
     Category.INTERVENTION_TECHNIQUE: "Intervention technique",
     Category.OFFRES_ABONNEMENT: "Offres et abonnement",
-    Category.RESILIATION_PORTABILITE: "Resiliation et portabilite",
+    Category.RESILIATION_PORTABILITE: "Résiliation et portabilité",
     Category.SERVICE_CLIENT_AGENCE: "Service client et agence",
-    Category.EQUIPEMENT: "Equipement",
+    Category.EQUIPEMENT: "Équipement",
     Category.ROAMING_INTERNATIONAL: "Roaming et international",
     Category.APPLICATION_MOBILE: "Application mobile",
 }
@@ -75,7 +75,7 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
     DepartmentSeed(
         code="FACTURATION",
         name="Facturation et Recouvrement",
-        description="Factures, prelevements, contestations de montant, recharges et paiements.",
+        description="Factures, prélèvements, contestations de montant, recharges et paiements.",
         categories=[Category.FACTURATION, Category.PAIEMENT_RECHARGE],
         keywords=[
             "facture", "facturation", "montant", "prelevement", "prélèvement",
@@ -87,8 +87,8 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
     ),
     DepartmentSeed(
         code="RESEAU_MOBILE",
-        name="Reseau Mobile",
-        description="Couverture, qualite du signal, data mobile, roaming et international.",
+        name="Réseau Mobile",
+        description="Couverture, qualité du signal, data mobile, roaming et international.",
         categories=[Category.RESEAU_MOBILE, Category.ROAMING_INTERNATIONAL],
         keywords=[
             "reseau", "réseau", "signal", "couverture", "4g", "5g", "3g",
@@ -101,7 +101,7 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
     DepartmentSeed(
         code="FIXE_INTERVENTION",
         name="Fixe et Intervention",
-        description="ADSL, fibre, ligne fixe, deplacements techniciens et retablissement.",
+        description="ADSL, fibre, ligne fixe, déplacements techniciens et rétablissement.",
         categories=[Category.INTERNET_FIXE, Category.INTERVENTION_TECHNIQUE],
         keywords=[
             "adsl", "fibre", "ligne fixe", "box", "modem", "debit", "débit",
@@ -114,7 +114,7 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
     DepartmentSeed(
         code="COMMERCIAL",
         name="Commercial et Offres",
-        description="Forfaits, promotions, engagements, resiliations et portabilite.",
+        description="Forfaits, promotions, engagements, résiliations et portabilité.",
         categories=[Category.OFFRES_ABONNEMENT, Category.RESILIATION_PORTABILITE],
         keywords=[
             "forfait", "offre", "promotion", "abonnement", "engagement",
@@ -127,7 +127,7 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
     DepartmentSeed(
         code="RELATION_CLIENT",
         name="Relation Client",
-        description="Accueil en agence, centre d'appel, comportement, materiel et SIM.",
+        description="Accueil en agence, centre d’appel, comportement, matériel et SIM.",
         categories=[Category.SERVICE_CLIENT_AGENCE, Category.EQUIPEMENT],
         keywords=[
             "agence", "guichet", "attente", "accueil", "agent", "conseiller",
@@ -139,7 +139,7 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
     ),
     DepartmentSeed(
         code="DIGITAL_SI",
-        name="Digital et Systemes d'Information",
+        name="Digital et Systèmes d’Information",
         description="Application self-care, espace client web, paiement en ligne.",
         categories=[Category.APPLICATION_MOBILE],
         keywords=[
@@ -152,8 +152,8 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
     ),
     DepartmentSeed(
         code=GENERAL_DEPARTMENT_CODE,
-        name="Service General",
-        description="File d'attente de secours: reclamations non routables automatiquement.",
+        name="Service Général",
+        description="File d’attente de secours : réclamations non routables automatiquement.",
         categories=[],
         keywords=[],
         default_sla_hours=None,

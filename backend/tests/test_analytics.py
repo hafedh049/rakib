@@ -146,7 +146,7 @@ async def test_rules_report_ranks_by_fires(client, supervisor_headers, seeded):
     rows = (await client.get(f"{ANALYTICS}/rules", headers=supervisor_headers)).json()
     assert rows[0]["code"] == "URGENCY_LEXICON_FR"
     assert rows[0]["fires"] == 6
-    assert rows[0]["label"] == "Vocabulaire d'urgence (FR)"
+    assert rows[0]["label"] == "Vocabulaire d’urgence (FR)"
     assert 0 <= rows[0]["breach_rate"] <= 1
 
 

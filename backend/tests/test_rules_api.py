@@ -122,6 +122,7 @@ async def test_simulate_exposes_the_normalisation_result(client, supervisor_head
     assert "<EMAIL>" in body["normalized_text"].upper()
     assert body["transliterated"]
     assert body["language"] == "ar-tn"
+    assert body["language_source"] == "derja"
 
 
 async def test_simulate_reflects_a_weight_change(client, admin_headers):

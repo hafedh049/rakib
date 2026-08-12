@@ -479,7 +479,13 @@ function Timeline({ entries }: { entries: TimelineEntry[] }) {
             />
             <div className="min-w-0 flex-1">
               <p className="text-xs">
-                <span className="font-medium">{entry.action}</span>
+                {/* Fall back to the raw code rather than a blank line if a new
+                    action ships before its translation does. */}
+                <span className="font-medium">
+                  {t(`action.${entry.action}` as never) === `action.${entry.action}`
+                    ? entry.action
+                    : t(`action.${entry.action}` as never)}
+                </span>
                 {entry.actor_type === 'engine' && (
                   <span className="ms-2 text-2xs text-primary">auto</span>
                 )}

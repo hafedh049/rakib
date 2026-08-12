@@ -17,9 +17,11 @@ function useConsoleTheme() {
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const stored = localStorage.getItem(THEME_KEY)
     if (stored === 'dark' || stored === 'light') return stored
-    return window.matchMedia('(prefers-color-scheme: light)').matches
-      ? 'light'
-      : 'dark'
+    // Dark unless the agent chooses otherwise. Deferring to the OS meant a
+    // light-mode laptop got a light console, which is not the eight-hours-in-
+    // one-window surface DESIGN.md commits to. The toggle still wins, and the
+    // choice persists.
+    return 'dark'
   })
 
   useEffect(() => {

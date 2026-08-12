@@ -14,20 +14,40 @@ log = get_logger(__name__)
 
 
 async def seed_departments() -> int:
-    """Insert any department from the catalogue that Mongo does not yet have."""
-    created = 0
+    """Insert missing departments; refresh catalogue fields on existing ones.
+
+    Name, description, keywords and categories come from the catalogue and are
+    kept in step. `escalation_to`, `default_sla_hours` and `active` belong to
+    the admin and are never touched by a redeploy.
+    """
+    created = refreshed = 0
     for seed in DEPARTMENT_SEED:
-        if await Department.find_one(Department.code == seed.code):
+        existing = await Department.find_one(Department.code == seed.code)
+        if existing is None:
+            await Department(
+                code=seed.code,
+                name=seed.name,
+                description=seed.description,
+                keywords=list(seed.keywords),
+                categories=list(seed.categories),
+                default_sla_hours=seed.default_sla_hours,
+            ).insert()
+            created += 1
             continue
-        await Department(
-            code=seed.code,
-            name=seed.name,
-            description=seed.description,
-            keywords=list(seed.keywords),
-            categories=list(seed.categories),
-            default_sla_hours=seed.default_sla_hours,
-        ).insert()
-        created += 1
-    if created:
-        log.info("seed.departments", created=created)
+
+        if (
+            existing.name != seed.name
+            or existing.description != seed.description
+            or existing.keywords != list(seed.keywords)
+            or existing.categories != list(seed.categories)
+        ):
+            existing.name = seed.name
+            existing.description = seed.description
+            existing.keywords = list(seed.keywords)
+            existing.categories = list(seed.categories)
+            await existing.save()
+            refreshed += 1
+
+    if created or refreshed:
+        log.info("seed.departments", created=created, refreshed=refreshed)
     return created
