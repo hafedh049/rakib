@@ -72,6 +72,11 @@ select = ["E", "F", "I", "UP", "B", "ASYNC", "RUF", "BLE"]
 # processes Arabic and derja by design, so the check is noise here.
 ignore = ["B008", "RUF012", "RUF001", "RUF002", "RUF003"]
 
+[tool.ruff.lint.per-file-ignores]
+# gold.py is a hand-authored data table; wrapping the rows would make the
+# corpus harder to read and edit than the long lines it replaces.
+"scripts/gold.py" = ["E501"]
+
 [tool.mypy]
 python_version = "3.12"
 ignore_missing_imports = true

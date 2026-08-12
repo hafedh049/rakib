@@ -145,10 +145,15 @@ async def test_simulate_requires_supervisor(client, make_user, login):
 
 
 # --------------------------------------------------------------------- readiness
-async def test_ready_reports_degraded_mode_without_a_classifier(client):
-    """Spec 11: the degraded state must be visible, not inferred."""
+async def test_ready_exposes_the_engine_state(client):
+    """Spec 11: the engine state must be visible, not inferred.
+
+    With artifacts committed the system runs `ml`; the degraded path is covered
+    in test_classifier.py by pointing ml_artifacts_dir at an empty directory.
+    """
     body = (await client.get("/health/ready")).json()
-    assert body["engine"]["active_engine"] == "rules"
-    assert body["engine"]["degraded"] is True
-    assert body["engine"]["model_loaded"] is False
-    assert body["engine"]["language_id_model"] is True
+    engine = body["engine"]
+    assert engine["active_engine"] in {"ml", "rules"}
+    assert engine["model_loaded"] is (engine["active_engine"] == "ml")
+    assert engine["degraded"] is not engine["model_loaded"]
+    assert engine["language_id_model"] is True
