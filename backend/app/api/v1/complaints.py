@@ -24,8 +24,9 @@ from app.schemas.complaint import (
     PublicMessage,
     ResolveRequest,
     SatisfactionIn,
+    SuggestionUsage,
 )
-from app.services import complaint_service, storage, triage_service
+from app.services import complaint_service, kb_service, storage, triage_service
 
 router = APIRouter(prefix="/complaints", tags=["complaints"])
 
@@ -186,6 +187,47 @@ async def upload_attachment(
         ),
     )
     return complaint
+
+
+@router.get("/{complaint_id}/suggest")
+async def suggest_reply(
+    complaint_id: PydanticObjectId,
+    user: AgentUser,
+    limit: Annotated[int, Query(ge=1, le=5)] = 3,
+) -> dict[str, Any]:
+    """Top drafts from the knowledge base. Retrieval and slot filling only —
+    nothing is generated, and nothing is sent."""
+    complaint = await complaint_service.get_for_user(complaint_id, user)
+    result = await kb_service.suggest(complaint, limit=limit)
+    return {
+        "language": kb_service.draft_language(complaint),
+        "drafts": [
+            {
+                "text": draft.text,
+                "source_article_id": draft.source_article_id,
+                "score": draft.score,
+                "filled_slots": draft.filled_slots,
+            }
+            for draft in result.drafts
+        ],
+        "cited_articles": result.cited_articles,
+        "missing_slots": result.missing_slots,
+    }
+
+
+@router.post("/{complaint_id}/suggest/used", status_code=204)
+async def record_suggestion_usage(
+    complaint_id: PydanticObjectId, payload: SuggestionUsage, user: AgentUser
+) -> None:
+    """Record whether the agent sent the draft verbatim, edited it, or dropped it."""
+    complaint = await complaint_service.get_for_user(complaint_id, user)
+    if await kb_service.record_usage(payload.article_id, payload.outcome) is None:
+        raise NotFound("Article introuvable")
+    complaint.log(
+        "suggestion.used", actor_type="agent", actor_id=str(user.id),
+        article_id=payload.article_id, outcome=payload.outcome,
+    )
+    await complaint.save()
 
 
 @router.post("/{complaint_id}/retriage", response_model=ComplaintOut)

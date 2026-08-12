@@ -79,6 +79,11 @@ class ResolveRequest(BaseModel):
     notify_claimant: bool = True
 
 
+class SuggestionUsage(BaseModel):
+    article_id: str
+    outcome: Literal["verbatim", "edited", "discarded"]
+
+
 class SatisfactionIn(BaseModel):
     score: int = Field(ge=1, le=5)
     comment: str | None = Field(default=None, max_length=2000)

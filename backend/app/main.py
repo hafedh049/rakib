@@ -14,7 +14,14 @@ from app.config import settings
 from app.core.errors import AppError, app_error_handler
 from app.core.logging import configure_logging, get_logger, request_context_middleware
 from app.events import bus
-from app.services import rules_service, seed_service, sse_consumer, storage, triage
+from app.services import (
+    kb_service,
+    rules_service,
+    seed_service,
+    sse_consumer,
+    storage,
+    triage,
+)
 from app.workers import queue
 
 log = get_logger(__name__)
@@ -26,6 +33,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await db.init_db()
     await seed_service.seed_departments()
     await rules_service.seed_rules()
+    await kb_service.seed_articles()
+    await kb_service.rebuild_index()
     await triage.refresh_rules()
     try:
         await storage.ensure_bucket()
