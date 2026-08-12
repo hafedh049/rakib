@@ -1,0 +1,245 @@
+@import 'tailwindcss';
+
+/* ===========================================================================
+   Rakib design tokens — see DESIGN.md
+   One token set, two registers: a calm light portal and a dense dark console.
+   =========================================================================== */
+
+@theme {
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', 'Noto Sans Arabic', var(--font-sans);
+
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.3125rem;
+  --text-2xl: 1.625rem;
+  --text-3xl: 2rem;
+
+  --radius-control: 6px;
+  --radius-panel: 10px;
+
+  --ease-out-quint: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  /* light — the portal's home */
+  --bg: oklch(1 0 0);
+  --surface: oklch(0.985 0.004 190);
+  --surface-2: oklch(0.965 0.006 190);
+  --ink: oklch(0.22 0.015 210);
+  --ink-muted: oklch(0.46 0.014 210);
+  --line: oklch(0.9 0.006 200);
+  --primary: oklch(0.52 0.1 185);
+  --primary-hover: oklch(0.46 0.1 185);
+  --primary-ink: oklch(0.99 0 0);
+  --primary-soft: oklch(0.95 0.03 185);
+
+  /* Reserved. An amber pixel always means "a human must look at this". */
+  --amber: oklch(0.68 0.13 75);
+  --amber-soft: oklch(0.95 0.05 80);
+  --danger: oklch(0.55 0.19 25);
+  --danger-soft: oklch(0.95 0.04 25);
+  --success: oklch(0.55 0.12 155);
+  --success-soft: oklch(0.95 0.04 155);
+
+  --shadow-panel:
+    0 1px 2px oklch(0 0 0 / 0.06), 0 4px 12px oklch(0 0 0 / 0.05);
+
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-backdrop: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-tooltip: 60;
+
+  color-scheme: light;
+}
+
+/* The console asks for dark; the portal always stays light (see [data-register]). */
+[data-theme='dark'] {
+  --bg: oklch(0.19 0.012 210);
+  --surface: oklch(0.235 0.014 210);
+  --surface-2: oklch(0.275 0.016 210);
+  --ink: oklch(0.96 0.004 190);
+  --ink-muted: oklch(0.72 0.012 200);
+  --line: oklch(0.33 0.016 210);
+  --primary: oklch(0.72 0.11 185);
+  --primary-hover: oklch(0.78 0.11 185);
+  --primary-ink: oklch(0.17 0.02 200);
+  --primary-soft: oklch(0.3 0.04 185);
+
+  --amber: oklch(0.79 0.13 75);
+  --amber-soft: oklch(0.32 0.06 70);
+  --danger: oklch(0.68 0.17 25);
+  --danger-soft: oklch(0.31 0.07 25);
+  --success: oklch(0.72 0.12 155);
+  --success-soft: oklch(0.29 0.05 155);
+
+  --shadow-panel: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 14px oklch(0 0 0 / 0.25);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-ink: var(--primary-ink);
+  --color-primary-soft: var(--primary-soft);
+  --color-amber: var(--amber);
+  --color-amber-soft: var(--amber-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+}
+
+/* --------------------------------------------------------------- base ----- */
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* System Arabic fallbacks are poor at UI sizes; PRODUCT.md commits to Arabic
+     not being an afterthought, so it gets a real face. */
+  :lang(ar),
+  [dir='rtl'] {
+    font-family: var(--font-arabic);
+    line-height: 1.75;
+  }
+
+  /* Refs, amounts and Latin product names must not reorder inside RTL text. */
+  .ltr-isolate {
+    direction: ltr;
+    unicode-bidi: isolate;
+    display: inline-block;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    letter-spacing: -0.011em;
+    font-weight: 600;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  ::placeholder {
+    /* Same 4.5:1 requirement as body text — not a lighter "elegant" grey. */
+    color: var(--ink-muted);
+    opacity: 1;
+  }
+
+  [dir='rtl'] .chevron {
+    scale: -1 1;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ------------------------------------------------------------- motion ----- */
+@layer utilities {
+  .anim-in {
+    animation: fade-rise 220ms var(--ease-out-quint) both;
+  }
+
+  .anim-row {
+    animation: fade-rise 180ms var(--ease-out-quint) both;
+  }
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+  border-radius: var(--radius-control);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.08),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .skeleton::after {
+    display: none;
+  }
+}
+
+/* Never restyle the scrollbar into something unfamiliar; only tone it down. */
+@supports (scrollbar-width: thin) {
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+}
