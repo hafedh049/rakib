@@ -1,0 +1,79 @@
+# Reference deliverable: `docker compose up` boots a working, seeded Rakib with no
+# internet access. k3s is the deployed environment; this file is the reproducible one.
+name: rakib
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    command: ["--quiet", "--logpath", "/dev/null"]
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-rakib}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-rakib-dev-secret}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      MONGO_URI: mongodb://mongo:27017/reclamations
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://minio:9000
+    depends_on:
+      mongo: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      minio: {condition: service_healthy}
+    ports:
+      - "8000:8000"
+    # the 2 vCPU / 4 GB envelope the project claims — enforced, not asserted
+    deploy:
+      resources:
+        limits: {cpus: "2.0", memory: 4G}
+
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      MONGO_URI: mongodb://mongo:27017/reclamations
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://minio:9000
+    depends_on:
+      api: {condition: service_started}
+    command: ["arq", "app.workers.settings.WorkerSettings"]
+
+volumes:
+  mongo_data:
+  redis_data:
+  minio_data:

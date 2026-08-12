@@ -1,0 +1,28 @@
+# Test harness: `docker compose -f docker-compose.test.yml run --rm tests`
+name: rakib-test
+
+services:
+  mongo:
+    image: mongo:7
+    command: ["--quiet", "--logpath", "/dev/null"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  tests:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    environment:
+      MONGO_URI: mongodb://mongo:27017/rakib_test
+      ENVIRONMENT: test
+      JWT_SECRET: test-secret-at-least-32-bytes-long-ok
+      TRACKING_TOKEN_SECRET: test-tracking-secret-at-least-32-bytes
+    depends_on:
+      mongo: {condition: service_healthy}
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/tests:/app/tests
+    command: ["pytest", "-q"]
