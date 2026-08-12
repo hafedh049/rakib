@@ -19,9 +19,17 @@ export function Login() {
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
 
+  // An already-authenticated visitor gets sent somewhere that shows they ARE
+  // signed in. Sending a claimant back to the anonymous submission form made
+  // the login link look broken, because that page gave no sign of a session.
   if (!loading && user) {
     const from = (location.state as { from?: Location } | null)?.from
-    return <Navigate to={isStaff ? (from?.pathname ?? '/inbox') : '/portal'} replace />
+    return (
+      <Navigate
+        to={isStaff ? (from?.pathname ?? '/inbox') : '/portal/mes-reclamations'}
+        replace
+      />
+    )
   }
 
   async function submit(event: React.FormEvent) {

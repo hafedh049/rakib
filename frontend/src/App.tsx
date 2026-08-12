@@ -7,6 +7,7 @@ import { useAuth } from './lib/auth'
 import { SSEProvider } from './lib/sse'
 import type { Role } from './lib/types'
 import { Login } from './routes/Login'
+import { PortalComplaint, PortalMine } from './routes/PortalMine'
 import { PortalSubmit } from './routes/PortalSubmit'
 import { PortalTrack } from './routes/PortalTrack'
 import { Register } from './routes/Register'
@@ -67,6 +68,8 @@ export function App() {
         {/* ---- public portal (light, FR + AR RTL) ---- */}
         <Route path="/" element={<Navigate to="/portal" replace />} />
         <Route path="/portal" element={<PortalSubmit />} />
+        <Route path="/portal/mes-reclamations" element={<PortalMine />} />
+        <Route path="/portal/reclamation/:id" element={<PortalComplaint />} />
         <Route path="/portal/suivi" element={<PortalTrack />} />
         <Route path="/portal/satisfaction" element={<PortalTrack satisfaction />} />
         <Route path="/login" element={<Login />} />

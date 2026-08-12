@@ -40,7 +40,9 @@ export function Register() {
       // row for no reason is friction with no security benefit.
       await signIn(form.email, form.password)
     },
-    onSuccess: () => navigate('/portal'),
+    // Land on the signed-in surface, not the anonymous form: the account was
+    // just created, so the very next screen should prove it exists.
+    onSuccess: () => navigate('/portal/mes-reclamations'),
     onError: (caught) => {
       if (caught instanceof ApiError) {
         setFieldErrors(caught.fieldErrors())

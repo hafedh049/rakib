@@ -1,7 +1,8 @@
 import { useEffect, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { useT, type Locale } from '@/i18n'
+import { useAuth } from '@/lib/auth'
 
 import { cx } from './ui'
 
@@ -57,12 +58,7 @@ export function PortalLayout({
 
           <div className="flex items-center gap-3">
             <LocaleSwitch locale={locale} onChange={setLocale} />
-            <Link
-              to="/login"
-              className="text-xs text-ink-muted underline-offset-2 hover:text-ink hover:underline"
-            >
-              {t('auth.signIn')}
-            </Link>
+            <AccountControls />
           </div>
         </div>
       </header>
@@ -78,6 +74,53 @@ export function PortalLayout({
           {t('brand')} — {t('brandTagline')}
         </p>
       </footer>
+    </div>
+  )
+}
+
+/**
+ * A signed-in claimant must be able to see that they are signed in, reach their
+ * own complaints, and sign out. Without this the portal looks logged-out while
+ * /login silently bounces an authenticated user back here — which reads as
+ * "login is broken".
+ */
+function AccountControls() {
+  const { t } = useT()
+  const { user, isStaff, signOut } = useAuth()
+  const navigate = useNavigate()
+
+  if (!user) {
+    return (
+      <Link
+        to="/login"
+        className="text-xs text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+      >
+        {t('auth.signIn')}
+      </Link>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      <Link
+        to={isStaff ? '/inbox' : '/portal/mes-reclamations'}
+        className="max-w-[16ch] truncate text-xs font-medium underline-offset-2 hover:underline"
+      >
+        {isStaff ? t('nav.inbox') : t('portal.myComplaints')}
+      </Link>
+      <span className="hidden text-2xs text-ink-muted sm:inline">
+        {user.full_name}
+      </span>
+      <button
+        type="button"
+        onClick={async () => {
+          await signOut()
+          navigate('/portal')
+        }}
+        className="text-xs text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+      >
+        {t('auth.signOut')}
+      </button>
     </div>
   )
 }

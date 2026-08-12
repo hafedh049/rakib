@@ -48,6 +48,15 @@ export const fr = {
   'portal.rateThanks': 'Merci pour votre retour.',
   'portal.deposited': 'Deposee le',
   'portal.dueBy': 'Reponse attendue avant le',
+  'portal.myComplaints': 'Mes reclamations',
+  'portal.myComplaintsLead':
+    'Toutes les reclamations deposees depuis ce compte.',
+  'portal.noComplaints': 'Aucune reclamation pour le moment',
+  'portal.noComplaintsHelp':
+    'Les reclamations que vous deposez en etant connecte apparaissent ici. Celles envoyees sans compte restent accessibles par leur lien de suivi.',
+  'portal.newOne': 'Deposer une reclamation',
+  'portal.account': 'Mon compte',
+  'portal.backToList': 'Retour a mes reclamations',
 
   // ---- auth ---------------------------------------------------------------
   'auth.signIn': 'Connexion',

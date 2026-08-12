@@ -53,6 +53,15 @@ export const ar: Partial<Record<TranslationKey, string>> = {
   'portal.rateThanks': 'شكرا على ملاحظاتكم.',
   'portal.deposited': 'قُدّمت في',
   'portal.dueBy': 'الرد متوقع قبل',
+  'portal.myComplaints': 'شكاواي',
+  'portal.myComplaintsLead': 'كل الشكاوى المقدمة من هذا الحساب.',
+  'portal.noComplaints': 'لا توجد شكاوى حاليا',
+  'portal.noComplaintsHelp':
+    'الشكاوى التي تقدمونها وأنتم متصلون تظهر هنا. أما المقدمة دون حساب فتبقى متاحة عبر رابط المتابعة.',
+  'portal.newOne': 'تقديم شكوى',
+  'portal.account': 'حسابي',
+  'portal.backToList': 'العودة إلى شكاواي',
+  'auth.signOut': 'تسجيل الخروج',
 
   'auth.signIn': 'تسجيل الدخول',
   'auth.email': 'البريد الإلكتروني',
