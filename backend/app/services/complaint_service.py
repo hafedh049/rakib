@@ -10,6 +10,7 @@ from typing import Any
 from beanie import PydanticObjectId
 
 from app.config import settings
+from app.core.background import spawn
 from app.core.errors import Conflict, NotFound, PermissionDenied, ValidationError
 from app.core.logging import get_logger
 from app.core.pagination import Page, clamp_limit, cursor_filter, encode_cursor
@@ -99,10 +100,16 @@ async def create_complaint(
     await complaint.insert()
 
     url = tracking_url(complaint)
-    # Triage runs in the worker so this endpoint stays under 100 ms p95.
-    await queue.enqueue("triage_complaint", str(complaint.id))
-    await publish(
-        EventName.COMPLAINT_CREATED, event_payload(complaint, tracking_url=url)
+    # Both are best-effort and their results are ignored, so they run after the
+    # response rather than adding two Redis round trips to the claimant's wait.
+    payload_for_event = event_payload(complaint, tracking_url=url)
+    spawn(
+        queue.enqueue("triage_complaint", str(complaint.id)),
+        name=f"enqueue-triage:{complaint.ref}",
+    )
+    spawn(
+        publish(EventName.COMPLAINT_CREATED, payload_for_event),
+        name=f"publish-created:{complaint.ref}",
     )
     log.info(
         "complaint.created", ref=complaint.ref, channel=str(payload.channel),

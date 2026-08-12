@@ -21,13 +21,38 @@ def get_database() -> AsyncIOMotorDatabase:
     return get_client().get_default_database()
 
 
+#: Pods start in arbitrary order under Kubernetes, so an API that exits because
+#: the database is not up yet turns a five-second race into a crash loop.
+STARTUP_RETRIES = 30
+STARTUP_BACKOFF_SECONDS = 2
+
+
 async def init_db(mongo_uri: str | None = None) -> AsyncIOMotorDatabase:
     global _client
+    import asyncio
+
     from beanie import init_beanie
 
     uri = mongo_uri or settings.mongo_uri
-    _client = AsyncIOMotorClient(uri, uuidRepresentation="standard", tz_aware=True)
+    _client = AsyncIOMotorClient(
+        uri,
+        uuidRepresentation="standard",
+        tz_aware=True,
+        serverSelectionTimeoutMS=5_000,
+    )
     database = _client.get_default_database()
+
+    for attempt in range(1, STARTUP_RETRIES + 1):
+        try:
+            await _client.admin.command("ping")
+            break
+        except Exception as exc:
+            if attempt == STARTUP_RETRIES:
+                log.error("mongo.unreachable", uri_host=uri.split("@")[-1], error=str(exc))
+                raise
+            log.warning("mongo.waiting", attempt=attempt, error=str(exc)[:120])
+            await asyncio.sleep(STARTUP_BACKOFF_SECONDS)
+
     await init_beanie(database=database, document_models=ALL_DOCUMENTS)
     log.info("mongo.connected", database=database.name, documents=len(ALL_DOCUMENTS))
     return database

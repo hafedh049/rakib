@@ -20,6 +20,11 @@ COPY app ./app
 COPY ml_artifacts ./ml_artifacts
 COPY data ./data
 
+# Only the operational scripts ship. harvest.py, generate_dataset.py, corpus.py
+# and gold.py are dev-time tooling and are deliberately absent from the runtime
+# image — that is the difference between "uses AI" and "requires AI".
+COPY scripts/__init__.py scripts/seed.py scripts/train.py ./scripts/
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

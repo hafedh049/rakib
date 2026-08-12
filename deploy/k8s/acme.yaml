@@ -1,0 +1,50 @@
+# ACME HTTP-01 plumbing.
+#
+# The Infomaniak token available here lacks the dns:read scope acme.sh's DNS
+# plugin needs, so validation goes over HTTP-01 instead. acme.sh runs in
+# standalone mode on the host, and the ingress forwards only the challenge path
+# to it via the host's cni0 address — the same host-hop pattern already used on
+# this cluster, since pods cannot reach host ports directly.
+#
+# Harmless when acme.sh is not running: the path simply 503s.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acme-challenge
+  namespace: reclamations
+spec:
+  ports:
+    - port: 8888
+      targetPort: 8888
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: acme-challenge
+  namespace: reclamations
+subsets:
+  - addresses:
+      - ip: 10.42.0.1 # host cni0
+    ports:
+      - port: 8888
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rakib-acme
+  namespace: reclamations
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: reclamations.activiity.com
+      http:
+        paths:
+          - path: /.well-known/acme-challenge
+            pathType: Prefix
+            backend:
+              service:
+                name: acme-challenge
+                port: { number: 8888 }

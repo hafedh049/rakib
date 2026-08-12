@@ -11,6 +11,7 @@ from app import db
 from app.api.v1 import api_router
 from app.api.v1 import health as health_routes
 from app.config import settings
+from app.core import background
 from app.core.errors import AppError, app_error_handler
 from app.core.logging import configure_logging, get_logger, request_context_middleware
 from app.events import bus
@@ -43,6 +44,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await sse_consumer.start()
     log.info("app.started", env=settings.environment, backend=settings.triage_backend)
     yield
+    await background.drain()
     await sse_consumer.stop()
     await queue.close_pool()
     await bus.close_redis()
