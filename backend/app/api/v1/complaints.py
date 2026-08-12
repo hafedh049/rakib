@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import uuid4
 
 from beanie import PydanticObjectId
@@ -10,7 +10,8 @@ from app.core.errors import NotFound, PermissionDenied, ValidationError
 from app.core.ids import doc_id
 from app.core.pagination import Page
 from app.core.security import verify_tracking_token
-from app.deps import AgentUser, CurrentUser, OptionalUser
+from app.deps import AgentUser, CurrentUser, OptionalUser, SupervisorUser
+from app.models.analysis_trace import AnalysisTrace
 from app.models.complaint import Attachment, Complaint, Status
 from app.schemas.complaint import (
     ComplaintCreate,
@@ -24,7 +25,7 @@ from app.schemas.complaint import (
     ResolveRequest,
     SatisfactionIn,
 )
-from app.services import complaint_service, storage
+from app.services import complaint_service, storage, triage_service
 
 router = APIRouter(prefix="/complaints", tags=["complaints"])
 
@@ -185,6 +186,64 @@ async def upload_attachment(
         ),
     )
     return complaint
+
+
+@router.post("/{complaint_id}/retriage", response_model=ComplaintOut)
+async def retriage(complaint_id: PydanticObjectId, user: SupervisorUser) -> Complaint:
+    """Re-run the whole pipeline. Synchronous so the caller sees the result."""
+    complaint = await complaint_service.get_for_user(complaint_id, user)
+    complaint.log("triage.requested", actor_type="agent", actor_id=str(user.id))
+    return await triage_service.triage_complaint(complaint)
+
+
+@router.get("/{complaint_id}/analysis")
+async def analysis(complaint_id: PydanticObjectId, user: AgentUser) -> dict[str, Any]:
+    """Everything behind the decision: stages, timings, rule hits, alternatives.
+
+    This is the explainability surface — the panel an agent opens to ask why a
+    complaint was given priority 1 and sent to their queue.
+    """
+    complaint = await complaint_service.get_for_user(complaint_id, user)
+    traces = (
+        await AnalysisTrace.find(AnalysisTrace.complaint_id == complaint.id)
+        .sort("-created_at")
+        .limit(5)
+        .to_list()
+    )
+    duplicate = (
+        await Complaint.get(complaint.analysis.duplicate_of)
+        if complaint.analysis.duplicate_of
+        else None
+    )
+    related = await Complaint.find(
+        {"_id": {"$in": complaint.analysis.related_ids}}
+    ).to_list()
+
+    return {
+        "ref": complaint.ref,
+        "triage_state": str(complaint.triage_state),
+        "analysis": complaint.analysis.model_dump(mode="json"),
+        "duplicate_of": (
+            {"id": str(duplicate.id), "ref": duplicate.ref, "subject": duplicate.subject}
+            if duplicate
+            else None
+        ),
+        "related": [
+            {"id": str(r.id), "ref": r.ref, "subject": r.subject} for r in related
+        ],
+        "traces": [
+            {
+                "engine": t.engine,
+                "model_version": t.model_version,
+                "outcome": t.outcome,
+                "error": t.error,
+                "total_latency_ms": t.total_latency_ms,
+                "created_at": t.created_at,
+                "stages": [s.model_dump() for s in t.stages],
+            }
+            for t in traces
+        ],
+    }
 
 
 @router.get("/{complaint_id}/attachments/{attachment_id}")

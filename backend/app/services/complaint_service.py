@@ -38,6 +38,7 @@ from app.models.counter import next_complaint_ref
 from app.models.department import Department
 from app.models.user import Role, User, role_at_least
 from app.schemas.complaint import ComplaintCreate, ComplaintPatch
+from app.workers import queue
 
 log = get_logger(__name__)
 
@@ -98,6 +99,8 @@ async def create_complaint(
     await complaint.insert()
 
     url = tracking_url(complaint)
+    # Triage runs in the worker so this endpoint stays under 100 ms p95.
+    await queue.enqueue("triage_complaint", str(complaint.id))
     await publish(
         EventName.COMPLAINT_CREATED, event_payload(complaint, tracking_url=url)
     )

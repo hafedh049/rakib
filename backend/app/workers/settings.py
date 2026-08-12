@@ -13,6 +13,8 @@ from arq.connections import RedisSettings
 from app.config import settings
 from app.core.logging import configure_logging, get_logger
 from app.db import close_db, init_db
+from app.services import rules_service, seed_service, triage
+from app.workers.triage_worker import triage_complaint
 
 log = get_logger(__name__)
 
@@ -20,7 +22,10 @@ log = get_logger(__name__)
 async def startup(ctx: dict[str, Any]) -> None:
     configure_logging()
     await init_db()
-    log.info("worker.started")
+    await seed_service.seed_departments()
+    await rules_service.seed_rules()
+    await triage.refresh_rules()
+    log.info("worker.started", engine=triage.get_engine().name)
 
 
 async def shutdown(ctx: dict[str, Any]) -> None:
@@ -32,7 +37,7 @@ class WorkerSettings:
     redis_settings = RedisSettings.from_dsn(settings.redis_url)
     on_startup = startup
     on_shutdown = shutdown
-    functions: list = []
+    functions: list = [triage_complaint]
     cron_jobs: list = []
     max_jobs = 10
     job_timeout = 120

@@ -6,6 +6,7 @@ indexes. Later phases append to this list as their models land.
 
 from beanie import Document
 
+from app.models.analysis_trace import AnalysisTrace
 from app.models.complaint import Complaint
 from app.models.counter import Counter
 from app.models.department import Department
@@ -20,10 +21,12 @@ ALL_DOCUMENTS: list[type[Document]] = [
     Complaint,
     Counter,
     Rule,
+    AnalysisTrace,
 ]
 
 __all__ = [
     "ALL_DOCUMENTS",
+    "AnalysisTrace",
     "Complaint",
     "Counter",
     "Department",
