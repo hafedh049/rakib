@@ -24,15 +24,22 @@ async def seed_departments() -> int:
     for seed in DEPARTMENT_SEED:
         existing = await Department.find_one(Department.code == seed.code)
         if existing is None:
-            await Department(
+            # Atomic upsert, not check-then-insert: seeding runs from startup and
+            # from fixtures, and two callers can both observe "missing" and race
+            # into a duplicate-key error on department_code.
+            document = Department(
                 code=seed.code,
                 name=seed.name,
                 description=seed.description,
                 keywords=list(seed.keywords),
                 categories=list(seed.categories),
                 default_sla_hours=seed.default_sla_hours,
-            ).insert()
-            created += 1
+            ).model_dump(by_alias=True, exclude={"id"})
+            result = await Department.get_motor_collection().update_one(
+                {"code": seed.code}, {"$setOnInsert": document}, upsert=True
+            )
+            if result.upserted_id is not None:
+                created += 1
             continue
 
         if (

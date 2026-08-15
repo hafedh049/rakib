@@ -16,16 +16,16 @@ from app.services import assignment_service, triage_service
 COMPLAINTS = "/api/v1/complaints"
 
 TEXT_A = (
-    "ma facture de janvier est de 187 dinars alors que mon forfait est a 45 dinars "
-    "je demande le detail des consommations hors forfait"
+    "des agios de 187 dinars ont ete preleves sur mon compte alors que je n ai "
+    "jamais ete a decouvert je demande le detail du calcul"
 )
 TEXT_B = (
-    "ma facture du mois de janvier s eleve a 187 dinars alors que mon forfait coute "
-    "45 dinars merci de me donner le detail des consommations"
+    "on m a preleve 187 dinars d agios sur mon compte alors que je n ai jamais "
+    "ete a decouvert merci de me donner le detail du calcul"
 )
 TEXT_C = (
-    "aucun reseau mobile dans mon quartier depuis trois jours impossible de "
-    "passer le moindre appel"
+    "le distributeur de la marsa a debite mon compte sans delivrer le moindre "
+    "billet et personne ne veut me rembourser"
 )
 
 
@@ -52,44 +52,42 @@ def test_jaccard_of_unrelated_text_is_zero():
 # ------------------------------------------------------------------- scoring
 def test_near_identical_complaints_score_high():
     match = score_candidate(
-        TEXT_A, "Facture elevee", candidate("1", "Facture elevee", TEXT_B), None
+        TEXT_A, "Agios eleves", candidate("1", "Agios eleves", TEXT_B), None
     )
     assert match.score > 0.6
 
 
 def test_unrelated_complaints_score_low():
     match = score_candidate(
-        TEXT_A, "Facture elevee", candidate("1", "Pas de reseau", TEXT_C), None
+        TEXT_A, "Agios eleves", candidate("1", "Distributeur", TEXT_C), None
     )
     assert match.score < 0.3
 
 
 def test_same_claimant_gets_a_bonus():
     same = score_candidate(
-        TEXT_A, "Facture", candidate("1", "Facture", TEXT_B, "a@b.tn"), "a@b.tn"
+        TEXT_A, "Agios", candidate("1", "Agios", TEXT_B, "a@b.tn"), "a@b.tn"
     )
     other = score_candidate(
-        TEXT_A, "Facture", candidate("1", "Facture", TEXT_B, "c@d.tn"), "a@b.tn"
+        TEXT_A, "Agios", candidate("1", "Agios", TEXT_B, "c@d.tn"), "a@b.tn"
     )
     assert same.score > other.score
     assert same.same_claimant is True
 
 
-def test_cold_start_scores_without_a_vectorizer():
-    """Token-set ratio and shingle overlap must produce a usable score."""
+def test_two_signals_produce_a_usable_score():
+    """Token-set ratio and shingle overlap alone must separate a near-duplicate."""
     match = score_candidate(
-        TEXT_A, "Facture elevee", candidate("1", "Facture elevee", TEXT_B), None,
-        vectorizer=None,
+        TEXT_A, "Agios eleves", candidate("1", "Agios eleves", TEXT_B), None,
     )
-    assert match.cosine == 0.0
     assert match.score > 0.6
 
 
 # -------------------------------------------------------------------- detect
 def test_same_claimant_duplicate_is_auto_linked():
     duplicate, _ = detect(
-        TEXT_A, "Facture elevee",
-        [candidate("1", "Facture elevee", TEXT_B, "a@b.tn")],
+        TEXT_A, "Agios eleves",
+        [candidate("1", "Agios eleves", TEXT_B, "a@b.tn")],
         claimant_email="a@b.tn",
         auto_threshold=0.6,
     )
@@ -100,8 +98,8 @@ def test_same_claimant_duplicate_is_auto_linked():
 def test_different_claimants_are_related_not_duplicates():
     """Forty people reporting one outage is an incident cluster, not duplication."""
     duplicate, _ = detect(
-        TEXT_C, "Pas de reseau",
-        [candidate("1", "Pas de reseau", TEXT_C, "voisin@example.tn")],
+        TEXT_C, "Distributeur",
+        [candidate("1", "Distributeur", TEXT_C, "voisin@example.tn")],
         claimant_email="moi@example.tn",
         auto_threshold=0.6,
         cross_claimant_threshold=0.5,
@@ -112,8 +110,8 @@ def test_different_claimants_are_related_not_duplicates():
 
 def test_cross_claimant_needs_a_much_higher_score():
     duplicate, suggestions = detect(
-        TEXT_A, "Facture elevee",
-        [candidate("1", "Facture elevee", TEXT_B, "autre@example.tn")],
+        TEXT_A, "Agios eleves",
+        [candidate("1", "Agios eleves", TEXT_B, "autre@example.tn")],
         claimant_email="moi@example.tn",
         auto_threshold=0.60,
         suggest_threshold=0.30,
@@ -124,13 +122,13 @@ def test_cross_claimant_needs_a_much_higher_score():
 
 
 def test_no_candidates_means_no_match():
-    assert detect(TEXT_A, "Facture", [], "a@b.tn") == (None, [])
+    assert detect(TEXT_A, "Agios", [], "a@b.tn") == (None, [])
 
 
 def test_middling_scores_are_suggested_not_linked():
     _, suggestions = detect(
-        TEXT_A, "Facture elevee",
-        [candidate("1", "Facture elevee", TEXT_B, "a@b.tn")],
+        TEXT_A, "Agios eleves",
+        [candidate("1", "Agios eleves", TEXT_B, "a@b.tn")],
         claimant_email="a@b.tn",
         auto_threshold=0.99,
         suggest_threshold=0.3,
@@ -140,8 +138,15 @@ def test_middling_scores_are_suggested_not_linked():
 
 # ------------------------------------------------------------------ assignment
 def test_skill_match_scores_overlap():
-    assert assignment_service.skill_match(["facturation"], Category.FACTURATION) == 1.0
-    assert assignment_service.skill_match(["reseau"], Category.FACTURATION) == 0.0
+    assert assignment_service.skill_match(
+        ["frais", "commissions"], Category.FRAIS_COMMISSIONS
+    ) == 1.0
+    assert assignment_service.skill_match(
+        ["frais"], Category.FRAIS_COMMISSIONS
+    ) == 0.5
+    assert assignment_service.skill_match(
+        ["virement"], Category.FRAIS_COMMISSIONS
+    ) == 0.0
 
 
 def test_recency_decays():
@@ -161,30 +166,31 @@ def test_agent_score_prefers_the_less_loaded_agent():
 
 
 async def test_pick_agent_prefers_skills_then_load(departments):
-    department = departments["FACTURATION"]
+    department = departments["RELATION_CLIENT"]
     specialist = User(
         email="spec@rakib.tn", password_hash="x", full_name="Specialist",
-        role=Role.AGENT, department_id=department.id, skills=["facturation"],
+        role=Role.AGENT, department_id=department.id,
+        skills=["frais", "commissions"],
         max_concurrent=10, last_active_at=datetime.now(UTC),
     )
     generalist = User(
         email="gen@rakib.tn", password_hash="x", full_name="Generalist",
-        role=Role.AGENT, department_id=department.id, skills=["reseau"],
+        role=Role.AGENT, department_id=department.id, skills=["remboursement"],
         max_concurrent=10, last_active_at=datetime.now(UTC),
     )
     await specialist.insert()
     await generalist.insert()
 
-    picked = await assignment_service.pick_agent(department, Category.FACTURATION)
+    picked = await assignment_service.pick_agent(department, Category.FRAIS_COMMISSIONS)
     assert picked.email == "spec@rakib.tn"
 
 
 async def test_pick_agent_returns_none_when_department_is_empty(departments):
-    assert await assignment_service.pick_agent(departments["DIGITAL_SI"], None) is None
+    assert await assignment_service.pick_agent(departments["DIGITAL"], None) is None
 
 
 async def test_pick_agent_skips_agents_at_capacity(departments):
-    department = departments["FACTURATION"]
+    department = departments["RELATION_CLIENT"]
     agent = User(
         email="full@rakib.tn", password_hash="x", full_name="Full", role=Role.AGENT,
         department_id=department.id, max_concurrent=1,
@@ -224,8 +230,8 @@ async def make_complaint(client, subject: str, body: str, email="fatma@example.t
 
 async def test_triage_classifies_prioritises_and_routes(client):
     complaint = await make_complaint(
-        client, "Facture anormalement elevee",
-        "Ma facture de janvier est de 187 dinars alors que mon forfait est a "
+        client, "Agios anormalement elevee",
+        "Ma prelevement d agios est de 187 dinars alors que mon plafond est a "
         "45 dinars par mois. Merci de me fournir le detail des consommations.",
     )
     result = await triage_service.triage_complaint(complaint)
@@ -241,7 +247,7 @@ async def test_triage_writes_a_trace_with_all_six_stages(client):
     from app.models.analysis_trace import AnalysisTrace
 
     complaint = await make_complaint(
-        client, "Pas de reseau",
+        client, "Distributeur",
         "Aucun signal dans le quartier depuis trois jours, impossible d appeler.",
     )
     await triage_service.triage_complaint(complaint)
@@ -257,7 +263,7 @@ async def test_triage_records_rule_hits_with_matched_tokens(client):
     complaint = await make_complaint(
         client, "URGENT mise en demeure",
         "C est inacceptable, mon avocat va porter plainte. Depuis des semaines "
-        "aucune reponse concernant ma facture de 340 dinars.",
+        "aucune reponse concernant ma agios de 340 dinars.",
     )
     result = await triage_service.triage_complaint(complaint)
     assert result.analysis.rule_hits
@@ -270,7 +276,11 @@ async def test_low_confidence_routes_to_human_triage(client, monkeypatch):
     complaint = await make_complaint(client, "probleme", "bonjour j ai un probleme")
     result = await triage_service.triage_complaint(complaint)
     assert result.analysis.needs_human_triage is True
-    assert result.analysis.triage_reason in {"low_confidence", "ambiguous", "no_model"}
+    # Every way the lexicon can decline to decide (see lexicon/classifier.py).
+    assert result.analysis.triage_reason in {
+        "no_signal", "insufficient_evidence", "evidence_too_spread",
+        "margin_too_narrow",
+    }
 
 
 async def test_complaint_needing_human_triage_is_not_auto_assigned(client, monkeypatch):
@@ -292,9 +302,9 @@ async def test_triage_auto_assigns_when_confident(client, departments, monkeypat
         ).insert()
 
     complaint = await make_complaint(
-        client, "Facture elevee",
-        "Ma facture de janvier est de 187 dinars au lieu de 45 dinars, "
-        "je conteste ce montant hors forfait.",
+        client, "Agios eleves",
+        "Ma agios de janvier est de 187 dinars au lieu de 45 dinars, "
+        "je conteste ce montant hors convention.",
     )
     result = await triage_service.triage_complaint(complaint)
     assert result.assignment.agent_id is not None
@@ -303,10 +313,10 @@ async def test_triage_auto_assigns_when_confident(client, departments, monkeypat
 
 async def test_duplicate_is_flagged_but_never_auto_closed(client, monkeypatch):
     monkeypatch.setattr(settings, "dedup_auto_threshold", 0.5)
-    first = await make_complaint(client, "Facture elevee", TEXT_A)
+    first = await make_complaint(client, "Agios eleves", TEXT_A)
     await triage_service.triage_complaint(first)
 
-    second = await make_complaint(client, "Facture elevee", TEXT_B)
+    second = await make_complaint(client, "Agios eleves", TEXT_B)
     result = await triage_service.triage_complaint(second)
 
     assert result.analysis.duplicate_of == first.id
@@ -317,7 +327,7 @@ async def test_duplicate_is_flagged_but_never_auto_closed(client, monkeypatch):
 async def test_unknown_department_falls_back_to_general(client, monkeypatch):
     """Deleting the routed department must not lose the complaint."""
     await Department.find(Department.code != "GENERAL").delete()
-    complaint = await make_complaint(client, "Facture", "ma facture est trop elevee")
+    complaint = await make_complaint(client, "Agios", "ma agios est trop elevee")
     result = await triage_service.triage_complaint(complaint)
     assert result.assignment.department_code == "GENERAL"
 
@@ -329,7 +339,7 @@ async def test_triage_failure_is_recorded_not_swallowed(client, monkeypatch):
         raise RuntimeError("engine exploded")
 
     monkeypatch.setattr(pipeline, "run", explode)
-    complaint = await make_complaint(client, "Facture", "ma facture est trop elevee")
+    complaint = await make_complaint(client, "Agios", "ma agios est trop elevee")
     result = await triage_service.triage_complaint(complaint)
 
     assert result.triage_state == TriageState.FAILED
@@ -338,8 +348,8 @@ async def test_triage_failure_is_recorded_not_swallowed(client, monkeypatch):
 
 async def test_triage_is_fast(client):
     complaint = await make_complaint(
-        client, "Facture anormale",
-        "Ma facture de janvier est de 187 dinars alors que mon forfait est a 45.",
+        client, "Agios anormale",
+        "Ma prelevement d agios est de 187 dinars alors que mon plafond est a 45.",
     )
     result = await triage_service.triage_complaint(complaint)
     assert result.analysis.latency_ms < 200

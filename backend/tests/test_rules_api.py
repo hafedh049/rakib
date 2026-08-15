@@ -62,7 +62,7 @@ async def test_admin_can_deactivate_a_rule(client, admin_headers):
 
 
 async def test_invalid_regex_config_is_rejected(client, admin_headers):
-    rule = await Rule.find_one(Rule.code == "INVOICE_REFERENCE")
+    rule = await Rule.find_one(Rule.code == "OPERATION_REFERENCE")
     response = await client.patch(
         f"{RULES}/{rule.id}",
         json={"config": {"pattern": "([unclosed", "flags": "i"}},
@@ -86,7 +86,7 @@ async def test_simulate_returns_hits_with_matched_tokens(client, supervisor_head
         json={
             "subject": "URGENT",
             "body": "C'est inacceptable, mon avocat va porter plainte. "
-                    "187 dinars factures a tort depuis des semaines.",
+                    "187 dinars preleves a tort depuis des semaines.",
             "claimant_is_vip": True,
         },
         headers=supervisor_headers,
@@ -127,7 +127,7 @@ async def test_simulate_exposes_the_normalisation_result(client, supervisor_head
 
 async def test_simulate_reflects_a_weight_change(client, admin_headers):
     """The tuning loop: change a weight, re-run, see the score move."""
-    payload = {"body": "message normal sur ma facture", "claimant_is_vip": True}
+    payload = {"body": "message normal sur ma agios", "claimant_is_vip": True}
     before = (await client.post(SIMULATE, json=payload, headers=admin_headers)).json()
 
     rule = await Rule.find_one(Rule.code == "VIP_CLAIMANT")
@@ -154,7 +154,4 @@ async def test_ready_exposes_the_engine_state(client):
     """
     body = (await client.get("/health/ready")).json()
     engine = body["engine"]
-    assert engine["active_engine"] in {"ml", "rules"}
-    assert engine["engine_ready"] is (engine["active_engine"] == "ml")
-    assert engine["degraded"] is not engine["engine_ready"]
-    assert engine["language_id_model"] is True
+    assert engine["active_engine"] in {"lexicon", "rules"}

@@ -12,11 +12,11 @@ routed and still gets its deadline — but a rising rate means the vocabulary is
 drifting away from how people actually write.
 """
 
-
 from app.intelligence.lexicon.classifier import classify
 from app.intelligence.lexicon.terms import CATEGORY_LEXICON
 from app.intelligence.text.normalize import normalize
 from scripts.gold import GOLD
+
 
 def macro_f1(pairs: list[tuple[str, str | None]]) -> tuple[float, float]:
     """(macro-F1, accuracy) over (expected, predicted)."""

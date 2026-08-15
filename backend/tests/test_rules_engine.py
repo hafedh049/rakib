@@ -86,7 +86,7 @@ def test_regex_rule_reports_its_matches():
         code="AMOUNT", label="Montant", kind="regex", weight=8,
         config={"pattern": r"\b\d{2,5}\s*(?:dinars?|dt)\b", "flags": "i"},
     )
-    hit = evaluate_rule(rule, context_for(body="on m'a facture 187 dinars ce mois"))
+    hit = evaluate_rule(rule, context_for(body="on m'a preleve 187 dinars ce mois"))
     assert hit is not None
     assert "187 dinars" in hit.matched
 
@@ -122,18 +122,18 @@ def test_length_rule_penalises_very_short_messages():
         code="SHORT", label="Court", kind="length", weight=-8, config={"max": 60}
     )
     assert evaluate_rule(rule, context_for(body="panne")) is not None
-    long_body = "ma connexion fibre est totalement coupee depuis mardi dernier " * 4
+    long_body = "mon virement de salaire n est toujours pas arrive depuis mardi " * 4
     assert evaluate_rule(rule, context_for(body=long_body)) is None
 
 
 def test_category_weight_rule():
     rule = RuleSpec(
         code="CAT", label="Categorie", kind="category_weight", weight=1,
-        config={"map": {Category.FACTURATION: 10}},
+        config={"map": {Category.FRAIS_COMMISSIONS: 10}},
     )
-    hit = evaluate_rule(rule, context_for(body="x", category=Category.FACTURATION))
+    hit = evaluate_rule(rule, context_for(body="x", category=Category.FRAIS_COMMISSIONS))
     assert hit.weight == 10
-    assert evaluate_rule(rule, context_for(body="x", category=Category.EQUIPEMENT)) is None
+    assert evaluate_rule(rule, context_for(body="x", category=Category.CHEQUE_EFFET)) is None
 
 
 # ------------------------------------------------------------------------ buckets
@@ -155,9 +155,9 @@ def test_routine_complaint_is_normal_priority():
     result = evaluate(
         ALL_SPECS,
         context_for(
-            "Question sur ma facture",
-            "Bonjour, je souhaite comprendre le detail de ma facture du mois. Merci.",
-            category=Category.FACTURATION,
+            "Question sur mes frais",
+            "Bonjour, je souhaite comprendre le detail des frais du mois. Merci.",
+            category=Category.FRAIS_COMMISSIONS,
         ),
     )
     assert result.priority == 3
@@ -170,7 +170,7 @@ def test_legal_threat_escalates():
             "Mise en demeure",
             "Sans reponse sous 8 jours je saisis mon avocat et je depose plainte "
             "au tribunal. Cela dure depuis des semaines.",
-            category=Category.FACTURATION,
+            category=Category.FRAIS_COMMISSIONS,
         ),
     )
     assert result.priority <= 2
@@ -183,9 +183,9 @@ def test_vip_with_legal_threat_and_history_is_critical():
         context_for(
             "URGENT - mise en demeure",
             "C'est inacceptable, aucune reponse depuis des semaines. Mon avocat "
-            "va deposer plainte. Je vais resilier et changer d'operateur. "
+            "va deposer plainte. Je vais cloturer mon compte et changer de banque. "
             "Toute la zone est touchee.",
-            category=Category.FACTURATION,
+            category=Category.FRAIS_COMMISSIONS,
             claimant_is_vip=True,
             prior_count_30d=4,
             prior_open=3,
@@ -200,7 +200,7 @@ def test_every_hit_carries_matched_tokens():
     result = evaluate(
         ALL_SPECS,
         context_for(
-            "Urgent", "Inacceptable, mon avocat va porter plainte, 187 dinars factures",
+            "Urgent", "Inacceptable, mon avocat va porter plainte, 187 dinars preleves",
             claimant_is_vip=True,
         ),
     )
@@ -242,9 +242,9 @@ def test_negation_flips_polarity():
 
 
 def test_shouting_pushes_sentiment_down():
-    calm, calm_score = analyse_sentiment(context_for(body="il y a un probleme de reseau"))
+    calm, calm_score = analyse_sentiment(context_for(body="il y a un probleme sur mon compte"))
     shouted, shouted_score = analyse_sentiment(
-        context_for(body="IL Y A UN PROBLEME DE RESEAU !!!")
+        context_for(body="IL Y A UN PROBLEME SUR MON COMPTE !!!")
     )
     assert shouted_score < calm_score
     assert calm or shouted  # both produced a label
@@ -268,9 +268,9 @@ def test_sentiment_score_stays_in_range():
 @pytest.mark.parametrize(
     "category,body,expected",
     [
-        (Category.FACTURATION, "j'ai ete preleve deux fois ce mois", "double_prelevement"),
-        (Category.RESEAU_MOBILE, "aucun reseau dans le quartier", "absence_signal"),
-        (Category.APPLICATION_MOBILE, "impossible de faire le login", "connexion_impossible"),
+        (Category.FRAIS_COMMISSIONS, "des agios sur mon decouvert", "agios"),
+        (Category.CARTE_BANCAIRE, "ma carte a ete avalee par le distributeur", "carte_avalee"),
+        (Category.BANQUE_DIGITALE, "impossible de faire le login", "connexion_impossible"),
     ],
 )
 def test_subcategory_detection(category, body, expected):
@@ -282,4 +282,4 @@ def test_subcategory_is_none_without_a_category():
 
 
 def test_subcategory_is_none_when_nothing_matches():
-    assert detect_subcategory(Category.FACTURATION, "bonjour") is None
+    assert detect_subcategory(Category.FRAIS_COMMISSIONS, "bonjour") is None

@@ -88,7 +88,6 @@ def detect(
     subject: str,
     candidates: list[DedupCandidate],
     claimant_email: str | None = None,
-    vectorizer=None,
     *,
     auto_threshold: float = 0.82,
     suggest_threshold: float = 0.65,
@@ -104,7 +103,7 @@ def detect(
 
     matches = sorted(
         (
-            score_candidate(text, subject, candidate, claimant_email, vectorizer)
+            score_candidate(text, subject, candidate, claimant_email)
             for candidate in candidates
         ),
         key=lambda match: match.score,

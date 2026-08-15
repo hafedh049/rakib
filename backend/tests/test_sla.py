@@ -124,7 +124,7 @@ async def make_open_complaint(
     complaint = Complaint(
         ref=ref,
         claimant=Claimant(full_name="Fatma", email="fatma@example.tn"),
-        subject="Facture", body="ma facture est trop elevee ce mois ci",
+        subject="Agios", body="ma agios est trop elevee ce mois ci",
         status=Status.ASSIGNED,
         created_at=created_at, updated_at=created_at,
         assignment=Assignment(department_id=department_id, agent_id=agent_id),
@@ -192,7 +192,7 @@ async def test_breach_escalates_to_the_department_contact(monkeypatch, departmen
         role=Role.SUPERVISOR,
     )
     await supervisor.insert()
-    department = departments["FACTURATION"]
+    department = departments["RELATION_CLIENT"]
     department.escalation_to = supervisor.id
     await department.save()
 
@@ -216,7 +216,7 @@ async def test_breach_without_an_escalation_contact_still_breaches(
     now = datetime.now(UTC)
     await make_open_complaint(
         "REC-2026-10006", now - timedelta(hours=9), hours=4,
-        department_id=departments["FACTURATION"].id,
+        department_id=departments["RELATION_CLIENT"].id,
     )
     result = await sla_service.sweep(now)
     assert result["breached"] == 1
@@ -251,7 +251,7 @@ async def test_sweep_publishes_breach_and_escalation_events(
         role=Role.SUPERVISOR,
     )
     await supervisor.insert()
-    department = departments["RESEAU_MOBILE"]
+    department = departments["MONETIQUE"]
     department.escalation_to = supervisor.id
     await department.save()
 

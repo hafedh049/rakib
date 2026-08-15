@@ -1,8 +1,17 @@
-"""Seed knowledge base — French and Arabic, one pair per category.
+"""Seed knowledge base — French and Arabic.
 
-Templates are what an agent actually sends, so they are written as an operator
-would write them: acknowledge, state what happens next, give a deadline. No
-promises the system cannot keep, and no apology that admits liability.
+Templates are what an agent actually sends, so they are written as a bank would
+write them: acknowledge, state what happens next, give a deadline. No promises
+the system cannot keep, and no apology that admits liability.
+
+Two obligations from the circulaire shape every template here:
+
+*   **Article 7** requires the bank to inform customers of the handling delays
+    *and of how to reach the banking mediator*. So the mediation route is named
+    in the acknowledgement rather than buried on a website.
+*   **Article 8** caps the reply at fifteen working days from the acknowledgement.
+    Templates quote {{sla_days}} — the internal target for that category — and
+    never a figure above the legal ceiling.
 """
 
 from typing import Any
@@ -11,349 +20,342 @@ from app.domain.taxonomy import Category
 
 GREETING_FR = "Bonjour {{claimant_name}},\n\n"
 GREETING_AR = "السلام عليكم {{claimant_name}}،\n\n"
-CLOSING_FR = (
-    "\n\nNous restons a votre disposition.\nService Reclamations — {{department}}"
+
+#: Article 7. Identical on every reply, because the obligation is not optional.
+MEDIATION_FR = (
+    "\n\nSi la reponse apportee ne vous satisfait pas, vous pouvez saisir le "
+    "mediateur bancaire, conformement a la reglementation en vigueur."
 )
-CLOSING_AR = "\n\nنبقى على ذمتكم.\nمصلحة الشكاوى — {{department}}"
+MEDIATION_AR = (
+    "\n\nإذا لم يقنعكم الرد، يمكنكم اللجوء إلى الوسيط البنكي طبقا للتراتيب "
+    "الجاري بها العمل."
+)
+
+CLOSING_FR = (
+    MEDIATION_FR + "\n\nNous restons a votre disposition.\n"
+    "Service Reclamations — {{department}}"
+)
+CLOSING_AR = MEDIATION_AR + "\n\nنبقى على ذمتكم.\nمصلحة الشكاوى — {{department}}"
+
+
+def _ack(body: str) -> str:
+    """Standard acknowledgement (Article 8: reference, date, then the delay)."""
+    return (
+        GREETING_FR
+        + "Votre reclamation {{ref}} concernant {{category}} a bien ete "
+        "enregistree le {{created_at}}.\n\n" + body + "\n\n"
+        "Notre equipe {{department}} traite votre demande dans un delai de "
+        "{{sla_days}} jours ouvrables." + CLOSING_FR
+    )
+
+
+def _ack_ar(body: str) -> str:
+    return (
+        GREETING_AR
+        + "تم تسجيل شكواكم {{ref}} بتاريخ {{created_at}}.\n\n" + body + "\n\n"
+        "تتولى مصلحة {{department}} معالجة طلبكم في أجل {{sla_days}} أيام عمل."
+        + CLOSING_AR
+    )
+
 
 KB_SEED: list[dict[str, Any]] = [
-    # ------------------------------------------------------------ FACTURATION
+    # -------------------------------------------------------- CARTE_BANCAIRE
     {
-        "title": "Contestation de facture — accuse et delai",
-        "category": Category.FACTURATION,
+        "title": "Carte avalee ou bloquee — procedure",
+        "category": Category.CARTE_BANCAIRE,
         "language": "fr",
-        "tags": ["facture", "montant", "contestation", "prelevement"],
+        "tags": ["carte", "avalee", "bloquee", "opposition", "distributeur"],
         "content": (
-            "Procedure de contestation de facture : verifier le detail de "
-            "consommation, comparer avec l'offre souscrite, identifier les "
-            "depassements hors forfait, puis emettre un avoir si l'ecart est "
-            "confirme. Delai de traitement standard : 72 heures."
+            "Carte avalee : le distributeur la conserve 24 a 48 heures avant "
+            "destruction. Identifier l'agence detentrice, verifier l'identite du "
+            "porteur, puis restituer ou commander un renouvellement. "
+            "Carte bloquee : identifier le motif (code errone trois fois, "
+            "suspicion de fraude, impaye) avant toute action."
         ),
-        "template": (
-            GREETING_FR
-            + "Votre reclamation {{ref}} concernant {{category}} a bien ete "
-            "enregistree le {{created_at}}.\n\n"
-            "Nous procedons a la verification detaillee de votre facture. "
-            "Si un ecart est confirme, un avoir sera emis sur votre prochaine "
-            "echeance.\n\n"
-            "Notre equipe {{department}} traite votre demande, delai maximum "
-            "{{sla_hours}} heures." + CLOSING_FR
+        "template": _ack(
+            "Nous verifions aupres de l'agence detentrice du distributeur "
+            "concerne. Si votre carte a ete conservee, elle vous sera restituee "
+            "apres verification de votre identite ; a defaut, une carte de "
+            "remplacement sera commandee sans frais."
         ),
     },
     {
-        "title": "الاعتراض على الفاتورة — إعلام بالاستلام",
-        "category": Category.FACTURATION,
+        "title": "البطاقة المحتجزة أو المعطلة",
+        "category": Category.CARTE_BANCAIRE,
         "language": "ar",
-        "tags": ["فاتورة", "مبلغ", "اعتراض"],
-        "content": (
-            "إجراءات الاعتراض على الفاتورة: مراجعة تفاصيل الاستهلاك، مقارنتها "
-            "بالعرض المشترك فيه، تحديد التجاوزات، ثم إصدار إشعار بالخصم عند "
-            "تأكد الفارق."
-        ),
-        "template": (
-            GREETING_AR
-            + "تم تسجيل شكواكم {{ref}} بخصوص {{category}} بتاريخ {{created_at}}.\n\n"
-            "نقوم حاليا بمراجعة تفاصيل فاتورتكم، وفي صورة تأكد وجود خطأ سيتم "
-            "تعديل المبلغ في الفاتورة القادمة.\n\n"
-            "أجل المعالجة الأقصى {{sla_hours}} ساعة." + CLOSING_AR
+        "tags": ["بطاقة", "الموزع", "تعطيل", "اعتراض"],
+        "content": "إجراءات استرجاع البطاقة المحتجزة لدى الموزع الآلي أو رفع التعطيل.",
+        "template": _ack_ar(
+            "نقوم بالتثبت لدى الوكالة المعنية بالموزع الآلي. في صورة حجز البطاقة، "
+            "يتم إرجاعها إليكم بعد التثبت من هويتكم، وإلا يتم إصدار بطاقة بديلة "
+            "دون مصاريف."
         ),
     },
-    # ------------------------------------------------------ PAIEMENT_RECHARGE
+    # --------------------------------------------------------------- DAB_GAB
     {
-        "title": "Recharge ou paiement non credite",
-        "category": Category.PAIEMENT_RECHARGE,
+        "title": "Retrait debite sans delivrance de billets",
+        "category": Category.DAB_GAB,
         "language": "fr",
-        "tags": ["recharge", "paiement", "solde", "transaction"],
+        "tags": ["distributeur", "retrait", "billets", "compensation"],
         "content": (
-            "Rapprochement bancaire : recuperer la reference de transaction, "
-            "verifier aupres du prestataire de paiement, crediter manuellement "
-            "si le debit est confirme et non impute. Delai bancaire habituel : "
-            "48 a 72 heures."
+            "Rapprocher le journal electronique du distributeur avec le "
+            "mouvement du compte : si les billets n'ont pas ete delivres, "
+            "l'ecart apparait a l'arrete de caisse. Pour un distributeur d'une "
+            "autre banque, la regularisation passe par la compensation "
+            "interbancaire — annoncer le delai reel plutot qu'une date."
         ),
-        "template": (
-            GREETING_FR
-            + "Votre reclamation {{ref}} relative a un paiement non credite est "
-            "enregistree depuis le {{created_at}}.\n\n"
-            "Nous effectuons le rapprochement avec notre prestataire de "
-            "paiement. Si le debit est confirme sans imputation, votre compte "
-            "sera credite du montant de {{amount}}.\n\n"
-            "Delai maximum : {{sla_hours}} heures." + CLOSING_FR
+        "template": _ack(
+            "Nous rapprochons le journal du distributeur concerne avec les "
+            "mouvements de votre compte. Si l'operation n'a pas ete honoree, le "
+            "montant vous sera recredite avec la date de valeur d'origine."
         ),
     },
     {
-        "title": "تعبئة أو خلاص لم يتم احتسابه",
-        "category": Category.PAIEMENT_RECHARGE,
+        "title": "خصم دون تسليم الأوراق النقدية",
+        "category": Category.DAB_GAB,
         "language": "ar",
-        "tags": ["تعبئة", "خلاص", "رصيد"],
-        "content": "مقارنة العملية مع مزود الخلاص وإضافة المبلغ يدويا عند تأكد الخصم.",
-        "template": (
-            GREETING_AR
-            + "تم تسجيل شكواكم {{ref}} حول عملية خلاص لم تُحتسب بتاريخ "
-            "{{created_at}}.\n\nنقوم بالتثبت مع مزود الخدمة، وسيتم تعديل رصيدكم "
-            "عند تأكد العملية.\n\nأجل المعالجة {{sla_hours}} ساعة." + CLOSING_AR
+        "tags": ["الموزع", "سحب", "خصم", "إرجاع"],
+        "content": "مقارنة سجل الموزع الآلي بحركة الحساب وإرجاع المبلغ عند ثبوت عدم التسليم.",
+        "template": _ack_ar(
+            "نقوم بمقارنة سجل الموزع الآلي بحركات حسابكم. في صورة عدم تنفيذ "
+            "العملية، يتم إرجاع المبلغ إلى حسابكم بتاريخ القيمة الأصلي."
         ),
     },
-    # ---------------------------------------------------------- RESEAU_MOBILE
+    # ------------------------------------------------ PAIEMENT_TPE_ECOMMERCE
     {
-        "title": "Incident de couverture mobile",
-        "category": Category.RESEAU_MOBILE,
+        "title": "Double debit ou paiement refuse",
+        "category": Category.PAIEMENT_TPE_ECOMMERCE,
         "language": "fr",
-        "tags": ["reseau", "couverture", "signal", "panne"],
+        "tags": ["tpe", "double debit", "3d secure", "commercant"],
         "content": (
-            "Verifier les incidents en cours sur la zone, relever la delegation "
-            "et le gouvernorat, ouvrir un ticket radio si plusieurs signalements "
-            "concordent. Une panne collective est traitee en priorite."
+            "Double debit : demander le ticket du commercant, distinguer une "
+            "pre-autorisation non levee (elle tombe seule sous sept jours) "
+            "d'une double capture (a annuler). Paiement refuse : verifier le "
+            "plafond, l'activation e-commerce et le numero enregistre pour le "
+            "code 3D Secure."
         ),
-        "template": (
-            GREETING_FR
-            + "Votre signalement {{ref}} concernant la couverture reseau a ete "
-            "transmis a notre equipe technique le {{created_at}}.\n\n"
-            "Un diagnostic est en cours sur votre zone. Vous serez informe des "
-            "que le service sera retabli.\n\n"
-            "Delai d'intervention estime : {{sla_hours}} heures." + CLOSING_FR
+        "template": _ack(
+            "Nous verifions aupres du commercant et de notre centre monetique "
+            "s'il s'agit d'une double capture ou d'une pre-autorisation non "
+            "levee. Tout montant preleve a tort vous sera restitue."
+        ),
+    },
+    # -------------------------------------------------- VIREMENT_PRELEVEMENT
+    {
+        "title": "Virement non recu — tracage",
+        "category": Category.VIREMENT_PRELEVEMENT,
+        "language": "fr",
+        "tags": ["virement", "rib", "salaire", "tracage"],
+        "content": (
+            "Verifier d'abord le RIB saisi et la date d'execution : un virement "
+            "vers une autre banque passe par la compensation, soit un jour "
+            "ouvre. Au-dela, ouvrir une demande de tracage. Si le RIB etait "
+            "errone, seule une demande de restitution aupres de la banque "
+            "beneficiaire est possible — le dire d'emblee."
+        ),
+        "template": _ack(
+            "Nous tracons l'operation aupres de la banque beneficiaire et vous "
+            "communiquerons la date effective de credit ainsi que la reference "
+            "interbancaire."
         ),
     },
     {
-        "title": "انقطاع التغطية الجوالة",
-        "category": Category.RESEAU_MOBILE,
+        "title": "التحويل غير الواصل",
+        "category": Category.VIREMENT_PRELEVEMENT,
         "language": "ar",
-        "tags": ["شبكة", "تغطية", "انقطاع"],
-        "content": "التثبت من الأعطاب الجارية بالمنطقة وفتح تذكرة فنية عند تعدد الإعلامات.",
-        "template": (
-            GREETING_AR
-            + "تم تحويل إعلامكم {{ref}} حول تغطية الشبكة إلى المصلحة الفنية "
-            "بتاريخ {{created_at}}.\n\nيجري حاليا تشخيص الوضعية بمنطقتكم وسيتم "
-            "إعلامكم فور إصلاح العطب.\n\nالأجل التقديري {{sla_hours}} ساعة."
-            + CLOSING_AR
+        "tags": ["تحويل", "أجرة", "تتبع"],
+        "content": "التثبت من المعرف البنكي وتاريخ التنفيذ ثم تتبع العملية لدى البنك المستفيد.",
+        "template": _ack_ar(
+            "نقوم بتتبع العملية لدى البنك المستفيد وسنوافيكم بتاريخ الإيداع "
+            "الفعلي وبمرجع العملية."
         ),
     },
-    # ---------------------------------------------------------- INTERNET_FIXE
+    # ---------------------------------------------------------- CHEQUE_EFFET
     {
-        "title": "Panne ADSL ou fibre",
-        "category": Category.INTERNET_FIXE,
+        "title": "Chequier non delivre ou cheque rejete",
+        "category": Category.CHEQUE_EFFET,
         "language": "fr",
-        "tags": ["adsl", "fibre", "box", "debit", "panne"],
+        "tags": ["cheque", "chequier", "provision", "rejet"],
         "content": (
-            "Test de ligne a distance, verification de la synchronisation du "
-            "modem, planification d'une intervention si le defaut est confirme "
-            "sur la boucle locale."
+            "Rejet pour defaut de provision : verifier le solde a la date de "
+            "presentation, non a la date de reclamation, ainsi que l'ordre "
+            "d'imputation des operations du jour. Un rejet errone se regularise "
+            "sans delai — ses consequences pour le client depassent le montant."
         ),
-        "template": (
-            GREETING_FR
-            + "Votre reclamation {{ref}} relative a votre connexion fixe est "
-            "enregistree depuis le {{created_at}}.\n\n"
-            "Un test de ligne a distance est en cours. Si le defaut est confirme "
-            "sur la boucle locale, une intervention technique sera planifiee et "
-            "vous serez contacte pour convenir d'un creneau.\n\n"
-            "Delai maximum : {{sla_hours}} heures." + CLOSING_FR
+        "template": _ack(
+            "Nous verifions le solde de votre compte a la date exacte de "
+            "presentation du cheque ainsi que l'ordre d'imputation des "
+            "operations. Si le rejet s'avere injustifie, nous procederons a la "
+            "regularisation et vous remettrons une attestation."
+        ),
+    },
+    # -------------------------------------------------------- COMPTE_GESTION
+    {
+        "title": "Cloture de compte et releves",
+        "category": Category.COMPTE_GESTION,
+        "language": "fr",
+        "tags": ["cloture", "releve", "compte", "procuration"],
+        "content": (
+            "Cloture : verifier l'absence d'operations en cours, de cheques non "
+            "presentes et d'engagements rattaches, recuperer les moyens de "
+            "paiement, puis solder. Les frais cessent a la date de cloture "
+            "effective, pas a celle de la demande — tout prelevement posterieur "
+            "est a rembourser."
+        ),
+        "template": _ack(
+            "Nous verifions l'etat de votre compte, les operations en cours et "
+            "les moyens de paiement a restituer. Tout frais preleve apres la "
+            "date de cloture effective vous sera rembourse."
         ),
     },
     {
-        "title": "عطب الأنترنت القار",
-        "category": Category.INTERNET_FIXE,
+        "title": "غلق الحساب وكشوفات الحساب",
+        "category": Category.COMPTE_GESTION,
         "language": "ar",
-        "tags": ["أنترنت", "عطب", "صبيب"],
-        "content": "اختبار الخط عن بعد وبرمجة تدخل ميداني عند تأكد العطب.",
-        "template": (
-            GREETING_AR
-            + "تم تسجيل شكواكم {{ref}} حول الأنترنت القار بتاريخ {{created_at}}.\n\n"
-            "يجري اختبار الخط عن بعد، وفي صورة تأكد العطب ستتم برمجة تدخل فني.\n\n"
-            "الأجل الأقصى {{sla_hours}} ساعة." + CLOSING_AR
+        "tags": ["حساب", "غلق", "كشف"],
+        "content": "إجراءات غلق الحساب وإرجاع المصاريف المقتطعة بعد تاريخ الغلق الفعلي.",
+        "template": _ack_ar(
+            "نتثبت من وضعية حسابكم ومن العمليات الجارية ووسائل الدفع الواجب "
+            "إرجاعها. كل مصاريف مقتطعة بعد تاريخ الغلق الفعلي سيتم إرجاعها."
         ),
     },
-    # -------------------------------------------------- INTERVENTION_TECHNIQUE
+    # ---------------------------------------------------- CREDIT_FINANCEMENT
     {
-        "title": "Rendez-vous technique manque ou retarde",
-        "category": Category.INTERVENTION_TECHNIQUE,
+        "title": "Echeance, mainlevee et dossier de credit",
+        "category": Category.CREDIT_FINANCEMENT,
         "language": "fr",
-        "tags": ["technicien", "rendez-vous", "intervention", "delai"],
+        "tags": ["credit", "echeance", "mainlevee", "amortissement"],
         "content": (
-            "Reprogrammer sous 48 heures, prevenir le client par appel, "
-            "escalader au responsable technique si le dossier depasse le delai "
-            "annonce."
+            "Double prelevement d'echeance : rembourser puis corriger le "
+            "tableau d'amortissement, faute de quoi l'ecart se propage sur "
+            "toute la duree. Mainlevee : delivrable seulement apres solde total, "
+            "et elle debloque souvent une vente — la traiter comme urgente."
         ),
-        "template": (
-            GREETING_FR
-            + "Nous avons bien note votre reclamation {{ref}} du {{created_at}} "
-            "concernant une intervention technique.\n\n"
-            "Nous reprogrammons votre rendez-vous en priorite et un conseiller "
-            "vous appellera pour convenir d'un creneau qui vous convient.\n\n"
-            "Delai maximum : {{sla_hours}} heures." + CLOSING_FR
+        "template": _ack(
+            "Nous verifions les echeances prelevees et, le cas echeant, "
+            "corrigeons le tableau d'amortissement avant de vous le communiquer "
+            "a jour."
         ),
     },
-    # ------------------------------------------------------ OFFRES_ABONNEMENT
+    # ----------------------------------------------------- FRAIS_COMMISSIONS
     {
-        "title": "Promotion ou changement de forfait non applique",
-        "category": Category.OFFRES_ABONNEMENT,
+        "title": "Contestation de frais et agios",
+        "category": Category.FRAIS_COMMISSIONS,
         "language": "fr",
-        "tags": ["offre", "promotion", "forfait", "engagement"],
+        "tags": ["frais", "agios", "commission", "tarification"],
         "content": (
-            "Verifier la date de souscription, l'eligibilite a la promotion et "
-            "l'etat de la commande. Appliquer retroactivement si l'eligibilite "
-            "est confirmee."
+            "Reconstituer le calcul jour par jour a partir des soldes en date "
+            "de valeur et le communiquer : un client qui voit le detail conteste "
+            "rarement deux fois. Verifier que la ligne figure dans la convention "
+            "signee ; a defaut, elle est a rembourser."
         ),
-        "template": (
-            GREETING_FR
-            + "Votre reclamation {{ref}} concernant votre offre a ete enregistree "
-            "le {{created_at}}.\n\n"
-            "Nous verifions votre eligibilite et la date effective de "
-            "souscription. Si la promotion vous etait bien applicable, elle sera "
-            "appliquee retroactivement.\n\n"
-            "Delai maximum : {{sla_hours}} heures." + CLOSING_FR
-        ),
-    },
-    # ------------------------------------------------- RESILIATION_PORTABILITE
-    {
-        "title": "Resiliation ou portabilite en cours",
-        "category": Category.RESILIATION_PORTABILITE,
-        "language": "fr",
-        "tags": ["resiliation", "portabilite", "engagement", "cloture"],
-        "content": (
-            "Verifier le depot de la demande, l'etat d'engagement et les "
-            "impayes. La facturation doit cesser a la date effective de "
-            "resiliation."
-        ),
-        "template": (
-            GREETING_FR
-            + "Votre demande {{ref}} du {{created_at}} est prise en charge.\n\n"
-            "Nous verifions l'etat de votre dossier de resiliation ainsi que "
-            "votre situation contractuelle. Toute facturation posterieure a la "
-            "date effective de resiliation vous sera remboursee.\n\n"
-            "Delai maximum : {{sla_hours}} heures." + CLOSING_FR
+        "template": _ack(
+            "Nous reconstituons le detail du calcul a partir des soldes en date "
+            "de valeur et verifions sa conformite a la convention que vous avez "
+            "signee. Le decompte detaille vous sera communique."
         ),
     },
     {
-        "title": "طلب فسخ أو نقل الرقم",
-        "category": Category.RESILIATION_PORTABILITE,
+        "title": "الاعتراض على المصاريف والفوائد",
+        "category": Category.FRAIS_COMMISSIONS,
         "language": "ar",
-        "tags": ["فسخ", "نقل الرقم"],
-        "content": "التثبت من تاريخ إيداع المطلب ووضعية الالتزام التعاقدي.",
-        "template": (
-            GREETING_AR
-            + "تم تسجيل مطلبكم {{ref}} بتاريخ {{created_at}}.\n\n"
-            "نقوم بالتثبت من وضعية ملفكم، وكل مبلغ تمت فوترته بعد تاريخ الفسخ "
-            "الفعلي سيتم إرجاعه.\n\nالأجل الأقصى {{sla_hours}} ساعة." + CLOSING_AR
-        ),
-    },
-    # ------------------------------------------------- SERVICE_CLIENT_AGENCE
-    {
-        "title": "Qualite d'accueil en agence ou au centre d'appel",
-        "category": Category.SERVICE_CLIENT_AGENCE,
-        "language": "fr",
-        "tags": ["agence", "accueil", "attente", "conseiller"],
+        "tags": ["مصاريف", "عمولة", "فوائد"],
         "content": (
-            "Identifier l'agence et le creneau, remonter au responsable de "
-            "point de vente, repondre au client sous 72 heures."
+            "إعادة احتساب المصاريف انطلاقا من الأرصدة بتاريخ القيمة وموافاة "
+            "الحريف بالتفصيل."
         ),
-        "template": (
-            GREETING_FR
-            + "Nous avons bien recu votre reclamation {{ref}} du {{created_at}} "
-            "concernant la qualite de notre accueil.\n\n"
-            "Votre retour a ete transmis au responsable concerne. Nous prenons "
-            "ce type de signalement au serieux et vous informerons des suites "
-            "donnees.\n\nDelai maximum : {{sla_hours}} heures." + CLOSING_FR
+        "template": _ack_ar(
+            "نقوم بإعادة احتساب المصاريف انطلاقا من الأرصدة بتاريخ القيمة "
+            "والتثبت من مطابقتها للاتفاقية الممضاة، وسنوافيكم بالتفصيل."
         ),
     },
-    # -------------------------------------------------------------- EQUIPEMENT
+    # ------------------------------------------------------- BANQUE_DIGITALE
     {
-        "title": "Materiel defectueux — echange",
-        "category": Category.EQUIPEMENT,
+        "title": "Acces a la banque en ligne",
+        "category": Category.BANQUE_DIGITALE,
         "language": "fr",
-        "tags": ["box", "routeur", "decodeur", "sim", "garantie"],
+        "tags": ["application", "connexion", "otp", "code"],
         "content": (
-            "Verifier la date de livraison et la garantie, proposer un echange "
-            "en agence ou un envoi, recuperer le materiel defectueux."
+            "Code bloque apres trois tentatives : deblocage en agence apres "
+            "verification d'identite. Code de validation non recu : verifier le "
+            "numero de telephone enregistre au dossier — c'est la cause dans la "
+            "grande majorite des cas, et le client l'ignore."
         ),
-        "template": (
-            GREETING_FR
-            + "Votre reclamation {{ref}} du {{created_at}} concernant votre "
-            "equipement est enregistree.\n\n"
-            "Si le materiel est sous garantie, un echange vous sera propose. "
-            "Vous pourrez le retirer en agence ou le recevoir a votre "
-            "adresse.\n\nDelai maximum : {{sla_hours}} heures." + CLOSING_FR
+        "template": _ack(
+            "Nous verifions l'etat de votre acces ainsi que le numero de "
+            "telephone enregistre a votre dossier, qui conditionne la reception "
+            "des codes de validation."
         ),
     },
-    # --------------------------------------------------- ROAMING_INTERNATIONAL
+    # -------------------------------------------- OPERATIONS_INTERNATIONALES
     {
-        "title": "Contestation de frais de roaming",
-        "category": Category.ROAMING_INTERNATIONAL,
+        "title": "Allocation touristique et transferts",
+        "category": Category.OPERATIONS_INTERNATIONALES,
         "language": "fr",
-        "tags": ["roaming", "itinerance", "international", "pass"],
+        "tags": ["allocation", "devise", "transfert", "change"],
         "content": (
-            "Verifier l'activation du pass, les dates de sejour et les "
-            "enregistrements du reseau partenaire. Regulariser si le pass etait "
-            "actif pendant la periode contestee."
+            "Allocation touristique : verifier le solde annuel disponible et les "
+            "justificatifs de voyage. Tout refus doit etre motive par ecrit — "
+            "c'est une exigence de l'article 8, pas une courtoisie. Transfert "
+            "recu : verifier le SWIFT et la domiciliation avant de conclure a un "
+            "non-recu."
         ),
-        "template": (
-            GREETING_FR
-            + "Votre reclamation {{ref}} du {{created_at}} concernant des frais "
-            "d'itinerance est en cours d'analyse.\n\n"
-            "Nous verifions l'activation de votre pass et les enregistrements "
-            "aupres du reseau partenaire. Toute facturation indue vous sera "
-            "remboursee.\n\nDelai maximum : {{sla_hours}} heures." + CLOSING_FR
+        "template": _ack(
+            "Nous verifions votre solde d'allocation disponible ainsi que les "
+            "pieces fournies. Toute decision de refus vous sera communiquee par "
+            "ecrit et motivee."
         ),
     },
-    # ---------------------------------------------------- APPLICATION_MOBILE
+    # ----------------------------------- FRAUDE_OPERATION_NON_AUTORISEE
     {
-        "title": "Probleme sur l'application mobile",
-        "category": Category.APPLICATION_MOBILE,
+        "title": "Operation non autorisee — reflexe immediat",
+        "category": Category.FRAUDE_OPERATION_NON_AUTORISEE,
         "language": "fr",
-        "tags": ["application", "connexion", "bug", "mise a jour"],
+        "tags": ["fraude", "opposition", "non autorisee", "urgence"],
         "content": (
-            "Faire verifier la version installee, vider le cache, tester la "
-            "reinitialisation du mot de passe. Remonter au support applicatif "
-            "si le defaut est reproductible."
+            "Mettre la carte en opposition avant toute analyse : la perte "
+            "continue tant que l'instrument reste actif. Recueillir la liste "
+            "exacte des operations contestees, la date de derniere utilisation "
+            "legitime et la position du porteur. Orienter vers un depot de "
+            "plainte. Ne jamais facturer les frais d'opposition a une victime."
         ),
-        "template": (
-            GREETING_FR
-            + "Votre signalement {{ref}} du {{created_at}} concernant "
-            "l'application a bien ete recu.\n\n"
-            "Merci de verifier que vous disposez de la derniere version "
-            "installee. Si le probleme persiste, notre equipe technique le "
-            "reproduira et vous tiendra informe.\n\n"
-            "Delai maximum : {{sla_hours}} heures." + CLOSING_FR
+        "template": _ack(
+            "Votre carte a ete mise en opposition immediatement. Nous analysons "
+            "les operations que vous contestez et les circonstances de leur "
+            "realisation. Nous vous invitons a deposer plainte et a nous "
+            "transmettre le recepisse, qui appuiera votre dossier."
         ),
     },
     {
-        "title": "مشكل في التطبيق الجوال",
-        "category": Category.APPLICATION_MOBILE,
+        "title": "عملية غير مصرح بها",
+        "category": Category.FRAUDE_OPERATION_NON_AUTORISEE,
         "language": "ar",
-        "tags": ["تطبيق", "تسجيل الدخول", "تحديث"],
-        "content": "التثبت من نسخة التطبيق وإعادة تعيين كلمة السر ثم إحالة المشكل للدعم.",
-        "template": (
-            GREETING_AR
-            + "تم استلام إعلامكم {{ref}} حول التطبيق بتاريخ {{created_at}}.\n\n"
-            "يرجى التثبت من تحديث التطبيق لآخر نسخة. في صورة تواصل المشكل ستتولى "
-            "المصلحة الفنية معالجته.\n\nالأجل الأقصى {{sla_hours}} ساعة." + CLOSING_AR
+        "tags": ["احتيال", "اعتراض", "بطاقة"],
+        "content": (
+            "الاعتراض الفوري على البطاقة ثم تحليل العمليات المتنازع فيها وتوجيه "
+            "الحريف لتقديم شكاية."
+        ),
+        "template": _ack_ar(
+            "تم الاعتراض على بطاقتكم فورا. نقوم بتحليل العمليات موضوع النزاع "
+            "وظروف إنجازها. ندعوكم إلى تقديم شكاية وموافاتنا بالوصل لدعم ملفكم."
         ),
     },
-    # ------------------------------------------------------------- generique
+    # ------------------------------------------------ AGENCE_QUALITE_SERVICE
     {
-        "title": "Accuse de reception generique",
-        "category": None,
+        "title": "Qualite de l'accueil en agence",
+        "category": Category.AGENCE_QUALITE_SERVICE,
         "language": "fr",
-        "tags": ["accuse", "reception", "generique"],
-        "content": "Modele neutre lorsqu'aucune categorie n'est encore confirmee.",
-        "template": (
-            GREETING_FR
-            + "Votre reclamation {{ref}} a bien ete enregistree le "
-            "{{created_at}}.\n\n"
-            "Elle est en cours d'examen par notre equipe {{department}}. "
-            "Nous reviendrons vers vous sous {{sla_hours}} heures."
-            + CLOSING_FR
+        "tags": ["agence", "attente", "accueil", "conseiller"],
+        "content": (
+            "Recueillir la date, l'heure et l'agence concernee avant toute "
+            "reponse : sans cela le retour au directeur d'agence n'a aucune "
+            "portee. Repondre au client meme lorsque la suite donnee est "
+            "interne — c'est l'absence de reponse qui transforme une remarque en "
+            "saisine du mediateur."
         ),
-    },
-    {
-        "title": "إعلام عام بالاستلام",
-        "category": None,
-        "language": "ar",
-        "tags": ["استلام", "عام"],
-        "content": "نموذج محايد عندما لا يكون التصنيف مؤكدا بعد.",
-        "template": (
-            GREETING_AR
-            + "تم تسجيل شكواكم {{ref}} بتاريخ {{created_at}}.\n\n"
-            "الملف قيد الدرس من طرف مصلحة {{department}}، وسنعود إليكم في أجل "
-            "{{sla_hours}} ساعة." + CLOSING_AR
+        "template": _ack(
+            "Votre remarque a ete transmise au directeur de l'agence concernee. "
+            "Nous revenons vers vous sur les mesures prises."
         ),
     },
 ]

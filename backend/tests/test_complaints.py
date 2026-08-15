@@ -12,14 +12,14 @@ COMPLAINTS = "/api/v1/complaints"
 TRACK = "/api/v1/complaints/track"
 
 BODY = (
-    "Ma facture de janvier s'eleve a 187 dinars alors que mon forfait est a 45 dinars. "
+    "Des agios de 187 dinars ont ete preleves alors que je n'ai jamais ete a decouvert. "
     "Merci de me fournir le detail des consommations."
 )
 
 
 def payload(**overrides):
     base = {
-        "subject": "Facture anormalement elevee",
+        "subject": "Agios anormalement eleves",
         "body": BODY,
         "channel": "web",
         "claimant": {
@@ -169,7 +169,7 @@ async def test_agent_sees_their_department_queue(
 ):
     await make_user(
         email="agent@rakib.tn", password="Password123!", role=Role.AGENT,
-        department_id=departments["FACTURATION"].id,
+        department_id=departments["RELATION_CLIENT"].id,
     )
     headers = await login(client, "agent@rakib.tn", "Password123!")
 
@@ -178,7 +178,7 @@ async def test_agent_sees_their_department_queue(
     from app.services import complaint_service
 
     await complaint_service.route_to_category_department(
-        complaint, Category.FACTURATION
+        complaint, Category.FRAIS_COMMISSIONS
     )
     await complaint.save()
 
@@ -250,7 +250,7 @@ async def test_agent_correcting_the_category_flags_a_training_signal(
     created = await routed_complaint()
     response = await client.patch(
         f"{COMPLAINTS}/{created['id']}",
-        json={"category": Category.PAIEMENT_RECHARGE},
+        json={"category": Category.PAIEMENT_TPE_ECOMMERCE},
         headers=agent_headers,
     )
     assert response.status_code == 200
@@ -328,7 +328,7 @@ async def test_resolve_then_satisfaction(client, routed_complaint, agent_headers
     created = await routed_complaint()
     resolved = await client.post(
         f"{COMPLAINTS}/{created['id']}/resolve",
-        json={"resolution": "Avoir de 142 dinars emis sur la prochaine facture."},
+        json={"resolution": "Remboursement de 142 dinars credite sur le compte."},
         headers=agent_headers,
     )
     assert resolved.status_code == 200

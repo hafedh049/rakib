@@ -53,57 +53,57 @@ def make_article(id_, title, content, category=None, language="fr"):
 
 
 def test_empty_index_returns_nothing():
-    assert KBIndex().search("facture") == []
+    assert KBIndex().search("agios") == []
 
 
 def test_bm25_ranks_the_relevant_article_first():
     index = KBIndex()
     index.build([
-        make_article("1", "Contestation de facture", "facture montant prelevement avoir"),
-        make_article("2", "Panne reseau mobile", "reseau signal couverture antenne"),
+        make_article("1", "Contestation de frais", "agios frais commission prelevement"),
+        make_article("2", "Carte avalee au distributeur", "carte distributeur retrait billet"),
     ])
-    hits = index.search("ma facture est trop elevee, montant anormal")
+    hits = index.search("des agios trop eleves, montant anormal")
     assert hits[0].article.id == "1"
 
 
 def test_search_prefers_the_complaint_category():
     index = KBIndex()
     index.build([
-        make_article("1", "Guide general", "facture reseau equipement", None),
-        make_article("2", "Facture detail", "facture montant", "FACTURATION"),
-        make_article("3", "Facture avoir", "facture avoir remboursement", "FACTURATION"),
-        make_article("4", "Facture delai", "facture delai traitement", "FACTURATION"),
+        make_article("1", "Guide general", "agios carte cheque", None),
+        make_article("2", "Frais detail", "agios montant", "FRAIS_COMMISSIONS"),
+        make_article("3", "Frais rembourses", "agios remboursement", "FRAIS_COMMISSIONS"),
+        make_article("4", "Frais delai", "agios delai traitement", "FRAIS_COMMISSIONS"),
     ])
-    hits = index.search("facture", category="FACTURATION")
-    assert all(hit.article.category == "FACTURATION" for hit in hits)
+    hits = index.search("agios", category="FRAIS_COMMISSIONS")
+    assert all(hit.article.category == "FRAIS_COMMISSIONS" for hit in hits)
 
 
 def test_search_falls_back_when_the_category_is_too_thin():
     """A narrow filter returning nothing is worse than a broad one an agent can judge."""
     index = KBIndex()
     index.build([
-        make_article("1", "Guide general facture", "facture montant prelevement"),
-        make_article("2", "Facture unique", "facture", "ROAMING_INTERNATIONAL"),
+        make_article("1", "Guide general change", "change devise montant"),
+        make_article("2", "Change unique", "change", "OPERATIONS_INTERNATIONALES"),
     ])
-    hits = index.search("facture", category="ROAMING_INTERNATIONAL")
+    hits = index.search("change", category="OPERATIONS_INTERNATIONALES")
     assert len(hits) == 2
 
 
 def test_search_puts_the_requested_language_first():
     index = KBIndex()
     index.build([
-        make_article("fr", "Facture", "facture montant", "FACTURATION", "fr"),
-        make_article("ar", "الفاتورة", "facture montant فاتورة", "FACTURATION", "ar"),
+        make_article("fr", "Frais", "agios montant", "FRAIS_COMMISSIONS", "fr"),
+        make_article("ar", "المصاريف", "agios montant مصاريف", "FRAIS_COMMISSIONS", "ar"),
     ])
-    hits = index.search("facture montant", language="ar")
+    hits = index.search("agios montant", language="ar")
     assert hits[0].article.language == "ar"
 
 
 def test_arabic_query_matches_an_arabic_article():
     index = KBIndex()
     index.build([
-        make_article("1", "الفاتورة", "فاتورة مبلغ خصم", "FACTURATION", "ar"),
-        make_article("2", "Reseau", "reseau signal", "RESEAU_MOBILE", "fr"),
+        make_article("1", "الفاتورة", "فاتورة مبلغ خصم", "FRAIS_COMMISSIONS", "ar"),
+        make_article("2", "Carte", "carte distributeur", "CARTE_BANCAIRE", "fr"),
     ])
     hits = index.search("الفاتورة فيها مبلغ غالط")
     assert hits and hits[0].article.id == "1"
@@ -171,16 +171,16 @@ async def test_suggest_answers_in_arabic_for_an_arabic_complaint(
         await client.post(
             COMPLAINTS,
             json={
-                "subject": "فاتورة غالية",
-                "body": "الفاتورة متاعي هذا الشهر 210 دينار و انا ما بدلتش في العرض",
+                "subject": "مصاريف غير مبررة",
+                "body": "تنقصت مني مصاريف كثيرة هذا الشهر و عمولة غير مبررة على الحساب",
                 "claimant": {"full_name": "Fatma", "email": "fatma@example.tn"},
             },
         )
     ).json()
     complaint = await Complaint.get(created["id"])
-    complaint.analysis.category = "FACTURATION"
+    complaint.analysis.category = "FRAIS_COMMISSIONS"
     complaint.analysis.language = "ar"
-    await complaint_service.route_to_category_department(complaint, "FACTURATION")
+    await complaint_service.route_to_category_department(complaint, "FRAIS_COMMISSIONS")
     await complaint.save()
 
     body = (
@@ -263,7 +263,7 @@ async def test_creating_an_article_rebuilds_the_index(client, supervisor_headers
         json={
             "title": "Procedure exceptionnelle grele",
             "content": "Procedure applicable en cas de degats materiels lies a la grele",
-            "category": "EQUIPEMENT",
+            "category": "CHEQUE_EFFET",
             "template": "Bonjour {{claimant_name}}, dossier {{ref}} en cours.",
         },
         headers=supervisor_headers,

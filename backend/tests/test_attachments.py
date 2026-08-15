@@ -42,8 +42,8 @@ async def create_anonymous(client) -> dict:
         await client.post(
             COMPLAINTS,
             json={
-                "subject": "Facture contestee",
-                "body": "Le montant facture ne correspond pas a mon forfait mensuel.",
+                "subject": "Frais contestes",
+                "body": "Le montant preleve ne correspond pas a la convention signee.",
                 "claimant": {"full_name": "Fatma Ben Ali", "phone": "20145879"},
             },
         )
@@ -56,7 +56,7 @@ def upload(client, complaint_id: str, *, token: str | None = None, headers=None)
         f"{COMPLAINTS}/{complaint_id}/attachments",
         params=params,
         headers=headers or {},
-        files={"file": ("facture.png", PNG, "image/png")},
+        files={"file": ("releve.png", PNG, "image/png")},
     )
 
 

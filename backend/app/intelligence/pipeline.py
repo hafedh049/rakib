@@ -22,12 +22,6 @@ from app.intelligence.ports import TriageEngine, TriageInput, TriageOutput
 log = get_logger(__name__)
 
 
-def _vectorizer_of(engine: TriageEngine):
-    """Reuse the classifier's vectorizer for dedup cosine, when there is one."""
-    model = getattr(engine, "_model", None)
-    return getattr(model, "vectorizer", None) if model else None
-
-
 async def run(
     engine: TriageEngine, data: TriageInput
 ) -> tuple[TriageOutput, list[DedupMatch]]:
@@ -41,7 +35,6 @@ async def run(
         data.subject,
         data.recent_complaints,
         claimant_email=data.claimant_email,
-        vectorizer=_vectorizer_of(engine),
         auto_threshold=settings.dedup_auto_threshold,
         suggest_threshold=settings.dedup_suggest_threshold,
         cross_claimant_threshold=settings.dedup_cross_claimant_threshold,

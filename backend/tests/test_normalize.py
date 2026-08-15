@@ -20,7 +20,7 @@ from app.intelligence.text.normalize import (
 
 # ------------------------------------------------------------------------ masking
 def test_urls_are_masked():
-    assert "<URL>" in mask_entities("voir https://ooredoo.tn/facture pour le detail")
+    assert "<URL>" in mask_entities("voir https://uib.com.tn/releve pour le detail")
 
 
 def test_emails_are_masked():
@@ -48,7 +48,7 @@ def test_masking_removes_the_identifier_itself():
 
 # --------------------------------------------------------------------- signatures
 def test_dash_signature_is_stripped():
-    text = "Ma facture est fausse.\n--\nKarim Jelassi\nDirecteur"
+    text = "Ma agios est fausse.\n--\nKarim Jelassi\nDirecteur"
     assert "Directeur" not in strip_signatures(text)
 
 
@@ -58,7 +58,7 @@ def test_dash_signature_is_stripped():
 )
 def test_mobile_signatures_are_stripped(signature):
     assert signature.lower() not in strip_signatures(
-        f"Aucun reseau depuis hier.\n{signature}"
+        f"Aucun remboursement depuis hier.\n{signature}"
     ).lower()
 
 
@@ -70,7 +70,7 @@ def test_quoted_history_is_stripped():
 
 
 def test_closing_formula_is_stripped():
-    text = "Merci de regulariser ma facture.\nCordialement\nSami Ouertani"
+    text = "Merci de regulariser ma agios.\nCordialement\nSami Ouertani"
     assert "Sami Ouertani" not in strip_signatures(text)
 
 
@@ -113,7 +113,7 @@ def test_arabizi_token_detection(token, expected):
 
 def test_reference_numbers_are_not_mistaken_for_arabizi():
     """`REC-2026-00412` must not be transliterated into Arabic."""
-    assert transliterate_arabizi("rec 2026 00412 facture") == ""
+    assert transliterate_arabizi("rec 2026 00412 agios") == ""
 
 
 def test_arabizi_is_transliterated_to_arabic_script():
@@ -146,7 +146,7 @@ def test_repetition_is_counted_even_though_it_is_removed():
 
 # ----------------------------------------------------------------------- features
 def test_uppercase_ratio_is_measured_before_lowercasing():
-    features = extract_features("AUCUN RESEAU DEPUIS TROIS JOURS")
+    features = extract_features("AUCUN REMBOURSEMENT DEPUIS TROIS JOURS")
     assert features.uppercase_ratio == 1.0
 
 
@@ -158,7 +158,7 @@ def test_features_count_punctuation():
 
 def test_arabic_ratio_detects_script():
     assert extract_features("ما فماش شبكة").arabic_ratio > 0.9
-    assert extract_features("aucun reseau").latin_ratio == 1.0
+    assert extract_features("aucun remboursement").latin_ratio == 1.0
 
 
 def test_arabizi_ratio():
@@ -175,18 +175,18 @@ def test_empty_text_does_not_divide_by_zero():
 
 # ----------------------------------------------------------------------- pipeline
 def test_subject_is_repeated_to_double_its_weight():
-    normalized = normalize("facture", "probleme")
-    assert normalized.text.count("facture") == 2
+    normalized = normalize("agios", "probleme")
+    assert normalized.text.count("agios") == 2
 
 
 def test_full_pipeline_is_lowercased_and_whitespace_collapsed():
-    normalized = normalize("FACTURE   ANORMALE", "Trop\n\n  cher")
+    normalized = normalize("AGIOS   ANORMALE", "Trop\n\n  cher")
     assert "  " not in normalized.text
     assert normalized.text == normalized.text.lower()
 
 
 def test_pipeline_is_idempotent_on_already_clean_text():
-    once = normalize(body="ma facture est trop elevee ce mois ci").text
+    once = normalize(body="mes agios sont trop eleves ce mois ci").text
     twice = normalize(body=once).text
     assert once == twice
 

@@ -41,7 +41,6 @@ async def ready(response: Response) -> dict[str, Any]:
         "engine": {
             "configured_backend": settings.triage_backend,
             "active_engine": engine.name,
-            "engine_ready": engine.engine_ready,
             "engine_version": engine.engine_version,
             "degraded": engine.degraded,
             "detail": engine.detail,

@@ -21,18 +21,18 @@ async def seeded(departments):
     """A small but realistic spread: categories, priorities, breaches, ratings."""
     agent = User(
         email="agent1@rakib.tn", password_hash="x", full_name="Karim Jelassi",
-        role=Role.AGENT, department_id=departments["FACTURATION"].id,
+        role=Role.AGENT, department_id=departments["RELATION_CLIENT"].id,
     )
     await agent.insert()
 
     now = datetime.now(UTC)
     rows = [
-        ("FACTURATION", 1, Status.RESOLVED, True, 4),
-        ("FACTURATION", 2, Status.IN_PROGRESS, False, None),
-        ("FACTURATION", 3, Status.NEW, False, None),
-        ("RESEAU_MOBILE", 1, Status.RESOLVED, False, 5),
-        ("RESEAU_MOBILE", 4, Status.CLOSED, False, 2),
-        ("APPLICATION_MOBILE", 3, Status.ASSIGNED, True, None),
+        ("FRAIS_COMMISSIONS", 1, Status.RESOLVED, True, 4),
+        ("FRAIS_COMMISSIONS", 2, Status.IN_PROGRESS, False, None),
+        ("FRAIS_COMMISSIONS", 3, Status.NEW, False, None),
+        ("CARTE_BANCAIRE", 1, Status.RESOLVED, False, 5),
+        ("CARTE_BANCAIRE", 4, Status.CLOSED, False, 2),
+        ("BANQUE_DIGITALE", 3, Status.ASSIGNED, True, None),
     ]
     for index, (category, priority, status, breached, rating) in enumerate(rows):
         created = now - timedelta(days=index, hours=3)
@@ -45,7 +45,7 @@ async def seeded(departments):
             created_at=created,
             updated_at=created,
             assignment=Assignment(
-                department_id=departments["FACTURATION"].id, agent_id=agent.id
+                department_id=departments["RELATION_CLIENT"].id, agent_id=agent.id
             ),
         )
         complaint.analysis.category = category
@@ -100,7 +100,7 @@ async def test_window_narrows_the_result(client, agent_headers, seeded):
 # -------------------------------------------------------------------- breakdowns
 async def test_by_category(client, agent_headers, seeded):
     rows = (await client.get(f"{ANALYTICS}/by-category", headers=agent_headers)).json()
-    assert rows[0]["category"] == "FACTURATION"
+    assert rows[0]["category"] == "FRAIS_COMMISSIONS"
     assert rows[0]["count"] == 3
     assert 0 <= rows[0]["avg_confidence"] <= 1
 
@@ -126,19 +126,19 @@ async def test_supervision_board(client, agent_headers, seeded):
 
 
 # ------------------------------------------------------------------------ model
-async def test_model_report_exposes_the_correction_rate(
+async def test_engine_report_exposes_the_correction_rate(
     client, supervisor_headers, seeded
 ):
-    body = (await client.get(f"{ANALYTICS}/model", headers=supervisor_headers)).json()
+    body = (await client.get(f"{ANALYTICS}/engine", headers=supervisor_headers)).json()
     assert body["corrections"]["triaged"] == 6
     assert body["corrections"]["corrected"] == 1
     assert body["corrections"]["correction_rate"] == pytest.approx(1 / 6, abs=0.001)
 
 
-async def test_model_report_without_a_trained_version(client, supervisor_headers):
-    body = (await client.get(f"{ANALYTICS}/model", headers=supervisor_headers)).json()
-    assert body["active_version"] is None
-    assert body["history"] == []
+async def test_engine_report_on_an_empty_system(client, supervisor_headers):
+    body = (await client.get(f"{ANALYTICS}/engine", headers=supervisor_headers)).json()
+    assert body["corrections"]["triaged"] == 0
+    assert body["corrections"]["correction_rate"] == 0.0
 
 
 # ------------------------------------------------------------------------ rules
@@ -165,7 +165,7 @@ async def test_analytics_requires_staff(client, make_user, login):
     ).status_code == 403
 
 
-@pytest.mark.parametrize("path", ["agents", "model", "rules", "kb"])
+@pytest.mark.parametrize("path", ["agents", "engine", "rules", "kb"])
 async def test_supervisor_only_endpoints(client, agent_headers, path):
     assert (
         await client.get(f"{ANALYTICS}/{path}", headers=agent_headers)

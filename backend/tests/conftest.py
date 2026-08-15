@@ -95,7 +95,7 @@ async def agent_headers(client, make_user, login, departments):
     """An agent who actually belongs to a department, as in production."""
     await make_user(
         email="agent@rakib.tn", password="Password123!", role=Role.AGENT,
-        department_id=departments["FACTURATION"].id,
+        department_id=departments["RELATION_CLIENT"].id,
     )
     return await login(client, "agent@rakib.tn", "Password123!")
 
@@ -104,7 +104,7 @@ async def agent_headers(client, make_user, login, departments):
 def routed_complaint(client):
     """Create a complaint and route it, the way the triage worker will."""
 
-    async def _create(category: str = "FACTURATION") -> dict:
+    async def _create(category: str = "FRAIS_COMMISSIONS") -> dict:
         from app.models.complaint import Complaint
         from app.services import complaint_service
 
@@ -112,9 +112,9 @@ def routed_complaint(client):
             await client.post(
                 "/api/v1/complaints",
                 json={
-                    "subject": "Facture anormalement elevee",
-                    "body": "Ma facture de janvier s'eleve a 187 dinars alors que "
-                            "mon forfait est a 45 dinars. Merci de verifier.",
+                    "subject": "Agios anormalement eleves",
+                    "body": "Des agios de 187 dinars ont ete preleves sur mon compte "
+                            "alors que je n'ai jamais ete a decouvert. Merci de verifier.",
                     "claimant": {
                         "full_name": "Fatma Ben Ali", "email": "fatma@example.tn"
                     },

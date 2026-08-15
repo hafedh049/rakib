@@ -13,19 +13,19 @@ from app.intelligence.text.normalize import normalize
 
 DEPARTMENTS = [
     DepartmentInfo(
-        code="FACTURATION", name="Facturation",
-        keywords=["facture", "montant", "prelevement", "recharge", "solde", "ligne"],
-        categories=["FACTURATION", "PAIEMENT_RECHARGE"],
+        code="FRAIS_COMMISSIONS", name="Facturation",
+        keywords=["frais", "agios", "commission", "montant", "compte", "operation"],
+        categories=["FRAIS_COMMISSIONS", "PAIEMENT_TPE_ECOMMERCE"],
     ),
     DepartmentInfo(
-        code="RESEAU_MOBILE", name="Reseau Mobile",
-        keywords=["reseau", "signal", "couverture", "4g", "appel", "ligne"],
-        categories=["RESEAU_MOBILE", "ROAMING_INTERNATIONAL"],
+        code="MONETIQUE", name="Monetique et Cartes",
+        keywords=["carte", "distributeur", "retrait", "plafond", "tpe", "operation"],
+        categories=["CARTE_BANCAIRE", "OPERATIONS_INTERNATIONALES"],
     ),
     DepartmentInfo(
-        code="FIXE_INTERVENTION", name="Fixe et Intervention",
-        keywords=["fibre", "adsl", "technicien", "panne", "box", "ligne"],
-        categories=["INTERNET_FIXE", "INTERVENTION_TECHNIQUE"],
+        code="OPERATIONS", name="Fixe et Intervention",
+        keywords=["virement", "cheque", "rib", "prelevement", "chequier", "operation"],
+        categories=["VIREMENT_PRELEVEMENT", "DAB_GAB"],
     ),
 ]
 
@@ -39,7 +39,7 @@ def test_arabic_script_is_detected_without_the_model():
 
 def test_french_is_detected():
     result = lid.detect(
-        normalize(body="Je vous ecris car ma facture est incorrecte depuis deux mois")
+        normalize(body="Je vous ecris car mon releve est incorrect depuis deux mois")
     )
     assert result.code == "fr"
 
@@ -78,9 +78,9 @@ def test_plain_derja_is_not_mistaken_for_french_or_english(text):
 def test_french_is_not_swallowed_by_the_derja_rule():
     """The marker set must not be so greedy that ordinary French trips it."""
     for text in [
-        "Bonjour, ma facture de janvier est incorrecte et personne ne repond",
-        "Je souhaite resilier mon abonnement et transferer mon numero",
-        "Le technicien n est jamais venu au rendez-vous de jeudi matin",
+        "Bonjour, mon releve de janvier est incorrect et personne ne repond",
+        "Je souhaite cloturer mon compte et transferer mes avoirs ailleurs",
+        "Le conseiller n est jamais revenu vers moi apres notre rendez-vous",
     ]:
         assert lid.detect(normalize(body=text)).code == "fr"
 
@@ -93,9 +93,9 @@ def test_language_detection_never_raises_on_empty_text():
 @pytest.mark.parametrize(
     "body,expected",
     [
-        ("ma facture de janvier est trop elevee, montant anormal", "FACTURATION"),
-        ("aucun signal, pas de couverture 4g dans ma zone", "RESEAU_MOBILE"),
-        ("la fibre est en panne, envoyez un technicien", "FIXE_INTERVENTION"),
+        ("des agios de 78 dinars, montant anormal sur mon compte", "FRAIS_COMMISSIONS"),
+        ("le distributeur a garde ma carte, retrait impossible", "MONETIQUE"),
+        ("mon virement n est pas arrive, le rib etait correct", "OPERATIONS"),
     ],
 )
 def test_keyword_routing_picks_the_right_department(body, expected):
@@ -104,12 +104,12 @@ def test_keyword_routing_picks_the_right_department(body, expected):
 
 
 def test_shared_keywords_carry_less_weight_than_discriminating_ones():
-    """`ligne` appears in every department, so it must not decide the routing."""
+    """`operation` appears in every department, so it must not decide routing."""
     code, _ = route_by_keywords(
-        normalize(body="probleme sur ma ligne, la fibre est en panne").indexable,
+        normalize(body="probleme sur une operation, mon cheque est rejete").indexable,
         DEPARTMENTS,
     )
-    assert code == "FIXE_INTERVENTION"
+    assert code == "OPERATIONS"
 
 
 def test_unroutable_text_falls_back_to_general():
@@ -122,16 +122,16 @@ def test_unroutable_text_falls_back_to_general():
 
 def test_routing_offers_the_department_categories_as_alternatives():
     _, alternatives = route_by_keywords(
-        normalize(body="ma facture est fausse").indexable, DEPARTMENTS
+        normalize(body="des agios injustifies sur mon compte").indexable, DEPARTMENTS
     )
     assert [category for category, _ in alternatives] == [
-        "FACTURATION", "PAIEMENT_RECHARGE"
+        "FRAIS_COMMISSIONS", "PAIEMENT_TPE_ECOMMERCE"
     ]
 
 
 def test_top_keywords_skips_short_words_and_placeholders():
-    keywords = top_keywords("la facture facture est <url> tres elevee elevee elevee")
-    assert keywords[0] == "elevee"
+    keywords = top_keywords("les agios agios sont <url> tres eleves eleves eleves")
+    assert keywords[0] == "eleves"
     assert "<url>" not in keywords
     assert "la" not in keywords
 
@@ -154,19 +154,19 @@ def engine():
 async def test_cold_start_engine_routes_without_any_model(engine):
     output = await engine.analyze(
         TriageInput(
-            subject="Facture trop elevee",
-            body="Ma facture de janvier s'eleve a 187 dinars, montant anormal.",
+            subject="Agios trop eleves",
+            body="Des agios de 187 dinars ont ete preleves, montant anormal.",
             departments=DEPARTMENTS,
         )
     )
-    assert output.department_code == "FACTURATION"
+    assert output.department_code == "FRAIS_COMMISSIONS"
     assert output.engine == "rules"
 
 
 async def test_cold_start_admits_it_cannot_categorise(engine):
     """It routes honestly and asks for a human rather than inventing a label."""
     output = await engine.analyze(
-        TriageInput(subject="Facture", body="montant anormal", departments=DEPARTMENTS)
+        TriageInput(subject="Frais", body="montant anormal", departments=DEPARTMENTS)
     )
     assert output.category is None
     assert output.category_confidence == 0.0
@@ -192,7 +192,7 @@ async def test_cold_start_still_prioritises_and_explains(engine):
 
 async def test_engine_records_stage_latencies(engine):
     output = await engine.analyze(
-        TriageInput(subject="x", body="ma facture est fausse", departments=DEPARTMENTS)
+        TriageInput(subject="x", body="des agios injustifies", departments=DEPARTMENTS)
     )
     assert [stage["name"] for stage in output.stages] == [
         "normalize", "language", "route", "rules"
@@ -204,8 +204,8 @@ async def test_engine_is_fast(engine):
     """Target is under 50 ms end to end (spec 5)."""
     output = await engine.analyze(
         TriageInput(
-            subject="Facture anormale",
-            body="Ma facture de janvier s'eleve a 187 dinars " * 20,
+            subject="Agios anormaux",
+            body="Des agios de 187 dinars ont ete preleves a tort " * 20,
             departments=DEPARTMENTS,
         )
     )
@@ -216,4 +216,3 @@ def test_engine_health_reports_degraded(engine):
     health = engine.health()
     assert health.ready is True
     assert health.degraded is True
-    assert health.engine_ready is False

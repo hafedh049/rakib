@@ -245,8 +245,8 @@ async def test_creating_a_complaint_publishes_an_event(client, monkeypatch):
     await client.post(
         COMPLAINTS,
         json={
-            "subject": "Facture anormale",
-            "body": "Ma facture est de 187 dinars au lieu de 45 dinars ce mois-ci.",
+            "subject": "Agios anormaux",
+            "body": "Des agios de 187 dinars ont ete preleves sur mon compte ce mois-ci.",
             "claimant": {"full_name": "Fatma Ben Ali", "email": "fatma@example.tn"},
         },
     )
@@ -273,7 +273,7 @@ async def test_correcting_a_category_publishes_the_training_signal(
 
     await client.patch(
         f"{COMPLAINTS}/{created['id']}",
-        json={"category": "PAIEMENT_RECHARGE"},
+        json={"category": "PAIEMENT_TPE_ECOMMERCE"},
         headers=agent_headers,
     )
     assert EventName.TRIAGE_CORRECTED in published

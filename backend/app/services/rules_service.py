@@ -25,8 +25,19 @@ async def seed_rules() -> int:
     for definition in DEFAULT_RULES:
         existing = await Rule.find_one(Rule.code == definition["code"])
         if existing is None:
-            await Rule(**definition, builtin=True).insert()
-            created += 1
+            # Upsert rather than insert: seeding runs from app startup and from
+            # test fixtures, and a plain check-then-insert lets two callers both
+            # observe "missing" and race into a duplicate-key error on rule_code.
+            # $setOnInsert makes creation atomic and a no-op when it lost the race.
+            result = await Rule.get_motor_collection().update_one(
+                {"code": definition["code"]},
+                {"$setOnInsert": Rule(**definition, builtin=True).model_dump(
+                    by_alias=True, exclude={"id"}
+                )},
+                upsert=True,
+            )
+            if result.upserted_id is not None:
+                created += 1
             continue
 
         if not existing.builtin:
