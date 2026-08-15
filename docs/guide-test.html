@@ -1,0 +1,2133 @@
+<title>Rakib — Dossier technique et guide de test</title>
+
+<style>
+  /* =====================================================================
+     Rakib — dossier technique. Jetons dérivés de frontend/src/styles/app.css
+     ===================================================================== */
+
+  :root {
+    /* clair — le registre du portail */
+    --ground:      oklch(0.995 0.002 190);
+    --surface:     oklch(0.975 0.005 190);
+    --surface-2:   oklch(0.955 0.007 190);
+    --ink:         oklch(0.22 0.015 210);
+    --ink-muted:   oklch(0.46 0.014 210);
+    --ink-faint:   oklch(0.60 0.012 205);
+    --line:        oklch(0.90 0.006 200);
+    --line-strong: oklch(0.82 0.008 200);
+
+    --teal:        oklch(0.52 0.10 185);
+    --teal-deep:   oklch(0.40 0.09 185);
+    --teal-soft:   oklch(0.955 0.028 185);
+
+    /* Réservé : un pixel ambre veut toujours dire « un humain doit regarder ». */
+    --amber:       oklch(0.62 0.13 75);
+    --amber-soft:  oklch(0.955 0.048 80);
+    --danger:      oklch(0.53 0.19 25);
+    --danger-soft: oklch(0.955 0.038 25);
+    --success:     oklch(0.50 0.12 155);
+    --success-soft:oklch(0.955 0.038 155);
+
+    --shadow: 0 1px 2px oklch(0 0 0 / 0.05), 0 6px 20px oklch(0 0 0 / 0.045);
+
+    --serif: ui-serif, "Iowan Old Style", "Source Serif 4", Cambria, Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+    --arabic: "Segoe UI", "Noto Sans Arabic", "Geeza Pro", var(--sans);
+
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      oklch(0.175 0.012 210);
+      --surface:     oklch(0.222 0.014 210);
+      --surface-2:   oklch(0.262 0.016 210);
+      --ink:         oklch(0.96 0.004 190);
+      --ink-muted:   oklch(0.74 0.012 200);
+      --ink-faint:   oklch(0.60 0.014 205);
+      --line:        oklch(0.32 0.016 210);
+      --line-strong: oklch(0.42 0.018 210);
+
+      --teal:        oklch(0.76 0.11 185);
+      --teal-deep:   oklch(0.84 0.10 185);
+      --teal-soft:   oklch(0.29 0.042 185);
+
+      --amber:       oklch(0.81 0.13 75);
+      --amber-soft:  oklch(0.30 0.058 70);
+      --danger:      oklch(0.71 0.16 25);
+      --danger-soft: oklch(0.29 0.068 25);
+      --success:     oklch(0.76 0.12 155);
+      --success-soft:oklch(0.28 0.055 155);
+
+      --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 6px 20px oklch(0 0 0 / 0.25);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      oklch(0.175 0.012 210);
+    --surface:     oklch(0.222 0.014 210);
+    --surface-2:   oklch(0.262 0.016 210);
+    --ink:         oklch(0.96 0.004 190);
+    --ink-muted:   oklch(0.74 0.012 200);
+    --ink-faint:   oklch(0.60 0.014 205);
+    --line:        oklch(0.32 0.016 210);
+    --line-strong: oklch(0.42 0.018 210);
+
+    --teal:        oklch(0.76 0.11 185);
+    --teal-deep:   oklch(0.84 0.10 185);
+    --teal-soft:   oklch(0.29 0.042 185);
+
+    --amber:       oklch(0.81 0.13 75);
+    --amber-soft:  oklch(0.30 0.058 70);
+    --danger:      oklch(0.71 0.16 25);
+    --danger-soft: oklch(0.29 0.068 25);
+    --success:     oklch(0.76 0.12 155);
+    --success-soft:oklch(0.28 0.055 155);
+
+    --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 6px 20px oklch(0 0 0 / 0.25);
+    color-scheme: dark;
+  }
+
+  /* ------------------------------------------------------------- structure */
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem) 6rem;
+  }
+
+  @media (min-width: 1060px) {
+    .page {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      gap: 3.5rem;
+      align-items: start;
+    }
+  }
+
+  main { min-width: 0; }
+
+  /* ---------------------------------------------------------------- entête */
+  .masthead {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid var(--line);
+    padding: clamp(2.5rem, 6vw, 4.5rem) 0 2.25rem;
+    margin-bottom: 3rem;
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+  }
+
+  .wordmark b {
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .wordmark .ar {
+    font-family: var(--arabic);
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    color: var(--teal);
+    line-height: 1;
+  }
+
+  .masthead p.lede {
+    font-family: var(--serif);
+    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    line-height: 1.5;
+    color: var(--ink-muted);
+    max-width: 46ch;
+    margin: 1.1rem 0 0;
+    text-wrap: pretty;
+  }
+
+  .masthead-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    margin-top: 1.75rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+
+  .masthead-meta span { white-space: nowrap; }
+  .masthead-meta b { color: var(--ink-muted); font-weight: 500; }
+
+  /* ------------------------------------------------------------- sommaire */
+  nav.toc { display: none; }
+
+  @media (min-width: 1060px) {
+    nav.toc {
+      display: block;
+      position: sticky;
+      top: 2rem;
+      font-size: 0.83rem;
+      line-height: 1.45;
+      border-inline-start: 1px solid var(--line);
+      padding-inline-start: 1.1rem;
+    }
+    nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+    nav.toc a {
+      color: var(--ink-muted);
+      text-decoration: none;
+      display: block;
+      transition: color 140ms ease;
+    }
+    nav.toc a:hover, nav.toc a:focus-visible { color: var(--teal); }
+    nav.toc .num {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ink-faint);
+      margin-inline-end: 0.45rem;
+    }
+  }
+
+  /* -------------------------------------------------------------- sections */
+  section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.5rem, 3.4vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin: 0 0 0.35rem;
+    text-wrap: balance;
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+  }
+
+  h2 .num {
+    font-family: var(--mono);
+    font-size: 0.72em;
+    font-weight: 400;
+    color: var(--teal);
+    letter-spacing: 0;
+  }
+
+  h2 + .sub {
+    color: var(--ink-muted);
+    max-width: 68ch;
+    margin: 0 0 1.9rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid var(--line);
+    text-wrap: pretty;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 1.02rem;
+    font-weight: 650;
+    letter-spacing: -0.005em;
+    margin: 2.4rem 0 0.8rem;
+    color: var(--ink);
+  }
+
+  h4 {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 1.8rem 0 0.7rem;
+  }
+
+  p, li { max-width: 72ch; text-wrap: pretty; }
+  p { margin: 0 0 1rem; }
+  ul, ol { margin: 0 0 1rem; padding-inline-start: 1.35rem; }
+  li { margin-bottom: 0.4rem; }
+  strong { font-weight: 650; }
+
+  a { color: var(--teal); text-underline-offset: 2px; }
+
+  :focus-visible {
+    outline: 2px solid var(--teal);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.08em 0.36em;
+    white-space: nowrap;
+  }
+
+  /* --------------------------------------------------------------- tableaux */
+  .scroll {
+    overflow-x: auto;
+    margin: 0 0 1.4rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  thead th {
+    text-align: start;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0.72rem 0.9rem;
+    border-bottom: 1px solid var(--line-strong);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 0.66rem 0.9rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--surface-2); }
+
+  td.mono, th.mono { font-family: var(--mono); font-size: 0.8rem; white-space: nowrap; }
+  td.tight { white-space: nowrap; }
+  td.num { text-align: end; font-family: var(--mono); font-size: 0.82rem; }
+
+  /* ------------------------------------------------------------- étiquettes */
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.14rem 0.44rem;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .tag-p1  { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); }
+  .tag-p2  { background: var(--amber-soft);  color: var(--amber);  border-color: var(--amber); }
+  .tag-p3  { background: var(--surface-2);   color: var(--ink-muted); border-color: var(--line-strong); }
+  .tag-ok  { background: var(--success-soft); color: var(--success); border-color: var(--success); }
+  .tag-teal{ background: var(--teal-soft);   color: var(--teal-deep); border-color: var(--teal); }
+  .tag-gap { background: var(--amber-soft);  color: var(--amber);  border-color: var(--amber); }
+
+  .yes { color: var(--success); font-weight: 700; }
+  .no  { color: var(--ink-faint); }
+  .partial { color: var(--amber); font-weight: 700; }
+
+  /* ------------------------------------------------------------- panneaux */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1.1rem 1.25rem;
+    margin: 0 0 1.4rem;
+  }
+
+  .panel > :last-child { margin-bottom: 0; }
+
+  .panel-note {
+    background: var(--teal-soft);
+    border-color: var(--teal);
+  }
+
+  .panel-warn {
+    background: var(--amber-soft);
+    border-color: var(--amber);
+  }
+
+  .panel h4 { margin-top: 0; }
+  .panel-note h4 { color: var(--teal-deep); }
+  .panel-warn h4 { color: var(--amber); }
+
+  /* -------------------------------------------------------------- épreuves */
+  .test {
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+    padding: 1.15rem 1.3rem 1.25rem;
+    margin: 0 0 1.1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .test-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+  }
+
+  .test-id {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary, var(--teal));
+    background: var(--teal-soft);
+    border: 1px solid var(--teal);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    color: var(--teal-deep);
+  }
+
+  .test-title {
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 650;
+    margin: 0;
+    flex: 1 1 14rem;
+    min-width: 0;
+  }
+
+  .test ol { margin: 0.5rem 0 0.9rem; padding-inline-start: 1.3rem; }
+  .test ol li { margin-bottom: 0.3rem; font-size: 0.925rem; }
+
+  .expect {
+    background: var(--ground);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+    font-size: 0.9rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .expect .label {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .expect p { margin: 0; font-size: 0.9rem; }
+
+  /* --------------------------------------------------------- bloc copiable */
+  .copyblock {
+    position: relative;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.7rem 3.4rem 0.7rem 0.85rem;
+    margin: 0.6rem 0 0.9rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+
+  .copyblock[dir="rtl"] {
+    font-family: var(--arabic);
+    padding: 0.7rem 0.85rem 0.7rem 3.4rem;
+    font-size: 1rem;
+  }
+
+  .copyblock.code {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .copy {
+    position: absolute;
+    top: 0.45rem;
+    inset-inline-end: 0.45rem;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 0.22rem 0.45rem;
+    cursor: pointer;
+    transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
+  }
+
+  .copy:hover { color: var(--teal); border-color: var(--teal); }
+  .copy[data-done="1"] { color: var(--success); border-color: var(--success); }
+
+  /* ------------------------------------------------------------ pas-à-pas */
+  .stages { display: grid; gap: 0.7rem; margin: 0 0 1.5rem; counter-reset: stage; }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 2.1rem minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 0.85rem 1rem;
+  }
+
+  .stage-n {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--teal);
+    line-height: 1.5;
+  }
+
+  .stage b { display: block; font-size: 0.95rem; margin-bottom: 0.15rem; }
+  .stage p { margin: 0; font-size: 0.9rem; color: var(--ink-muted); max-width: 66ch; }
+
+  /* --------------------------------------------------------------- chiffres */
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0 0 1.4rem;
+  }
+
+  .figure { background: var(--surface); padding: 0.95rem 1.05rem; }
+
+  .figure .v {
+    font-family: var(--mono);
+    font-size: 1.45rem;
+    font-weight: 600;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+
+  .figure .k {
+    font-size: 0.76rem;
+    color: var(--ink-muted);
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  .figure.good .v { color: var(--success); }
+  .figure.warn .v { color: var(--amber); }
+  .figure.bad  .v { color: var(--danger); }
+
+  hr.rule { border: 0; border-top: 1px solid var(--line); margin: 2.5rem 0; }
+
+  footer.colophon {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--line);
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--ink-faint);
+    line-height: 1.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="wordmark">
+      <b>Rakib</b>
+      <span class="ar">رقيب</span>
+    </div>
+    <p class="lede">
+      Plateforme intelligente de gestion des réclamations pour un opérateur télécom
+      tunisien. Dossier technique et protocole de test manuel.
+    </p>
+    <div class="masthead-meta">
+      <span><b>URL</b> reclamations.activiity.com</span>
+      <span><b>Version</b> 0.1.0</span>
+      <span><b>Modèle</b> category_v1</span>
+      <span><b>Moteur</b> ml</span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sommaire">
+    <ol>
+      <li><a href="#quoi"><span class="num">01</span>Qu'est-ce que Rakib</a></li>
+      <li><a href="#interfaces"><span class="num">02</span>Les deux interfaces</a></li>
+      <li><a href="#pipeline"><span class="num">03</span>Comment ça marche</a></li>
+      <li><a href="#archi"><span class="num">04</span>Architecture</a></li>
+      <li><a href="#tech"><span class="num">05</span>Technologies</a></li>
+      <li><a href="#taxo"><span class="num">06</span>Taxonomie</a></li>
+      <li><a href="#regles"><span class="num">07</span>Règles de priorité</a></li>
+      <li><a href="#comptes"><span class="num">08</span>Comptes de test</a></li>
+      <li><a href="#rbac"><span class="num">09</span>RBAC</a></li>
+      <li><a href="#manuels"><span class="num">10</span>Tests manuels</a></li>
+      <li><a href="#auto"><span class="num">11</span>Tests automatisés</a></li>
+      <li><a href="#eval"><span class="num">12</span>Évaluation du modèle</a></li>
+      <li><a href="#limites"><span class="num">13</span>Limites connues</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============================================================ 01 -->
+    <section id="quoi">
+      <h2><span class="num">01</span>Qu'est-ce que Rakib&nbsp;?</h2>
+      <p class="sub">
+        Le problème réel, et la décision que le système prend à la place de l'humain
+        — ainsi que celle qu'il ne prend jamais.
+      </p>
+
+      <p>
+        Un opérateur télécom tunisien reçoit des réclamations toute la journée&nbsp;:
+        formulaire web, courriel, téléphone. Aujourd'hui, un agent lit chaque message
+        et tranche quatre questions&nbsp;: <strong>de quoi s'agit-il, quel degré
+        d'urgence, quel service est compétent, et cette réclamation a-t-elle déjà été
+        reçue&nbsp;?</strong>
+      </p>
+
+      <p>
+        C'est lent, c'est incohérent d'un agent à l'autre, et beaucoup de réclamations
+        dépassent leur délai de traitement alors qu'elles attendent encore, non lues,
+        dans la file.
+      </p>
+
+      <p>
+        <strong>Rakib prend ces quatre décisions automatiquement, en une quarantaine de
+        millisecondes, sur la machine locale et sans aucun accès à Internet.</strong>
+        Ensuite, l'humain reprend la main.
+      </p>
+
+      <div class="panel panel-note">
+        <h4>Principe non négociable</h4>
+        <p>
+          Le système ne répond <strong>jamais</strong> de lui-même au réclamant. Il
+          rédige un projet de réponse&nbsp;; c'est un agent qui l'envoie. C'est une
+          règle de conception, pas une limite technique.
+        </p>
+      </div>
+
+      <h3>Ce que le système décide</h3>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Décision</th><th>Sortie</th><th>Comment</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Catégorie</strong></td>
+              <td class="mono">11 classes</td>
+              <td>Classifieur entraîné, avec probabilité calibrée et alternatives</td>
+            </tr>
+            <tr>
+              <td><strong>Priorité</strong></td>
+              <td><span class="tag tag-p1">P1</span> <span class="tag tag-p2">P2</span> <span class="tag tag-p3">P3</span></td>
+              <td>Somme pondérée de règles déterministes et modifiables</td>
+            </tr>
+            <tr>
+              <td><strong>Service compétent</strong></td>
+              <td class="mono">7 services</td>
+              <td>Dérivé de la catégorie&nbsp;; repli sur <code>GENERAL</code></td>
+            </tr>
+            <tr>
+              <td><strong>Doublon</strong></td>
+              <td class="mono">score + lien</td>
+              <td>BM25 + correspondance approximative sur les réclamations récentes</td>
+            </tr>
+            <tr>
+              <td><strong>Échéance</strong></td>
+              <td class="mono">date SLA</td>
+              <td>Calendrier ouvré tunisien (été, Ramadan, fêtes lunaires)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================ 02 -->
+    <section id="interfaces">
+      <h2><span class="num">02</span>Les deux interfaces</h2>
+      <p class="sub">
+        Un seul système de jetons de design, deux registres&nbsp;: un portail public
+        calme et une console de travail dense.
+      </p>
+
+      <h3>Le portail public — <code>/portal</code></h3>
+      <p>
+        Français et arabe, avec un vrai sens de lecture de droite à gauche. N'importe
+        qui dépose une réclamation <strong>anonymement</strong>, avec un numéro de
+        téléphone <em>ou</em> une adresse électronique — un seul des deux suffit. Le
+        déposant reçoit une référence de suivi et consulte l'avancement
+        <strong>sans créer de compte</strong>.
+      </p>
+
+      <h3>La console des agents — <code>/inbox</code></h3>
+      <p>
+        Français, fond sombre par défaut. La file de travail triée par priorité&nbsp;;
+        chaque réclamation affiche <strong>pourquoi</strong> elle a été priorisée
+        ainsi, avec un compte à rebours SLA. S'y ajoutent, pour l'encadrement, un
+        simulateur de règles et une console de pilotage du modèle.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Route</th><th>Surface</th><th>Accès</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">/portal</td><td>Dépôt d'une réclamation</td><td>Public</td></tr>
+            <tr><td class="mono">/portal/suivi</td><td>Suivi par référence</td><td>Public</td></tr>
+            <tr><td class="mono">/portal/mes-reclamations</td><td>Espace du réclamant connecté</td><td>Réclamant</td></tr>
+            <tr><td class="mono">/portal/satisfaction</td><td>Évaluation après clôture</td><td>Public</td></tr>
+            <tr><td class="mono">/inbox</td><td>File de travail</td><td>Agent +</td></tr>
+            <tr><td class="mono">/inbox/:id</td><td>Détail et analyse</td><td>Agent +</td></tr>
+            <tr><td class="mono">/supervision</td><td>Tableau de supervision</td><td>Superviseur +</td></tr>
+            <tr><td class="mono">/analytics</td><td>Statistiques</td><td>Agent +</td></tr>
+            <tr><td class="mono">/admin/rules</td><td>Règles et simulateur</td><td>Admin</td></tr>
+            <tr><td class="mono">/admin/kb</td><td>Base de connaissances</td><td>Admin</td></tr>
+            <tr><td class="mono">/admin/ml</td><td>Console du modèle</td><td>Admin</td></tr>
+            <tr><td class="mono">/admin/users</td><td>Utilisateurs</td><td>Admin</td></tr>
+            <tr><td class="mono">/admin/departments</td><td>Services</td><td>Admin</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================ 03 -->
+    <section id="pipeline">
+      <h2><span class="num">03</span>Comment ça marche</h2>
+      <p class="sub">
+        Six étapes, dans cet ordre, exécutées en mémoire. L'ordre porte
+        l'information&nbsp;: chaque étape consomme la sortie de la précédente.
+      </p>
+
+      <div class="stages">
+        <div class="stage">
+          <span class="stage-n">1</span>
+          <div>
+            <b>Normalisation</b>
+            <p>
+              Nettoyage du texte&nbsp;; masquage des numéros de téléphone, adresses
+              électroniques et références de facture en jetons&nbsp;;
+              repli des variantes orthographiques arabes (diacritiques, alef, teh
+              marbouta)&nbsp;; translittération de l'arabizi <em>en conservant les
+              deux graphies</em>.
+            </p>
+          </div>
+        </div>
+        <div class="stage">
+          <span class="stage-n">2</span>
+          <div>
+            <b>Identification de la langue</b>
+            <p>
+              Français, arabe, anglais ou <strong>derja tunisienne</strong>. La derja
+              est le cas difficile&nbsp;: aucun modèle du marché ne possède cette
+              étiquette, elle est donc tranchée par nos propres règles
+              <em>avant</em> fastText et indépendamment de sa confiance.
+            </p>
+          </div>
+        </div>
+        <div class="stage">
+          <span class="stage-n">3</span>
+          <div>
+            <b>Classification</b>
+            <p>
+              Le texte devient des nombres (motifs de mots et de caractères), puis un
+              classifieur linéaire calibré choisit l'une des 11 catégories et rend une
+              <strong>probabilité véritable</strong>, pas un score arbitraire.
+            </p>
+          </div>
+        </div>
+        <div class="stage">
+          <span class="stage-n">4</span>
+          <div>
+            <b>Règles et priorité</b>
+            <p>
+              Dix-neuf règles déterministes, chacune portant un poids réglable par
+              l'administration. Leur somme détermine P1, P2 ou P3. Chaque déclenchement
+              est conservé avec les mots exacts qui l'ont provoqué.
+            </p>
+          </div>
+        </div>
+        <div class="stage">
+          <span class="stage-n">5</span>
+          <div>
+            <b>Détection de doublon</b>
+            <p>
+              Recherche BM25 et correspondance approximative sur les réclamations
+              récentes du même réclamant et du même service, pour signaler les
+              doublons probables plutôt que de les fusionner d'office.
+            </p>
+          </div>
+        </div>
+        <div class="stage">
+          <span class="stage-n">6</span>
+          <div>
+            <b>Décision</b>
+            <p>
+              Routage vers le service compétent et calcul de l'échéance selon le
+              <strong>calendrier ouvré tunisien</strong> — horaire normal, séance
+              unique d'été, horaire de Ramadan, fêtes du calendrier lunaire — pour
+              qu'un délai ne s'écoule pas pendant l'Aïd.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h4>Le seuil de confiance</h4>
+        <p>
+          Il n'existe volontairement <strong>aucune catégorie «&nbsp;AUTRE&nbsp;»</strong>.
+          Une classe fourre-tout absorbe tous les exemples difficiles et détruit sa
+          propre précision. Une réclamation inclassable passe donc sous le seuil de
+          confiance et bascule dans <code>needs_human_triage</code>&nbsp;: le système
+          reconnaît qu'il ne sait pas, au lieu d'inventer une étiquette.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 04 -->
+    <section id="archi">
+      <h2><span class="num">04</span>Architecture</h2>
+      <p class="sub">
+        Trois choix structurants — ce sont eux qui font de ce projet une pièce
+        d'ingénierie plutôt qu'un script.
+      </p>
+
+      <h3>Une seule interface, trois cerveaux interchangeables</h3>
+      <p>
+        La couche d'intelligence <em>ignore tout</em> du web, de la base de données et
+        de FastAPI&nbsp;: elle n'importe ni <code>api/</code> ni <code>models/</code>,
+        et seules des structures de données simples franchissent la frontière. Derrière
+        une interface unique <code>TriageEngine</code> se tiennent trois
+        implémentations.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Moteur</th><th>État</th><th>Rôle</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">RulesOnlyTriageEngine</td>
+              <td><span class="tag tag-teal">Démarrage à froid</span></td>
+              <td>
+                Fonctionne dès le premier jour, <strong>sans aucune donnée
+                d'entraînement</strong>. Route par mots-clés, priorise, et admet
+                honnêtement qu'il ne sait pas catégoriser.
+              </td>
+            </tr>
+            <tr>
+              <td class="mono">MLTriageEngine</td>
+              <td><span class="tag tag-ok">Par défaut</span></td>
+              <td>Le classifieur entraîné. C'est le moteur actif en production.</td>
+            </tr>
+            <tr>
+              <td class="mono">LLMTriageEngine</td>
+              <td><span class="tag tag-p3">Désactivé</span></td>
+              <td>
+                Adaptateur optionnel. Sa raison d'être est architecturale&nbsp;: il
+                démontre que l'interface accepte une implémentation radicalement
+                différente sans changer une ligne au-dessus d'elle.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Rien n'est une boîte noire</h3>
+      <p>
+        L'agent ne voit pas seulement «&nbsp;P1&nbsp;». Il voit quelles règles se sont
+        déclenchées, <strong>sur quels mots exactement</strong>, avec quel taux de
+        confiance, et quelles catégories arrivaient juste derrière. C'est ce qui lui
+        permet de faire confiance au système — ou de le corriger en connaissance de
+        cause.
+      </p>
+
+      <h3>Le système apprend de ses corrections</h3>
+      <p>
+        Chaque fois qu'un agent corrige une catégorie, la correction est conservée
+        comme donnée d'entraînement. Une tâche nocturne (03&nbsp;h&nbsp;17) vérifie
+        si un volume suffisant s'est accumulé et, le cas échéant, relance
+        l'entraînement — <strong>et ne promeut le nouveau modèle que s'il n'est pas
+        moins bon que l'actuel</strong>. Un modèle rejeté est conservé, jamais
+        supprimé.
+      </p>
+
+      <h3>Infrastructure déployée</h3>
+      <p>
+        Sept services sur un cluster k3s, espace de noms <code>reclamations</code>,
+        certificat TLS automatique.
+      </p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Service</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">api</td><td>API FastAPI et flux temps réel</td></tr>
+            <tr><td class="mono">worker</td><td>Analyse en tâche de fond, balayage SLA, réentraînement</td></tr>
+            <tr><td class="mono">notifier</td><td>Consommateur du flux d'événements, envoi des courriels</td></tr>
+            <tr><td class="mono">web</td><td>Interface React servie par nginx</td></tr>
+            <tr><td class="mono">mongo</td><td>Base de données documentaire</td></tr>
+            <tr><td class="mono">redis</td><td>File de tâches et bus d'événements (Redis Streams)</td></tr>
+            <tr><td class="mono">minio</td><td>Stockage des pièces jointes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================ 05 -->
+    <section id="tech">
+      <h2><span class="num">05</span>Technologies</h2>
+      <p class="sub">
+        Toutes les versions sont épinglées. La contrainte qui a tout déterminé&nbsp;:
+        fonctionner intégralement hors ligne, sur un bi-cœur avec 4&nbsp;Go de RAM et
+        sans carte graphique.
+      </p>
+
+      <h3>Serveur</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Composant</th><th>Version</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td>Python</td><td class="mono">3.12</td><td>Langage du serveur</td></tr>
+            <tr><td>FastAPI</td><td class="mono">0.115</td><td>Cadriciel web asynchrone</td></tr>
+            <tr><td>Uvicorn</td><td class="mono">0.32</td><td>Serveur ASGI</td></tr>
+            <tr><td>Pydantic</td><td class="mono">2.9</td><td>Validation et schémas</td></tr>
+            <tr><td>Beanie / Motor</td><td class="mono">1.27 / 3.6</td><td>ODM et pilote MongoDB asynchrone</td></tr>
+            <tr><td>MongoDB</td><td class="mono">7</td><td>Base documentaire</td></tr>
+            <tr><td>Redis</td><td class="mono">7</td><td>File de tâches et bus d'événements</td></tr>
+            <tr><td>arq</td><td class="mono">0.26</td><td>Tâches de fond et tâches planifiées</td></tr>
+            <tr><td>PyJWT + argon2</td><td class="mono">2.9 / 23.1</td><td>Jetons et hachage des mots de passe</td></tr>
+            <tr><td>structlog</td><td class="mono">24.4</td><td>Journalisation structurée</td></tr>
+            <tr><td>aiosmtplib</td><td class="mono">3.0</td><td>Envoi de courriels</td></tr>
+            <tr><td>aioboto3</td><td class="mono">13.2</td><td>Client de stockage objet (MinIO)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Couche d'intelligence</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Composant</th><th>Version</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td>scikit-learn</td><td class="mono">1.5</td><td>TF-IDF, SVM linéaire, calibration sigmoïde</td></tr>
+            <tr><td>NumPy / SciPy</td><td class="mono">1.26 / 1.14</td><td>Algèbre et matrices creuses</td></tr>
+            <tr><td>rank-bm25</td><td class="mono">0.2.2</td><td>Recherche documentaire (doublons, base de connaissances)</td></tr>
+            <tr><td>RapidFuzz</td><td class="mono">3.10</td><td>Correspondance approximative de chaînes</td></tr>
+            <tr><td>fastText</td><td class="mono">0.9.2</td><td>Identification de langue (<code>lid.176.ftz</code>, 917&nbsp;Ko)</td></tr>
+            <tr><td>joblib</td><td class="mono">1.4</td><td>Sérialisation des artefacts de modèle</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel panel-note">
+        <h4>Ce qui n'est pas là, volontairement</h4>
+        <p>
+          Pas de PyTorch, pas de TensorFlow, pas de <em>transformers</em>, pas de clé
+          d'API, pas de GPU, aucun appel réseau au moment de l'inférence. Le modèle
+          entier tient dans quelques dizaines de mégaoctets et s'exécute en
+          une quarantaine de millisecondes sur un bi-cœur.
+        </p>
+      </div>
+
+      <h3>Interface</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Composant</th><th>Version</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td>React</td><td class="mono">19</td><td>Bibliothèque d'interface</td></tr>
+            <tr><td>TypeScript</td><td class="mono">5.7</td><td>Typage statique</td></tr>
+            <tr><td>Vite</td><td class="mono">6</td><td>Outil de compilation</td></tr>
+            <tr><td>Tailwind CSS</td><td class="mono">4</td><td>Système de styles à jetons</td></tr>
+            <tr><td>TanStack Query</td><td class="mono">5.62</td><td>Cache et synchronisation des données</td></tr>
+            <tr><td>React Router</td><td class="mono">7.1</td><td>Routage</td></tr>
+            <tr><td>Recharts</td><td class="mono">2.15</td><td>Graphiques des statistiques</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================ 06 -->
+    <section id="taxo">
+      <h2><span class="num">06</span>Taxonomie</h2>
+      <p class="sub">
+        Onze catégories et sept services. Le fichier de taxonomie est l'unique source
+        de vérité&nbsp;: changer de secteur d'activité, c'est remplacer ce fichier.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Code</th><th>Libellé</th><th>العربية</th><th>Service</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">FACTURATION</td><td>Facturation</td><td dir="rtl">الفوترة</td><td>Facturation et Recouvrement</td></tr>
+            <tr><td class="mono">PAIEMENT_RECHARGE</td><td>Paiement et recharge</td><td dir="rtl">الدفع والتعبئة</td><td>Facturation et Recouvrement</td></tr>
+            <tr><td class="mono">RESEAU_MOBILE</td><td>Réseau mobile</td><td dir="rtl">الشبكة الجوالة</td><td>Réseau Mobile</td></tr>
+            <tr><td class="mono">ROAMING_INTERNATIONAL</td><td>Roaming et international</td><td dir="rtl">التجوال والدولي</td><td>Réseau Mobile</td></tr>
+            <tr><td class="mono">INTERNET_FIXE</td><td>Internet fixe</td><td dir="rtl">الأنترنت القار</td><td>Fixe et Intervention</td></tr>
+            <tr><td class="mono">INTERVENTION_TECHNIQUE</td><td>Intervention technique</td><td dir="rtl">التدخل الفني</td><td>Fixe et Intervention</td></tr>
+            <tr><td class="mono">OFFRES_ABONNEMENT</td><td>Offres et abonnement</td><td dir="rtl">العروض والاشتراك</td><td>Commercial et Offres</td></tr>
+            <tr><td class="mono">RESILIATION_PORTABILITE</td><td>Résiliation et portabilité</td><td dir="rtl">الفسخ ونقل الرقم</td><td>Commercial et Offres</td></tr>
+            <tr><td class="mono">SERVICE_CLIENT_AGENCE</td><td>Service client et agence</td><td dir="rtl">خدمة الحرفاء والوكالة</td><td>Relation Client</td></tr>
+            <tr><td class="mono">EQUIPEMENT</td><td>Équipement</td><td dir="rtl">التجهيزات</td><td>Relation Client</td></tr>
+            <tr><td class="mono">APPLICATION_MOBILE</td><td>Application mobile</td><td dir="rtl">التطبيق الجوال</td><td>Digital et SI</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Le septième service, <code>GENERAL</code> (Service Général), ne porte aucune
+        catégorie&nbsp;: c'est la file d'attente de secours pour tout ce qui n'est pas
+        routable automatiquement.
+      </p>
+    </section>
+
+    <!-- ============================================================ 07 -->
+    <section id="regles">
+      <h2><span class="num">07</span>Règles de priorité</h2>
+      <p class="sub">
+        Dix-neuf règles, chacune avec un poids modifiable sans redéploiement ni
+        réentraînement. Un poids négatif <em>abaisse</em> la priorité.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Code</th><th>Libellé</th><th>Type</th><th class="num">Poids</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">LEGAL_LEXICON_FR</td><td>Menace juridique (FR)</td><td>lexique</td><td class="num">+30</td></tr>
+            <tr><td class="mono">LEGAL_LEXICON_AR</td><td>Menace juridique (AR)</td><td>lexique</td><td class="num">+30</td></tr>
+            <tr><td class="mono">VIP_CLAIMANT</td><td>Client VIP / compte entreprise</td><td>champ</td><td class="num">+25</td></tr>
+            <tr><td class="mono">CHURN_LEXICON_FR</td><td>Risque de résiliation (FR)</td><td>lexique</td><td class="num">+20</td></tr>
+            <tr><td class="mono">CHURN_LEXICON_AR</td><td>Risque de résiliation (AR/derja)</td><td>lexique</td><td class="num">+20</td></tr>
+            <tr><td class="mono">OUTAGE_COLLECTIVE</td><td>Panne collective signalée</td><td>lexique</td><td class="num">+20</td></tr>
+            <tr><td class="mono">REPEAT_CLAIMANT_30D</td><td>Réclamations répétées (30 jours)</td><td>historique</td><td class="num">+20</td></tr>
+            <tr><td class="mono">URGENCY_LEXICON_FR</td><td>Vocabulaire d'urgence (FR)</td><td>lexique</td><td class="num">+15</td></tr>
+            <tr><td class="mono">URGENCY_LEXICON_AR</td><td>Vocabulaire d'urgence (AR)</td><td>lexique</td><td class="num">+15</td></tr>
+            <tr><td class="mono">URGENCY_LEXICON_TN</td><td>Vocabulaire d'urgence (derja)</td><td>lexique</td><td class="num">+15</td></tr>
+            <tr><td class="mono">DURATION_WEEKS</td><td>Problème persistant (semaines/mois)</td><td>regex</td><td class="num">+12</td></tr>
+            <tr><td class="mono">PROFANITY</td><td>Propos agressifs</td><td>lexique</td><td class="num">+10</td></tr>
+            <tr><td class="mono">MULTIPLE_OPEN</td><td>Plusieurs dossiers ouverts</td><td>historique</td><td class="num">+10</td></tr>
+            <tr><td class="mono">AMOUNT_IN_DINARS</td><td>Montant contesté en dinars</td><td>regex</td><td class="num">+8</td></tr>
+            <tr><td class="mono">SHOUTING</td><td>Message en majuscules</td><td>champ</td><td class="num">+8</td></tr>
+            <tr><td class="mono">INVOICE_REFERENCE</td><td>Référence de facture citée</td><td>regex</td><td class="num">+5</td></tr>
+            <tr><td class="mono">HAS_ATTACHMENT</td><td>Pièce jointe fournie</td><td>champ</td><td class="num">+5</td></tr>
+            <tr><td class="mono">DETAILED_REPORT</td><td>Description détaillée</td><td>longueur</td><td class="num">+5</td></tr>
+            <tr><td class="mono">EXCLAMATION_STORM</td><td>Ponctuation excessive</td><td>champ</td><td class="num">+5</td></tr>
+            <tr><td class="mono">VERY_SHORT</td><td>Message très court (peu d'information)</td><td>longueur</td><td class="num">&minus;8</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Une vingtième entrée, <code>CATEGORY_WEIGHTS</code>, applique une pondération
+        propre à chaque catégorie — une panne réseau ne part pas du même socle qu'une
+        question sur une offre commerciale.
+      </p>
+    </section>
+
+    <!-- ============================================================ 08 -->
+    <section id="comptes">
+      <h2><span class="num">08</span>Comptes de test</h2>
+      <p class="sub">
+        Douze comptes de démonstration. <strong>Le mot de passe est le même pour
+        tous.</strong>
+      </p>
+
+      <div class="panel">
+        <h4>Mot de passe universel</h4>
+        <div class="copyblock code" data-copy>Rakib2026!</div>
+        <p style="margin:0;font-size:0.875rem;color:var(--ink-muted)">
+          Connexion sur <code>/login</code>. Les données de démonstration sont
+          régénérables&nbsp;; ces identifiants n'ont aucune valeur en dehors de
+          l'environnement de test.
+        </p>
+      </div>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Adresse</th><th>Nom</th><th>Rôle</th><th>Service</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">admin@rakib.tn</td><td>Sonia Trabelsi</td>
+              <td><span class="tag tag-p1">Admin</span></td><td class="no">—</td>
+            </tr>
+            <tr>
+              <td class="mono">superviseur1@rakib.tn</td><td>Mehdi Gharbi</td>
+              <td><span class="tag tag-p2">Superviseur</span></td><td class="no">tous</td>
+            </tr>
+            <tr>
+              <td class="mono">superviseur2@rakib.tn</td><td>Ines Bouzid</td>
+              <td><span class="tag tag-p2">Superviseur</span></td><td class="no">tous</td>
+            </tr>
+            <tr>
+              <td class="mono">agent.fact1@rakib.tn</td><td>Karim Jelassi</td>
+              <td><span class="tag tag-p3">Agent</span></td><td>Facturation</td>
+            </tr>
+            <tr>
+              <td class="mono">agent.fact2@rakib.tn</td><td>Rania Ayari</td>
+              <td><span class="tag tag-p3">Agent</span></td><td>Facturation</td>
+            </tr>
+            <tr>
+              <td class="mono">agent.mob1@rakib.tn</td><td>Yassine Chaouch</td>
+              <td><span class="tag tag-p3">Agent</span></td><td>Réseau Mobile</td>
+            </tr>
+            <tr>
+              <td class="mono">agent.mob2@rakib.tn</td><td>Nadia Belhaj</td>
+              <td><span class="tag tag-p3">Agent</span></td><td>Réseau Mobile</td>
+            </tr>
+            <tr>
+              <td class="mono">agent.fixe1@rakib.tn</td><td>Walid Mansouri</td>
+              <td><span class="tag tag-p3">Agent</span></td><td>Fixe et Intervention</td>
+            </tr>
+            <tr>
+              <td class="mono">agent.fixe2@rakib.tn</td><td>Olfa Hamdi</td>
+              <td><span class="tag tag-p3">Agent</span></td><td>Fixe et Intervention</td>
+            </tr>
+            <tr>
+              <td class="mono">agent.com1@rakib.tn</td><td>Bilel Khemiri</td>
+              <td><span class="tag tag-p3">Agent</span></td><td>Commercial et Offres</td>
+            </tr>
+            <tr>
+              <td class="mono">agent.rc1@rakib.tn</td><td>Amel Zouari</td>
+              <td><span class="tag tag-p3">Agent</span></td><td>Relation Client</td>
+            </tr>
+            <tr>
+              <td class="mono">agent.si1@rakib.tn</td><td>Hamza Ben Romdhane</td>
+              <td><span class="tag tag-p3">Agent</span></td><td>Digital et SI</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Un quatrième rôle, <strong>Réclamant</strong>, n'est pas pré-créé&nbsp;: il se
+        crée depuis <code>/register</code>, ou implicitement lorsqu'un dépôt anonyme
+        est rattaché à une adresse connue.
+      </p>
+    </section>
+
+    <!-- ============================================================ 09 -->
+    <section id="rbac">
+      <h2><span class="num">09</span>RBAC — qui voit quoi</h2>
+      <p class="sub">
+        Quatre rôles hiérarchisés. Le point important pour la soutenance&nbsp;: le
+        cloisonnement est appliqué <em>dans la requête</em>, jamais après.
+      </p>
+
+      <div class="panel panel-note">
+        <h4>Cloisonnement au niveau de la requête</h4>
+        <p>
+          Le périmètre d'un agent n'est pas un filtre appliqué aux résultats&nbsp;:
+          c'est un fragment injecté dans la requête MongoDB elle-même. Un agent ne
+          reçoit jamais, même une microseconde, une réclamation qui ne le concerne pas.
+          Une garantie explicite est testée&nbsp;: <strong>un filtre vide — qui
+          signifierait «&nbsp;tout lire&nbsp;» — ne peut jamais être produit pour un
+          rôle inférieur.</strong>
+        </p>
+      </div>
+
+      <h3>Périmètre de lecture par rôle</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Rôle</th><th>Filtre injecté</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-p1">Admin</span></td>
+              <td class="mono">{} — aucune restriction</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p2">Superviseur</span></td>
+              <td class="mono">{} — aucune restriction</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p3">Agent</span> <em>avec service</em></td>
+              <td class="mono">son service OU ses affectations</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p3">Agent</span> <em>sans service</em></td>
+              <td class="mono">ses affectations uniquement</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-p3">Réclamant</span></td>
+              <td class="mono">ses propres réclamations</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Matrice des droits</h3>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Réclamant</th><th>Agent</th><th>Superviseur</th><th>Admin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Déposer une réclamation</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Suivre ses réclamations</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Voir la file de travail</td><td class="no">non</td><td class="partial">périmètre</td><td class="yes">tout</td><td class="yes">tout</td></tr>
+            <tr><td>Voir l'analyse détaillée</td><td class="no">non</td><td class="partial">périmètre</td><td class="yes">tout</td><td class="yes">tout</td></tr>
+            <tr><td>Corriger une catégorie</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Changer un statut</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Statistiques générales</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Charge par agent</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Tableau de supervision</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Rapport du modèle et des règles</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Lire les règles</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Simulateur de règles</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td><strong>Modifier un poids de règle</strong></td><td class="no">non</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td></tr>
+            <tr><td>Gérer la base de connaissances</td><td class="no">non</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td></tr>
+            <tr><td>Console du modèle et réentraînement</td><td class="no">non</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td></tr>
+            <tr><td>Gérer les utilisateurs et services</td><td class="no">non</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h4>Une subtilité que le jury peut apprécier</h4>
+        <p>
+          La hiérarchie n'est pas toujours transitive. Deux gardes coexistent&nbsp;:
+          <code>require_role</code> respecte la hiérarchie (un admin passe partout où
+          un agent passe), tandis que <code>require_exact_roles</code> ne la respecte
+          pas — <strong>un admin n'est pas implicitement un agent</strong>. Cette
+          distinction est testée explicitement.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 10 -->
+    <section id="manuels">
+      <h2><span class="num">10</span>Tests manuels</h2>
+      <p class="sub">
+        Sept campagnes, vingt épreuves. Elles sont numérotées parce qu'elles se
+        déroulent dans cet ordre&nbsp;: chacune s'appuie sur les données créées par la
+        précédente.
+      </p>
+
+      <div class="panel">
+        <h4>Avant de commencer</h4>
+        <p style="margin-bottom:0.5rem">
+          Ouvrez <strong>reclamations.activiity.com</strong>. Gardez deux fenêtres
+          disponibles&nbsp;: une normale, une en navigation privée — plusieurs épreuves
+          demandent d'être connecté et anonyme en même temps.
+          <strong>Notez les références</strong> que le portail vous rend&nbsp;; elles
+          servent aux épreuves suivantes.
+        </p>
+      </div>
+
+      <h3>Campagne A — Parcours citoyen</h3>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">A1</span>
+          <p class="test-title">Dépôt d'une réclamation en français, urgence forte</p>
+        </div>
+        <ol>
+          <li>Aller sur <code>/portal</code> — aucune connexion requise.</li>
+          <li>Objet&nbsp;: <em>Facture de janvier anormalement élevée</em>.</li>
+          <li>Coller le message ci-dessous.</li>
+          <li>Renseigner un téléphone (<code>20145879</code>) <em>ou</em> un courriel.</li>
+          <li>Envoyer et <strong>noter la référence</strong>.</li>
+        </ol>
+        <div class="copyblock" data-copy>C'est inacceptable ! Ma facture de janvier s'élève à 187 dinars alors que mon forfait est à 45 dinars. Cela fait trois semaines que personne ne me répond. Si ce n'est pas réglé cette semaine, mon avocat va porter plainte.</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Référence au format <code>REC-2026-000NN</code>. Catégorie
+            <strong>Facturation</strong>, priorité <span class="tag tag-p1">P1</span>,
+            service <strong>Facturation et Recouvrement</strong>. Règles déclenchées
+            attendues&nbsp;: menace juridique, vocabulaire d'urgence, montant en
+            dinars, problème persistant.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">A2</span>
+          <p class="test-title">Un seul moyen de contact suffit</p>
+        </div>
+        <ol>
+          <li>Déposer une réclamation en ne remplissant <em>ni</em> téléphone <em>ni</em> courriel.</li>
+          <li>Puis recommencer avec le courriel seul.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Le premier essai est refusé avec un message clair. Le second passe&nbsp;:
+            le portail exige <strong>l'un ou l'autre</strong>, pas les deux.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">A3</span>
+          <p class="test-title">Suivi anonyme par référence</p>
+        </div>
+        <ol>
+          <li>Aller sur <code>/portal/suivi</code>.</li>
+          <li>Saisir la référence de A1 et le même moyen de contact.</li>
+          <li>Essayer ensuite la même référence avec un <em>autre</em> numéro.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Le statut et l'historique s'affichent sans connexion. Avec un contact
+            différent, l'accès est refusé — la référence seule ne suffit pas.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">A4</span>
+          <p class="test-title">Création de compte et espace réclamant</p>
+        </div>
+        <ol>
+          <li>Créer un compte sur <code>/register</code>.</li>
+          <li>Vérifier la redirection automatique vers le portail, en état connecté.</li>
+          <li>Ouvrir <code>/portal/mes-reclamations</code>.</li>
+          <li>Déposer une réclamation en étant connecté, et la retrouver dans la liste.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Le nom apparaît en haut du portail avec «&nbsp;Mes réclamations&nbsp;» et
+            la déconnexion. La nouvelle réclamation est rattachée au compte.
+          </p>
+        </div>
+      </div>
+
+      <h3>Campagne B — Intelligence et analyse</h3>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">B1</span>
+          <p class="test-title">Derja tunisienne en caractères latins (arabizi)</p>
+        </div>
+        <p style="font-size:0.925rem;margin-bottom:0">
+          C'est l'épreuve distinctive du projet&nbsp;: aucun modèle du marché ne sait
+          étiqueter la derja.
+        </p>
+        <div class="copyblock" data-copy>3andi mochkla fel internet, 7atta lyoum ma7alouhech. El fatoura mte3i hedha chhar barcha ghalia w ana ma badeltech fel offre.</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Langue détectée <code>ar-tn</code>, source <code>derja</code> — et non
+            «&nbsp;français&nbsp;» ni «&nbsp;anglais&nbsp;». Vérifiable dans le détail
+            de la réclamation (campagne C) ou immédiatement via le simulateur (E1).
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">B2</span>
+          <p class="test-title">Derja sans substitution de chiffres</p>
+        </div>
+        <p style="font-size:0.925rem;margin-bottom:0">
+          Cas plus difficile&nbsp;: pas un seul chiffre à la place d'une lettre. Le
+          détecteur ne peut pas s'appuyer sur le motif arabizi.
+        </p>
+        <div class="copyblock" data-copy>nhabet nbadel operateur, 3malt talab fasakh men jomaa w hatta hadhek ma jawebnich. barcha flous w el khedma khayba.</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Toujours <code>ar-tn</code>. Catégorie attendue&nbsp;:
+            <strong>Résiliation et portabilité</strong>, avec la règle
+            <em>risque de résiliation</em> déclenchée.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">B3</span>
+          <p class="test-title">Arabe en écriture arabe</p>
+        </div>
+        <div class="copyblock" dir="rtl" data-copy>من ثلاثة أيام ما فماش شبكة في الحي كامل، لا مكالمات لا أنترنت. عملت إعلام في الوكالة و ما تحل شيء. هذا غير مقبول.</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Langue <code>ar</code>, source <code>script</code> (décidée sans modèle).
+            Catégorie <strong>Réseau mobile</strong>, avec la règle
+            <em>panne collective</em> déclenchée par «&nbsp;الحي كامل&nbsp;».
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">B4</span>
+          <p class="test-title">Message calme — la priorité doit redescendre</p>
+        </div>
+        <p style="font-size:0.925rem;margin-bottom:0">
+          Contre-épreuve indispensable&nbsp;: un système qui met tout en P1 ne
+          priorise rien.
+        </p>
+        <div class="copyblock" data-copy>Bonjour, je souhaiterais connaître les démarches pour changer mon offre mobile vers un forfait supérieur. Merci d'avance pour votre retour.</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            <span class="tag tag-p3">P3</span>, catégorie <strong>Offres et
+            abonnement</strong>, service <strong>Commercial et Offres</strong>. Aucune
+            règle d'urgence déclenchée.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">B5</span>
+          <p class="test-title">Message inclassable — le système doit l'admettre</p>
+        </div>
+        <div class="copyblock" data-copy>Bonjour, merci de me rappeler quand vous pourrez. Cordialement.</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Confiance sous le seuil, drapeau <code>needs_human_triage</code>, routage
+            vers <strong>Service Général</strong>. Le système <em>n'invente pas</em>
+            une catégorie — il n'existe volontairement aucune classe «&nbsp;Autre&nbsp;».
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">B6</span>
+          <p class="test-title">Détection de doublon</p>
+        </div>
+        <ol>
+          <li>Redéposer, avec le <strong>même contact qu'en A1</strong>, le texte ci-dessous.</li>
+        </ol>
+        <div class="copyblock" data-copy>Facture de janvier de 187 dinars toujours pas corrigée, et toujours aucune réponse de votre part depuis trois semaines.</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            La nouvelle réclamation porte la mention <strong>Doublon probable</strong>
+            avec un lien vers celle de A1. Elle est <em>signalée</em>, jamais fusionnée
+            d'office.
+          </p>
+        </div>
+      </div>
+
+      <h3>Campagne C — Poste agent</h3>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">C1</span>
+          <p class="test-title">Lecture de l'analyse et de son explication</p>
+        </div>
+        <ol>
+          <li>Se connecter en <code>agent.fact1@rakib.tn</code>.</li>
+          <li>Ouvrir la réclamation de A1 depuis <code>/inbox</code>.</li>
+          <li>Repérer&nbsp;: catégorie et confiance, catégories alternatives, langue détectée, échéance SLA.</li>
+          <li>Repérer surtout <strong>les règles déclenchées et les mots exacts</strong> qui les ont déclenchées.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            «&nbsp;mon avocat&nbsp;» apparaît explicitement sous la règle de menace
+            juridique. <strong>C'est ce qu'il faut montrer en soutenance</strong> —
+            pas le badge P1, mais la justification derrière.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">C2</span>
+          <p class="test-title">Correction d'une catégorie — la boucle d'apprentissage</p>
+        </div>
+        <ol>
+          <li>Sur une réclamation, corriger la catégorie proposée.</li>
+          <li>Recharger la page&nbsp;: la correction doit tenir.</li>
+          <li>Vérifier l'entrée correspondante dans l'historique.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            La correction est enregistrée comme donnée d'entraînement et le taux de
+            correction bouge dans <code>/analytics</code> (épreuve E4). C'est
+            l'apprentissage continu, visible de bout en bout.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">C3</span>
+          <p class="test-title">Cycle de vie du statut</p>
+        </div>
+        <ol>
+          <li>Faire passer une réclamation par&nbsp;: en cours, résolue, clôturée.</li>
+          <li>Vérifier l'historique après chaque changement.</li>
+          <li>Relancer l'analyse sur une réclamation <strong>déjà résolue</strong>.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Chaque transition est horodatée et libellée en clair (pas de code brut).
+            Une réanalyse <strong>ne rouvre pas</strong> une réclamation résolue ou
+            clôturée&nbsp;: c'était un défaut réel, corrigé et testé.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">C4</span>
+          <p class="test-title">Pièce jointe</p>
+        </div>
+        <ol>
+          <li>Joindre une image ou un PDF à une réclamation.</li>
+          <li>Recharger, vérifier que la pièce est toujours listée.</li>
+          <li>La télécharger.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            La pièce reste visible après rechargement, et une entrée
+            <em>pièce jointe ajoutée</em> figure dans l'historique. Ce point mérite
+            une vérification attentive&nbsp;: un envoi pouvait auparavant réussir puis
+            disparaître silencieusement.
+          </p>
+        </div>
+      </div>
+
+      <h3>Campagne D — RBAC et sécurité</h3>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">D1</span>
+          <p class="test-title">Cloisonnement d'un agent</p>
+        </div>
+        <ol>
+          <li>Connecté en <code>agent.fact1@rakib.tn</code> (Facturation).</li>
+          <li>Parcourir <code>/inbox</code> et relever les services présents.</li>
+          <li>Tenter d'ouvrir directement l'identifiant d'une réclamation «&nbsp;Réseau mobile&nbsp;».</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            La file ne contient que Facturation, plus ses propres affectations.
+            L'accès direct par URL est <strong>refusé côté serveur</strong> — pas
+            seulement masqué dans l'interface.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">D2</span>
+          <p class="test-title">Frontières entre rôles</p>
+        </div>
+        <ol>
+          <li>En agent&nbsp;: tenter <code>/supervision</code> puis <code>/admin/rules</code>.</li>
+          <li>En <code>superviseur1@rakib.tn</code>&nbsp;: reprendre les deux.</li>
+          <li>En <code>admin@rakib.tn</code>&nbsp;: reprendre les deux.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Agent&nbsp;: refusé deux fois. Superviseur&nbsp;: supervision oui, règles en
+            <em>lecture</em> oui, <strong>modification refusée</strong>. Admin&nbsp;:
+            tout. La même application, trois périmètres.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">D3</span>
+          <p class="test-title">Réclamant cloisonné à ses propres dossiers</p>
+        </div>
+        <ol>
+          <li>Se connecter avec le compte créé en A4.</li>
+          <li>Tenter d'accéder à <code>/inbox</code> et à <code>/analytics</code>.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Refus dans les deux cas. Un réclamant ne voit que ses propres réclamations,
+            par un filtre injecté dans la requête.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">D4</span>
+          <p class="test-title">Jetons et session</p>
+        </div>
+        <ol>
+          <li>Se connecter, puis recharger complètement la page (<kbd>Ctrl</kbd>+<kbd>F5</kbd>).</li>
+          <li>Se déconnecter, puis tenter de revenir en arrière dans l'historique.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            La session survit au rechargement. Après déconnexion, aucune page protégée
+            n'est accessible.
+            <span class="tag tag-gap">Bruit connu</span> un
+            <code>401</code> apparaît dans la console du navigateur à chaque
+            rechargement&nbsp;: le jeton n'est conservé qu'en mémoire, par choix de
+            sécurité. Sans effet fonctionnel.
+          </p>
+        </div>
+      </div>
+
+      <h3>Campagne E — Supervision et administration</h3>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">E1</span>
+          <p class="test-title">Simulateur de règles</p>
+        </div>
+        <ol>
+          <li>En <code>superviseur1@rakib.tn</code>, ouvrir <code>/admin/rules</code>.</li>
+          <li>Coller le texte de A1 dans le simulateur et lancer.</li>
+          <li>Puis coller le texte derja de B1 et observer la langue détectée.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Chaque règle déclenchée s'affiche avec les mots correspondants et le score
+            obtenu. Le texte normalisé montre les jetons de masquage
+            (<code>&lt;PHONE&gt;</code>, <code>&lt;EMAIL&gt;</code>).
+            <strong>La simulation n'enregistre rien</strong> — aucune réclamation n'est
+            créée.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">E2</span>
+          <p class="test-title">Boucle de réglage — modifier un poids</p>
+        </div>
+        <ol>
+          <li>En <code>admin@rakib.tn</code>, sur <code>/admin/rules</code>.</li>
+          <li>Simuler un texte contenant «&nbsp;mon avocat&nbsp;» et noter le score.</li>
+          <li>Faire passer le poids de <code>LEGAL_LEXICON_FR</code> de 30 à 5.</li>
+          <li>Relancer exactement la même simulation.</li>
+          <li>Remettre le poids à 30.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Le score et la priorité baissent immédiatement.
+            <strong>Aucun redéploiement, aucun réentraînement.</strong> C'est la
+            meilleure démonstration de la partie déterministe&nbsp;: le métier garde la
+            main sur la priorisation.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">E3</span>
+          <p class="test-title">Console du modèle</p>
+        </div>
+        <ol>
+          <li>En admin, ouvrir <code>/admin/ml</code>.</li>
+          <li>Relever la version active, ses scores mesurés, l'historique des versions.</li>
+          <li>Relever le nombre de corrections accumulées.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Version <code>category_v1</code>, macro-F1 <code>0,9928</code> sur
+            l'échantillon de contrôle et <code>0,7607</code> sur le jeu de référence
+            indépendant. Voir la section 12 pour la lecture honnête de ces chiffres.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">E4</span>
+          <p class="test-title">Statistiques</p>
+        </div>
+        <ol>
+          <li>Ouvrir <code>/analytics</code>.</li>
+          <li>Vérifier volumes, répartition par catégorie, conformité SLA, taux de correction.</li>
+          <li>Restreindre la fenêtre temporelle et vérifier que les totaux diminuent.</li>
+          <li>En superviseur, ouvrir la charge par agent.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Les chiffres sont cohérents entre eux. Sur le jeu de démonstration, environ
+            <strong>17 réclamations sur 60</strong> sont hors délai — un mélange
+            réaliste, pas «&nbsp;tout au vert&nbsp;» ni «&nbsp;tout en retard&nbsp;».
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">E5</span>
+          <p class="test-title">Base de connaissances</p>
+        </div>
+        <ol>
+          <li>En admin, ouvrir <code>/admin/kb</code>.</li>
+          <li>Créer un article court sur la contestation de facture.</li>
+          <li>Rouvrir une réclamation de facturation et regarder les suggestions.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            L'article apparaît en suggestion sur les réclamations pertinentes, et son
+            compteur d'utilisation figure dans le rapport dédié.
+          </p>
+        </div>
+      </div>
+
+      <h3>Campagne F — Temps réel et internationalisation</h3>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">F1</span>
+          <p class="test-title">Mise à jour en temps réel</p>
+        </div>
+        <ol>
+          <li>Fenêtre 1&nbsp;: <code>/inbox</code>, connecté en agent Facturation.</li>
+          <li>Fenêtre 2 (navigation privée)&nbsp;: <code>/portal</code>.</li>
+          <li>Déposer une réclamation de facturation depuis la fenêtre 2.</li>
+          <li>Regarder la fenêtre 1 <strong>sans la rafraîchir</strong>.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            La réclamation apparaît seule dans la file. L'indicateur de connexion en
+            bas de l'écran doit être actif.
+            <span class="tag tag-gap">Écart connu</span> l'arrivée est
+            <em>silencieuse</em> — il n'y a pas encore de notification visuelle.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">F2</span>
+          <p class="test-title">Portail en arabe et sens de lecture</p>
+        </div>
+        <ol>
+          <li>Sur <code>/portal</code>, basculer en العربية.</li>
+          <li>Vérifier le miroir complet&nbsp;: logo à droite, libellés alignés à droite, champs inversés.</li>
+          <li>Saisir un numéro de téléphone et l'observer attentivement.</li>
+          <li>Déposer une réclamation entièrement en arabe.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            La mise en page est réellement inversée, pas seulement le texte. Le numéro
+            <code>+216 20 145 879</code> reste lu de gauche à droite à l'intérieur du
+            texte arabe — c'est le détail que la plupart des implémentations ratent.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">F3</span>
+          <p class="test-title">Comportement responsive</p>
+        </div>
+        <ol>
+          <li>Réduire la fenêtre à une largeur de téléphone (≈&nbsp;390&nbsp;px).</li>
+          <li>Parcourir le portail puis la console.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Aucun débordement horizontal, aucun texte tronqué. Les tableaux denses de
+            la console défilent dans leur propre conteneur.
+          </p>
+        </div>
+      </div>
+
+      <h3>Campagne G — Vérifications techniques</h3>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">G1</span>
+          <p class="test-title">État de santé du système</p>
+        </div>
+        <p style="font-size:0.925rem;margin-bottom:0">
+          Ouvrir directement dans le navigateur, ou en ligne de commande&nbsp;:
+        </p>
+        <div class="copyblock code" data-copy>curl -s https://reclamations.activiity.com/health/ready</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            <code>status: ready</code>, <code>mongo: true</code>,
+            <code>redis: true</code>, <code>active_engine: ml</code>,
+            <code>model_loaded: true</code>, <code>degraded: false</code>,
+            <code>language_id_model: true</code>. L'état du moteur est
+            <strong>visible, jamais deviné</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">G2</span>
+          <p class="test-title">Dépôt par l'API</p>
+        </div>
+        <p style="font-size:0.925rem;margin-bottom:0">
+          Prouve que le canal web n'est pas le seul point d'entrée&nbsp;:
+        </p>
+        <div class="copyblock code" data-copy>curl -s -X POST https://reclamations.activiity.com/api/v1/complaints \
+  -H "Content-Type: application/json" \
+  -d '{"subject":"Test API","body":"Aucun signal depuis quatre jours dans tout le quartier, cest inacceptable.","claimant":{"full_name":"Test","phone":"+21620145879"},"channel":"WEB"}'</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Réponse <code>201</code> avec une référence. La réclamation apparaît dans
+            la file de l'agent Réseau mobile, analysée.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">G3</span>
+          <p class="test-title">Le balayage SLA tourne réellement</p>
+        </div>
+        <ol>
+          <li>Repérer dans <code>/supervision</code> une réclamation proche de son échéance.</li>
+          <li>Attendre le prochain quart d'heure rond et recharger.</li>
+        </ol>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Une tâche planifiée s'exécute <strong>toutes les cinq minutes</strong>. Le
+            passage en alerte puis en dépassement s'opère sans intervention. Vérifié en
+            production&nbsp;: un balayage a relevé
+            <code>{scanned: 38, warned: 2, breached: 17}</code>.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">G4</span>
+          <p class="test-title">Dégradation maîtrisée</p>
+        </div>
+        <p style="font-size:0.925rem;margin-bottom:0">
+          Épreuve de conception plutôt que de clic. Si le modèle entraîné disparaît, le
+          système <strong>ne s'arrête pas</strong>&nbsp;: il bascule sur le moteur à
+          règles seules, continue de router et de prioriser, et signale son état
+          dégradé sur <code>/health/ready</code>.
+        </p>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Comportement couvert par les tests automatisés (<code>test_classifier.py</code>
+            pointe le répertoire d'artefacts vers un dossier vide). Un jury peut poser
+            la question&nbsp;: la réponse est «&nbsp;dégradé mais opérationnel, et
+            visible&nbsp;».
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 11 -->
+    <section id="auto">
+      <h2><span class="num">11</span>Tests automatisés</h2>
+      <p class="sub">
+        Dix-sept fichiers de test. La couverture est mesurée uniquement sur
+        <code>services/</code> et <code>intelligence/</code> — le cœur métier.
+      </p>
+
+      <div class="figures">
+        <div class="figure good"><span class="v">17</span><span class="k">fichiers de test</span></div>
+        <div class="figure good"><span class="v">88&nbsp;%</span><span class="k">couverture du cœur</span></div>
+        <div class="figure good"><span class="v">0</span><span class="k">erreur ruff</span></div>
+        <div class="figure good"><span class="v">97</span><span class="k">fichiers typés (mypy)</span></div>
+      </div>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Fichier</th><th>Couvre</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">test_normalize.py</td><td>Nettoyage, masquage, repli arabe, translittération arabizi</td></tr>
+            <tr><td class="mono">test_language_and_engine.py</td><td>Identification de langue, derja, moteur à règles seules</td></tr>
+            <tr><td class="mono">test_classifier.py</td><td>Entraînement, calibration, garde-fou de promotion, mode dégradé</td></tr>
+            <tr><td class="mono">test_rules_engine.py</td><td>Les 20 règles, pondérations, seuils de priorité</td></tr>
+            <tr><td class="mono">test_triage_pipeline.py</td><td>Chaîne complète des six étapes</td></tr>
+            <tr><td class="mono">test_rules_api.py</td><td>Lecture, édition, validation, simulateur</td></tr>
+            <tr><td class="mono">test_complaints.py</td><td>Dépôt, cycle de vie, pagination par curseur</td></tr>
+            <tr><td class="mono">test_attachments.py</td><td>Envoi authentifié et anonyme, écriture atomique</td></tr>
+            <tr><td class="mono">test_auth.py</td><td>Inscription, connexion, rafraîchissement, jetons de suivi</td></tr>
+            <tr><td class="mono">test_rbac.py</td><td>Hiérarchie des rôles, gardes de routes, filtre de périmètre</td></tr>
+            <tr><td class="mono">test_security.py</td><td>Hachage argon2, signature JWT, expiration</td></tr>
+            <tr><td class="mono">test_sla.py</td><td>Calendrier ouvré tunisien, alertes, dépassements, escalade</td></tr>
+            <tr><td class="mono">test_events.py</td><td>Bus Redis Streams, groupes de consommateurs, flux SSE</td></tr>
+            <tr><td class="mono">test_learning.py</td><td>Corrections, déclenchement du réentraînement, promotion</td></tr>
+            <tr><td class="mono">test_kb.py</td><td>Recherche BM25, suggestions, comptage d'usage</td></tr>
+            <tr><td class="mono">test_analytics.py</td><td>Agrégations et leur cloisonnement RBAC</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Lancer la suite</h4>
+      <div class="copyblock code" data-copy>pytest --cov                                   # tests + couverture
+ruff check .                                   # style
+mypy app/                                      # types</div>
+
+      <div class="panel">
+        <h4>Deux pièges qui valent d'être mentionnés en soutenance</h4>
+        <p>
+          <strong>Une boucle d'événements unique pour toute la session&nbsp;:</strong>
+          Motor lie son client à la première boucle qui l'anime&nbsp;; des boucles par
+          test casseraient la connexion partagée.
+        </p>
+        <p style="margin-bottom:0">
+          <strong>Un test qui passait pour de mauvaises raisons&nbsp;:</strong> le
+          garde-fou de promotion semblait vérifié, mais le corpus jouet était
+          parfaitement séparable (macro-F1 de 1,0) — le garde-fou n'était donc jamais
+          sollicité. Un corpus délibérément inapprenable (300 lignes aux étiquettes
+          contradictoires) a été ajouté pour le mettre réellement à l'épreuve.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 12 -->
+    <section id="eval">
+      <h2><span class="num">12</span>Évaluation du modèle</h2>
+      <p class="sub">
+        La partie la plus honnête du projet — et, à mon sens, la plus solide à
+        défendre.
+      </p>
+
+      <p>
+        Le classifieur a été évalué de trois façons, sur trois jeux de données
+        différents&nbsp;:
+      </p>
+
+      <div class="figures">
+        <div class="figure good">
+          <span class="v">0,993</span>
+          <span class="k">Contrôle — même source que l'entraînement</span>
+        </div>
+        <div class="figure warn">
+          <span class="v">0,761</span>
+          <span class="k">Référence — indépendante, vérifiée à la main</span>
+        </div>
+        <div class="figure bad">
+          <span class="v">0,493</span>
+          <span class="k">Réel — réclamations collectées en ligne</span>
+        </div>
+      </div>
+
+      <div class="panel panel-warn">
+        <h4>L'écart est le résultat, pas l'échec</h4>
+        <p>
+          La plupart des projets d'étudiants ne publient que le premier chiffre et
+          annoncent «&nbsp;99&nbsp;% de précision&nbsp;».
+          <strong>C'est l'écart entre les trois qui constitue la véritable
+          conclusion.</strong> Il indique que le modèle a davantage appris le
+          <em>style d'écriture</em> de ses données d'entraînement que la
+          <em>substance</em> du problème — le défaut le plus répandu en apprentissage
+          automatique appliqué.
+        </p>
+      </div>
+
+      <h3>La cause, diagnostiquée</h3>
+      <p>
+        La collecte de données réelles est déséquilibrée&nbsp;: <strong>506 des 656
+        lignes étiquetées relèvent d'une seule catégorie</strong> (application mobile),
+        parce que les avis publics disponibles portent massivement sur les
+        applications. Les dix autres catégories reposent donc sur du texte rédigé pour
+        l'occasion — d'où un score de contrôle excellent et un score réel faible.
+      </p>
+
+      <h3>La correction identifiée</h3>
+      <p>
+        La réponse n'est pas de changer d'algorithme, mais de corriger la distribution
+        d'entraînement&nbsp;: élargir la collecte et faire étiqueter un volume
+        important de réclamations <em>réelles</em>, puis réentraîner le modèle local
+        dessus. L'exécution reste hors ligne, locale et rapide&nbsp;; seule la
+        préparation des données change.
+      </p>
+
+      <h4>Performance mesurée</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Mesure</th><th class="num">Valeur</th><th>Lecture</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Analyse complète (6 étapes)</td>
+              <td class="num">≈ 40 ms</td>
+              <td class="tight"><span class="tag tag-ok">conforme</span></td>
+            </tr>
+            <tr>
+              <td>p95 de bout en bout, 1 client</td>
+              <td class="num">191 ms</td>
+              <td class="tight"><span class="tag tag-p2">au-delà de la cible</span></td>
+            </tr>
+            <tr>
+              <td>p95 de bout en bout, 20 clients</td>
+              <td class="num">865 ms</td>
+              <td class="tight"><span class="tag tag-p2">au-delà de la cible</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        La cible visée était de 100&nbsp;ms. Elle n'est pas atteinte, et la
+        décomposition mesurée attribue l'écart à la <strong>machine hôte partagée</strong>
+        (charge de 10 à 13 sur 16 cœurs) plutôt qu'à l'application ou au modèle. Le
+        chiffre est rapporté tel quel, avec sa cause.
+      </p>
+    </section>
+
+    <!-- ============================================================ 13 -->
+    <section id="limites">
+      <h2><span class="num">13</span>Limites connues</h2>
+      <p class="sub">
+        Recensées volontairement&nbsp;: mieux vaut les annoncer que les découvrir
+        pendant une démonstration.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Limite</th><th>Portée</th><th>Détail</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Pas de réaffectation d'agent</strong></td>
+              <td class="tight"><span class="tag tag-p2">Démonstration</span></td>
+              <td>
+                Le serveur l'accepte, l'interface n'expose aucun bouton. À ne pas
+                promettre pendant une démonstration.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Notifications visuelles absentes</strong></td>
+              <td class="tight"><span class="tag tag-p2">Confort</span></td>
+              <td>
+                Les erreurs s'affichent en ligne&nbsp;; les mises à jour temps réel
+                arrivent en silence.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Écran d'étiquetage ML</strong></td>
+              <td class="tight"><span class="tag tag-p3">Secondaire</span></td>
+              <td>Les points d'entrée existent, sans interface dédiée.</td>
+            </tr>
+            <tr>
+              <td><strong>Image conteneur de 1,2 Go</strong></td>
+              <td class="tight"><span class="tag tag-p3">Technique</span></td>
+              <td>
+                La cible était 800&nbsp;Mo. Aucune dépendance d'apprentissage profond
+                n'est en cause&nbsp;; c'est la pile scientifique.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Police arabe non embarquée</strong></td>
+              <td class="tight"><span class="tag tag-p3">Cosmétique</span></td>
+              <td>
+                La feuille de style la déclare, le fichier n'est pas livré. Le rendu
+                système reste correct.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>401 au rechargement</strong></td>
+              <td class="tight"><span class="tag tag-p3">Cosmétique</span></td>
+              <td>
+                Conséquence d'un choix de sécurité (jeton en mémoire uniquement).
+                Sans effet fonctionnel.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Jeu de démonstration réduit</strong></td>
+              <td class="tight"><span class="tag tag-p3">Données</span></td>
+              <td>
+                Soixante réclamations&nbsp;: les graphiques sont clairsemés, mais
+                authentiques.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="colophon">
+    Rakib — plateforme intelligente de gestion des réclamations · Projet de fin
+    d'études · Document de référence et protocole de test<br>
+    Environnement de test&nbsp;: reclamations.activiity.com · Les identifiants
+    ci-dessus n'ont cours que sur cet environnement de démonstration.
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    document.querySelectorAll('[data-copy]').forEach(function (block) {
+      var button = document.createElement('button');
+      button.className = 'copy';
+      button.type = 'button';
+      button.textContent = 'Copier';
+      button.setAttribute('aria-label', 'Copier le texte');
+      block.appendChild(button);
+
+      button.addEventListener('click', function () {
+        var text = block.textContent.replace(/Copier|Copié$/, '').trim();
+        var done = function () {
+          button.textContent = 'Copié';
+          button.dataset.done = '1';
+          setTimeout(function () {
+            button.textContent = 'Copier';
+            delete button.dataset.done;
+          }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () {});
+        } else {
+          var area = document.createElement('textarea');
+          area.value = text;
+          document.body.appendChild(area);
+          area.select();
+          try { document.execCommand('copy'); done(); } catch (e) {}
+          document.body.removeChild(area);
+        }
+      });
+    });
+  })();
+</script>

@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     tracking_token_secret: str = "change-me-too"
     tracking_token_ttl_days: int = 365
 
-    triage_backend: Literal["ml", "rules", "llm"] = "ml"
+    triage_backend: Literal["lexicon", "rules"] = "lexicon"
     ml_artifacts_dir: str = "./ml_artifacts"
     category_confidence_threshold: float = 0.55
     ambiguity_margin: float = 0.15

@@ -9,10 +9,16 @@ from pydantic import BaseModel, Field
 
 
 class Channel(StrEnum):
-    WEB = "web"
+    """Article 6 requires at minimum an electronic mailbox, an online form and
+    in-branch deposit. Everything here maps onto one of the regulator's four
+    reception buckets — see app.domain.bct.canal_bct.
+    """
+
+    WEB = "web"           # formulaire en ligne
     PHONE = "phone"       # logged by a call-centre agent
-    AGENCE = "agence"     # walk-in, logged at the counter
+    AGENCE = "agence"     # walk-in, logged at the counter or at head office
     EMAIL = "email"       # pasted in by an agent (no inbound ingestion)
+    COURRIER = "courrier"  # postal mail, logged by the complaints unit
 
 
 class Status(StrEnum):

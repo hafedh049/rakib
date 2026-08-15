@@ -1,29 +1,35 @@
-"""Language identification: fr | ar | ar-tn | en | other.
+"""Language identification: fr | ar | ar-tn | en | other. Rule-based, no model.
 
-fastText's `lid.176.ftz` (917 KB) does the heavy lifting, but the module is built
-to work without it: if the artifact is missing the system must still boot and
-classify (spec section 11), so a script-and-stopword heuristic takes over.
+This module used to lean on fastText's `lid.176.ftz`. That artifact was dropped
+with the rest of the trained components: a 917 KB model file *is* a trained
+model, and shipping one while claiming the system trains nothing is a
+contradiction an examiner finds in thirty seconds.
 
-`ar-tn` is not a fastText label. Tunisian derja written in Latin script is
-detected here, because fastText will happily call "3andi mochkla fel internet"
-Romanian.
+Losing it costs less than it appears, because three of the four decisions never
+used it:
+
+*   **Arabic** is decided by script ratio. Unambiguous, no model needed.
+*   **Derja** was never a fastText label at all. It has always been decided here,
+    by arabizi patterns and a marker set — precisely because fastText called
+    "3andi mochkla fel internet" Romanian and "nhabet nbadel operateur" English
+    at 0.64 confidence. A confident verdict from a model with no label for the
+    language is confidently wrong.
+*   **French vs English** is the only decision that used it, and stopword
+    overlap settles it: the two share almost no function words.
+
+`ar-tn` remains our own call, taken before anything else looks at the text.
 """
 
-import os
 from dataclasses import dataclass
-from functools import lru_cache
-from typing import Any
 
-from app.config import settings
 from app.core.logging import get_logger
 from app.intelligence.text.normalize import NormalizedText
 
 log = get_logger(__name__)
 
-LID_MODEL_FILENAME = "lid.176.ftz"
 SUPPORTED = {"fr", "ar", "en"}
 
-#: Above this share of derja markers the text is Tunisian, whatever fastText says.
+#: Above this share of derja markers the text is Tunisian.
 DERJA_THRESHOLD = 0.15
 ARABIC_SCRIPT_THRESHOLD = 0.50
 
@@ -67,40 +73,24 @@ class LanguageResult:
     source: str
 
 
-@lru_cache(maxsize=1)
-def _load_model() -> Any | None:
-    path = os.path.join(settings.ml_artifacts_dir, LID_MODEL_FILENAME)
-    if not os.path.exists(path):
-        log.warning("lid.model_missing", path=path)
-        return None
-    try:
-        import fasttext
-
-        # fastText prints a deprecation banner to stderr on load; harmless.
-        return fasttext.load_model(path)
-    except Exception as exc:  # noqa: BLE001 — LID must never break triage
-        log.error("lid.load_failed", path=path, error=str(exc))
-        return None
-
-
 def model_available() -> bool:
-    return _load_model() is not None
+    """Always False: there is no model. Kept so /health/ready keeps its shape."""
+    return False
 
 
 def detect(normalized: NormalizedText) -> LanguageResult:
     features = normalized.features
 
-    # Arabic script is unambiguous — no model needed.
+    # Arabic script is unambiguous.
     if features.arabic_ratio >= ARABIC_SCRIPT_THRESHOLD:
         return LanguageResult("ar", min(1.0, features.arabic_ratio), "script")
 
-    # Latin-script derja is decided here, BEFORE fastText, and without regard to
-    # its confidence: there is no derja label to be confident about.
+    # Latin-script derja, decided before anything else looks at the text.
     derja = derja_share(normalized.text)
     if derja >= DERJA_THRESHOLD:
         return LanguageResult("ar-tn", round(derja, 3), "derja")
 
-    return _fasttext_verdict(normalized.text) or _heuristic_verdict(normalized.text)
+    return _heuristic_verdict(normalized.text)
 
 
 def derja_share(text: str) -> float:
@@ -120,38 +110,8 @@ def derja_share(text: str) -> float:
     return hits / len(tokens)
 
 
-def _fasttext_verdict(text: str) -> LanguageResult | None:
-    model = _load_model()
-    if model is None or not text.strip():
-        return None
-
-    # Call the underlying binding rather than model.predict(): the Python
-    # wrapper in fasttext 0.9.2 finishes with `np.array(probs, copy=False)`,
-    # which NumPy 2 refuses outright. Every prediction was raising and silently
-    # dropping the system onto the stopword heuristic. `f.predict` returns plain
-    # (probability, label) tuples and never touches NumPy.
-    cleaned = text.replace("\n", " ")
-    try:
-        predictions = model.f.predict(cleaned, 1, 0.0, "strict")
-        if not predictions:
-            return None
-        confidence, label = predictions[0]
-    except Exception:  # noqa: BLE001 — last resort, try the wrapper
-        try:
-            labels, scores = model.predict(cleaned, k=1)
-            label, confidence = labels[0], float(scores[0])
-        except Exception as exc:  # noqa: BLE001 — heuristic takes over
-            log.warning("lid.predict_failed", error=str(exc))
-            return None
-
-    code = str(label).replace("__label__", "")
-    return LanguageResult(
-        code if code in SUPPORTED else "other", float(confidence), "fasttext"
-    )
-
-
 def _heuristic_verdict(text: str) -> LanguageResult:
-    """Stopword fallback for when the artifact is absent."""
+    """French vs English by stopword overlap — they share almost no function words."""
     tokens = set(text.split())
     french = len(tokens & FRENCH_MARKERS)
     english = len(tokens & ENGLISH_MARKERS)
