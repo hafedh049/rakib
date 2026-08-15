@@ -1,205 +1,130 @@
-{"subject": "facture", "text": "chnowa hedha 340 dinar?? ana ma3milt walou", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "Trop cher", "text": "vous m avez pris 89 dt de plus ce mois pourquoi", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "reclamation", "text": "الفاتورة فيها مبلغ ما نعرفوش شنو هو", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "Facture", "text": "double paiement janvier + fevrier, remboursez", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "montant", "text": "j ai un forfait a 25dt on me facture 61dt depuis 3 mois", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "PROBLEME FACTURE", "text": "C EST DU VOL PUR ET SIMPLE 200 DINARS POUR RIEN", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "frais", "text": "des frais de dossier jamais annonces sur ma derniere facture", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "facture erronee", "text": "khalaset 120 dt w el consommation mte3i ma tetjawezch 40", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "Reclamation facture", "text": "prelevement automatique effectue deux fois le meme jour", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "bill", "text": "why am i charged twice for the same month", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "Facture juin", "text": "la tva a ete appliquee deux fois sur ma facture de juin", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "فاتورة", "text": "خصمولي المبلغ مرتين من البنكة", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "cher", "text": "9adech hedha? 187 dt w ana ma sta3maltech", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "Contestation", "text": "je conteste les 45 dinars de hors forfait, ma data etait coupee", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "facture", "text": "montant different de celui annonce par le vendeur en boutique", "category": "FACTURATION", "source": "gold", "unclassifiable": false}
-{"subject": "recharge", "text": "3abbit 20 dinar w ma wsalnich walou", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "paiement", "text": "carte debitee, facture toujours impayee dans mon espace", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "تعبئة", "text": "عبيت الرصيد و ما زادش شي", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "recharge ratee", "text": "3 tentatives de recharge, 3 echecs, argent parti", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "d17", "text": "paiement d17 valide cote banque mais rien chez vous", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "solde", "text": "credit disparu apres rechargement de 30dt hier soir", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "top up", "text": "topped up 50 dinars, balance still zero after 2 hours", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "recharge", "text": "el flous mchew mel carte w el solde 0", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "paiement refuse", "text": "impossible de payer ma facture, erreur systeme a chaque fois", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "خلاص", "text": "خلصت الفاتورة و مازالت تظهر غير مخلصة", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "rechargement", "text": "j ai recharge sur le mauvais numero par erreur du systeme", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "credit", "text": "mon credit a ete debite sans aucune consommation de ma part", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "recharge en ligne", "text": "transaction TRX9982211 debitee mais non creditee", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "paiement", "text": "e-dinar accepte puis annule, montant non restitue", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "recharge", "text": "chariti recharge w ma khdemetch, 3lech?", "category": "PAIEMENT_RECHARGE", "source": "gold", "unclassifiable": false}
-{"subject": "pas de reseau", "text": "3 jours sans reseau a mourouj, rien ne marche", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "شبكة", "text": "ما فماش شبكة في الحومة الكل", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "4g", "text": "4g inutilisable des 20h, on dirait de la 2g", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "appels", "text": "mes appels coupent apres 20 secondes systematiquement", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "reseau", "text": "famech reseau fi sfax men lbera7", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "couverture", "text": "aucune barre chez moi alors que la carte annonce 4g+", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "network", "text": "no signal at all in my area for two days now", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "SIGNAL", "text": "AUCUN SIGNAL DEPUIS UNE SEMAINE C EST HONTEUX", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "sms", "text": "je ne recois plus aucun sms depuis lundi, les appels passent", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "data", "text": "internet mobile mort a hammamet tout le week end", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "شبكة ضعيفة", "text": "الاشارة ضعيفة برشة في الدار", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "reseau", "text": "obliged de sortir dans la rue pour telephoner", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "coupures", "text": "coupures reseau toutes les 10 minutes a ariana", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "3g", "text": "bloque en 3g alors que je paye un forfait 4g illimite", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "reseau nul", "text": "el reseau khayeb barcha fel medina", "category": "RESEAU_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "fibre", "text": "fibre coupee depuis 9 jours, je teletravaille", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "adsl lent", "text": "je paye 20 mega je recois 2 mega en filaire", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "box", "text": "la box clignote rouge en boucle depuis mardi", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "انترنت", "text": "الانترنت القار مقطوع من جمعة", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "deconnexion", "text": "connexion qui saute toutes les 10 min impossible de travailler", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "internet", "text": "el internet fel dar ma ye5demch men 3 iyem", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "debit", "text": "debit divise par 10 depuis le passage a la fibre", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "ligne fixe", "text": "plus de tonalite et plus d internet sur la ligne fixe", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "wifi", "text": "aucune connexion depuis l orage de samedi", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "internet", "text": "no internet at home since friday, three calls no fix", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "adsl", "text": "ligne adsl instable la nuit uniquement", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "fibre", "text": "installee il y a 2 semaines, deja 4 pannes", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "connexion", "text": "debit correct le matin, inexistant le soir, tous les jours", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "صبيب", "text": "الصبيب ضعيف برغم اني خالص عرض 20 ميغا", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "panne internet", "text": "voisins tous coupes aussi, probleme sur le quartier", "category": "INTERNET_FIXE", "source": "gold", "unclassifiable": false}
-{"subject": "rdv", "text": "technicien jamais venu, j ai pose un conge pour rien", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "intervention", "text": "dossier ouvert depuis 3 semaines, zero nouvelle", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "تقني", "text": "التقني ما جاش و ما عيطش", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "cable", "text": "cable arrache par les travaux devant chez moi", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "technicien", "text": "el technicien ma jech w 3malt conge", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "delai", "text": "72h annoncees, on est a 15 jours", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "rendez vous", "text": "3eme rdv annule par vos services sans prevenir", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "depannage", "text": "on attend une piece depuis un mois sans nouvelle", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "visit", "text": "the technician cancelled three times in a row", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "intervention", "text": "constat fait par le technicien, aucune suite donnee", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "poteau", "text": "poteau tombe dans la rue, ligne au sol, dangereux", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "تدخل", "text": "من شهر و انا نستنى في التدخل", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "raccordement", "text": "raccordement promis sous 10 jours, toujours rien apres 2 mois", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "SAV", "text": "personne ne se deplace malgre 5 appels au service technique", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "installation", "text": "installation reportee 4 fois, je perds patience", "category": "INTERVENTION_TECHNIQUE", "source": "gold", "unclassifiable": false}
-{"subject": "promo", "text": "promo 2 mois offerts jamais appliquee", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "forfait", "text": "j ai demande le changement de forfait il y a 6 semaines", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "عرض", "text": "العرض ما تفعلش رغم اني اشتركت", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "offre", "text": "on m a vendu 12 mois d engagement le contrat dit 24", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "abonnement", "text": "baddlouli el forfait bla ma nab3ath talab", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "promotion", "text": "la remise affichee sur le site ne figure pas sur ma ligne", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "plan", "text": "i subscribed to the family offer, it was never activated", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "option", "text": "option internet souscrite non active apres 4 jours", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "forfait", "text": "migration vers offre superieure facturee mais pas effective", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "engagement", "text": "on refuse de me laisser partir a cause d un engagement fantome", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "اشتراك", "text": "بدلولي العرض بلا اذني و الثمن زاد", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "offre familia", "text": "familia desactivee sans preavis ni explication", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "tarif", "text": "tarif change en cours de contrat, jamais informe", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "promo", "text": "el promo eli fel affiche ma tطbقatech 3lia", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "bonus", "text": "bonus data promis a la souscription jamais credite", "category": "OFFRES_ABONNEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "resiliation", "text": "resilie il y a 2 mois, toujours facture", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "portabilite", "text": "portabilite bloquee, je perds mon numero pro", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "فسخ", "text": "طلبت الفسخ و مازلت نخلص كل شهر", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "resilier", "text": "je veux resilier, personne ne traite ma demande", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "changer operateur", "text": "nhab nbadel operateur w ma5allounich", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "cloture", "text": "compte toujours actif malgre lettre recommandee", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "cancel", "text": "i cancelled last month and i am still being billed", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "portabilite", "text": "3 echecs de portabilite sans aucune explication", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "resiliation", "text": "accuse de reception en main, aucune suite depuis 5 semaines", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "transfert numero", "text": "mon numero n a jamais ete transfere chez vous", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "نقل الرقم", "text": "نقل الرقم مبلوك من ثلاث اسابيع", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "depart", "text": "je pars a la concurrence, liberez ma ligne", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "resiliation", "text": "frais de resiliation reclames alors que j etais hors engagement", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "fasakh", "text": "3malt talab fasakh w mazelt nkhalas", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "abonnement", "text": "arret du prelevement demande, toujours preleve", "category": "RESILIATION_PORTABILITE", "source": "gold", "unclassifiable": false}
-{"subject": "agence", "text": "2h d attente pour une sim, 2 guichets sur 6", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "service client", "text": "ligne qui raccroche apres le message d accueil", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "وكالة", "text": "قعدت ساعتين في الوكالة و ما تحلش شي", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "agent", "text": "l agent m a parle tres mal et a refuse de donner son nom", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "call center", "text": "n3ayet men sbe7 w 7atta wa7ed ma yjaweb", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "rappel", "text": "3 promesses de rappel sous 24h, aucun rappel", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "support", "text": "nobody ever answers the customer service line", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "accueil", "text": "agence fermee en pleine journee sans affichage", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "conseiller", "text": "on me renvoie d un service a l autre depuis 3 semaines", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "خدمة الحرفاء", "text": "عيطت برشة مرات و حتى واحد ما جاوبني", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "file", "text": "systeme de tickets en panne, tout le monde attend debout", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "agent", "text": "on m a raccroche au nez deux fois de suite", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "reclamation", "text": "ma reclamation deposee en agence n a jamais ete enregistree", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "guichet", "text": "el agence tetsakker 3la 15h w famech information", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "attente", "text": "45 minutes en attente telephonique puis coupure", "category": "SERVICE_CLIENT_AGENCE", "source": "gold", "unclassifiable": false}
-{"subject": "routeur", "text": "routeur neuf ne s allume pas du tout", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "decodeur", "text": "decodeur redemarre toutes les 5 minutes", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "sim", "text": "puce non reconnue par 2 telephones differents", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "تجهيز", "text": "التجهيز الجديد ما يخدمش خاطر", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "box", "text": "el box tsakhen barcha w tetfa wa7adha", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "materiel", "text": "on refuse l echange malgre la garantie de 12 mois", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "router", "text": "the router died after three weeks and nobody replaces it", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "cable", "text": "cable ethernet manquant dans le carton du modem", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "sim", "text": "carte sim illisible recue par la poste", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "decodeur", "text": "image qui gele en permanence sur la tv", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "شريحة", "text": "الشريحة ما تتقراش في التلفون", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "modem", "text": "modem fourni obsolete, incompatible avec la fibre installee", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "telephone", "text": "terminal achete en boutique defectueux des le premier jour", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "materiel", "text": "le materiel restitue m est toujours facture", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "box", "text": "voyants eteints, alimentation testee sur 3 prises", "category": "EQUIPEMENT", "source": "gold", "unclassifiable": false}
-{"subject": "roaming", "text": "340 dt de roaming apres 5 jours en italie", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "international", "text": "appels vers la france factures 3x le tarif annonce", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "تجوال", "text": "معاليم التجوال غالية برغم العرض الدولي", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "pass", "text": "pass international paye jamais active a l etranger", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "roaming", "text": "rja3t men turkiya w jatni facture 500 dinar", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "data etranger", "text": "data en itinerance facturee alors que desactivee", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "abroad", "text": "huge roaming bill even though i bought the travel pass", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "appels", "text": "impossible d appeler la tunisie depuis l allemagne", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "itinerance", "text": "aucun reseau partenaire disponible pendant tout le sejour", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "roaming", "text": "facture roaming recue 2 mois apres le retour", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "دولي", "text": "المكالمات الدولية غالية اكثر من المعلن", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "sejour", "text": "sms surtaxes a l etranger sans aucun avertissement", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "pass international", "text": "pass achete la veille du depart, jamais fonctionne", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "roaming", "text": "el roaming ghali barcha, 3lech ma 9alouliech?", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "etranger", "text": "coupure totale de service des le passage de la frontiere", "category": "ROAMING_INTERNATIONAL", "source": "gold", "unclassifiable": false}
-{"subject": "appli", "text": "impossible de me connecter depuis la mise a jour", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "application", "text": "ecran blanc au demarrage, rien ne charge", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "تطبيق", "text": "التطبيق يسكر وحدو كل مرة", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "app", "text": "solde affiche faux, ussd donne le bon montant", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "appli", "text": "l app tetsakker wa9t nhel", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "bug", "text": "bouton payer ne repond pas dans l application", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "app", "text": "the app crashes every time i open the bills section", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "connexion", "text": "identifiants refuses alors que le mot de passe est bon", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "historique", "text": "historique de consommation vide depuis la mise a jour", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "application", "text": "notification de facture recue mais rien dans l appli", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "تطبيق", "text": "التطبيق ما يفتحش من بعد التحديث", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "appli", "text": "desinstalle reinstalle 4 fois, meme probleme", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "espace client", "text": "site web et appli affichent des soldes differents", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "app", "text": "l application demande une mise a jour qui n existe pas sur le store", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "login", "text": "code otp jamais recu pour se connecter a l application", "category": "APPLICATION_MOBILE", "source": "gold", "unclassifiable": false}
-{"subject": "probleme", "text": "bonjour j ai un probleme", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "aide", "text": "aidez moi svp", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "?", "text": "c est quoi ca", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "urgent", "text": "URGENT", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "reclamation", "text": "je suis tres mecontent de vos services", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "مشكل", "text": "عندي مشكل", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "mochkel", "text": "3andi mochkel", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "service", "text": "rien ne marche chez vous", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "carte", "text": "el machine bel3atli el karta w l agence t9oli stanna 15 jour", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "Carte bloquee", "text": "ma carte marche plus depuis mardi personne sait pourquoi", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "reclamation", "text": "البطاقة متاعي مسكرة و ما نعرفش علاش، الحساب فيه فلوس", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "CARTE", "text": "JE PAYE 40DT PAR AN POUR UNE CARTE QUI MARCHE JAMAIS", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "renouvellement", "text": "carte expiree en mars, la nouvelle jamais arrivee a l agence", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "opposition", "text": "j ai fait opposition lundi et y a eu 2 achats mardi", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "card", "text": "my card was swallowed by your atm and nobody helps", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "karta", "text": "karti ma5dmch fel magasin ama fel distributeur tekhdem, chnowa hedha", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "plafond", "text": "vous avez baisse mon plafond a 200dt sans me prevenir", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "Carte perdue", "text": "carte perdue signalee samedi toujours pas remplacee", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "bloquee", "text": "3 fois que je demande le deblocage de ma carte rien ne bouge", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "البطاقة", "text": "طلبت بطاقة جديدة من شهرين و حتى اليوم ما وصلتنيش", "category": "CARTE_BANCAIRE", "source": "gold", "unclassifiable": false}
+{"subject": "retrait", "text": "el distributeur 5a l flous w ma5rejch waraq, 200dt", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "PROBLEME", "text": "300 DT DEBITES ET RIEN N EST SORTI DE LA MACHINE", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "distributeur", "text": "الموزع خذا 500 دينار و ما خرجش شيء و انا مستني من اسبوع", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "retrait rate", "text": "j ai demande 400 il m a donne 300 et debite 400", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "gab", "text": "le gab de la marsa hors service depuis 3 semaines c est le seul du coin", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "atm", "text": "atm took my money no cash dispensed reference op8823141", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "machine", "text": "operation annulee par la machine mais compte debite quand meme", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "retrait double", "text": "un seul retrait fait deux lignes sur mon releve", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "guichet auto", "text": "ca fait 1 mois que j attends le remboursement du retrait rate", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "moziaa", "text": "el moziia3 mte3 sousse dima 5arban, kol marra nemchi w nerja3", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "billets", "text": "billets non delivres et l agence me parle de compensation je comprends rien", "category": "DAB_GAB", "source": "gold", "unclassifiable": false}
+{"subject": "paiement", "text": "khalast marra wa7da 3and el pharmacien w el releve ybayen zouz", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "Double debit", "text": "180dt preleves 2 fois pour un seul achat au monoprix", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "achat en ligne", "text": "j ai paye ma commande 2 fois le site dit une seule", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "code sms", "text": "jamais recu le code pour valider mes achats internet", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "refus", "text": "ma carte est refusee partout alors que j ai 3000dt sur le compte", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "الدفع", "text": "خلصت في المغازة و المبلغ تنقص مرتين، عندي التذكرة", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "tpe", "text": "le tpe a affiche echec et pourtant j ai ete debite", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "online payment", "text": "charged twice for one online order please refund", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "3ds", "text": "el code 3d secure ma yjinich w ma nejjemch nechri online", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "commercant", "text": "paiement passe chez le commercant mais lui dit qu il n a rien recu", "category": "PAIEMENT_TPE_ECOMMERCE", "source": "gold", "unclassifiable": false}
+{"subject": "virement", "text": "virement fait le 3 toujours pas arrive on est le 19", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "SALAIRE", "text": "MON SALAIRE N EST PAS ARRIVE ET JE DOIS PAYER LE LOYER", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "transfert", "text": "التحويل متاعي من 10 ايام و المستفيد ما وصلوش شيء", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "prelevement", "text": "vous prelevez encore une assurance que j ai resiliee en janvier", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "rib", "text": "virement parti sur mon ancien rib alors que j ai donne le nouveau", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "virement perm", "text": "mon virement permanent n a jamais ete mis en place", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "paie", "text": "el paie mte3i ma wsaletch w el patron 3malha, chnowa el mochkla", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "transfer", "text": "sent 2000dt internally 8 days ago beneficiary got nothing", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "virement bloque", "text": "virement en attente depuis une semaine sans explication", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "اقتطاع", "text": "يقتطعوا من الحساب متاعي كل شهر و ما عندي حتى عقد معاهم", "category": "VIREMENT_PRELEVEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "chequier", "text": "chequier commande y a 5 semaines toujours rien a l agence", "category": "CHEQUE_EFFET", "source": "gold", "unclassifiable": false}
+{"subject": "cheque rejete", "text": "mon cheque est revenu impaye alors que j avais de quoi", "category": "CHEQUE_EFFET", "source": "gold", "unclassifiable": false}
+{"subject": "الشيك", "text": "الشيك متاعي رجع و الحساب كان فيه فلوس، ضرني مع المزود", "category": "CHEQUE_EFFET", "source": "gold", "unclassifiable": false}
+{"subject": "remise", "text": "cheque depose y a 12 jours pas encore credite", "category": "CHEQUE_EFFET", "source": "gold", "unclassifiable": false}
+{"subject": "opposition", "text": "j ai fait opposition sur un cheque vole et il a ete paye quand meme", "category": "CHEQUE_EFFET", "source": "gold", "unclassifiable": false}
+{"subject": "chek", "text": "talabt chekat men chhar w nos w ma3tawnich, w khalast el frais", "category": "CHEQUE_EFFET", "source": "gold", "unclassifiable": false}
+{"subject": "certification", "text": "attente de 3 semaines pour certifier un cheque j ai perdu la vente", "category": "CHEQUE_EFFET", "source": "gold", "unclassifiable": false}
+{"subject": "cheque", "text": "rejet pour provision insuffisante alors que le virement etait arrive la veille", "category": "CHEQUE_EFFET", "source": "gold", "unclassifiable": false}
+{"subject": "cheque book", "text": "ordered a chequebook a month ago never received it", "category": "CHEQUE_EFFET", "source": "gold", "unclassifiable": false}
+{"subject": "cloture", "text": "j ai demande la cloture en mars vous prelevez toujours des frais", "category": "COMPTE_GESTION", "source": "gold", "unclassifiable": false}
+{"subject": "releve", "text": "plus aucun releve depuis 4 mois j en ai besoin pour ma compta", "category": "COMPTE_GESTION", "source": "gold", "unclassifiable": false}
+{"subject": "compte bloque", "text": "compte bloque du jour au lendemain sans un sms", "category": "COMPTE_GESTION", "source": "gold", "unclassifiable": false}
+{"subject": "الحساب", "text": "سكرو الحساب متاعي بلا ما يعلموني و ما نعرفش السبب", "category": "COMPTE_GESTION", "source": "gold", "unclassifiable": false}
+{"subject": "solde", "text": "le solde de mon releve ne correspond pas aux operations ecart de 120dt", "category": "COMPTE_GESTION", "source": "gold", "unclassifiable": false}
+{"subject": "procuration", "text": "demande de procuration pour ma femme deposee y a 6 semaines rien", "category": "COMPTE_GESTION", "source": "gold", "unclassifiable": false}
+{"subject": "compte joint", "text": "vous avez transforme notre compte joint sans nous demander", "category": "COMPTE_GESTION", "source": "gold", "unclassifiable": false}
+{"subject": "nsakker", "text": "talabt nsakker el compte w mazel ma7loul w el frais mazelou", "category": "COMPTE_GESTION", "source": "gold", "unclassifiable": false}
+{"subject": "statement", "text": "no account statements for four months now", "category": "COMPTE_GESTION", "source": "gold", "unclassifiable": false}
+{"subject": "credit", "text": "l echeance est passee 2 fois ce mois 340dt en trop", "category": "CREDIT_FINANCEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "mainlevee", "text": "credit solde en janvier mainlevee toujours pas faite ca bloque ma vente", "category": "CREDIT_FINANCEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "dossier", "text": "ملف القرض متاعي من 3 اشهر و حتى واحد ما يجاوبني", "category": "CREDIT_FINANCEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "taux", "text": "le taux du contrat n est pas celui qu on m avait annonce", "category": "CREDIT_FINANCEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "PENALITES", "text": "VOUS ME FACTUREZ DES PENALITES ALORS QUE C EST VOTRE ERREUR", "category": "CREDIT_FINANCEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "echeancier", "text": "jamais recu le tableau d amortissement malgre 4 demandes", "category": "CREDIT_FINANCEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "9ist", "text": "el 9ist tna99es zouz marrat hedha chhar, rajj3ouli flousi", "category": "CREDIT_FINANCEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "credit auto", "text": "dossier depose en fevrier aucune reponse ni oui ni non", "category": "CREDIT_FINANCEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "loan", "text": "my loan instalment was taken twice this month", "category": "CREDIT_FINANCEMENT", "source": "gold", "unclassifiable": false}
+{"subject": "agios", "text": "des agios de 78dt alors que je n ai jamais ete a decouvert", "category": "FRAIS_COMMISSIONS", "source": "gold", "unclassifiable": false}
+{"subject": "frais", "text": "vous prelevez 25dt par trimestre c est ecrit ou ca", "category": "FRAIS_COMMISSIONS", "source": "gold", "unclassifiable": false}
+{"subject": "مصاريف", "text": "تنقصو مني مصاريف كل ثلاثية و ما فهمت علاش", "category": "FRAIS_COMMISSIONS", "source": "gold", "unclassifiable": false}
+{"subject": "commission", "text": "commission de 45dt sur un virement de 200dt vous plaisantez", "category": "FRAIS_COMMISSIONS", "source": "gold", "unclassifiable": false}
+{"subject": "carte resiliee", "text": "je paye encore la cotisation d une carte rendue y a 8 mois", "category": "FRAIS_COMMISSIONS", "source": "gold", "unclassifiable": false}
+{"subject": "frais dossier", "text": "300dt de frais de dossier pour un credit que vous avez refuse", "category": "FRAIS_COMMISSIONS", "source": "gold", "unclassifiable": false}
+{"subject": "frais opposition", "text": "vous me facturez l opposition alors que je suis victime de fraude", "category": "FRAIS_COMMISSIONS", "source": "gold", "unclassifiable": false}
+{"subject": "frais", "text": "tna99sou meni 60 dinar frais w 3omri ma kont fel negatif", "category": "FRAIS_COMMISSIONS", "source": "gold", "unclassifiable": false}
+{"subject": "charges", "text": "quarterly account fees never mentioned when i opened the account", "category": "FRAIS_COMMISSIONS", "source": "gold", "unclassifiable": false}
+{"subject": "appli", "text": "l application se ferme des que je tape mon code", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "code bloque", "text": "mon code d acces est bloque et le lien de deblocage n arrive jamais", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "التطبيق", "text": "التطبيق ما يخدمش من اسبوع، نزلتو و رجعت نزلتو و نفس الشيء", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "otp", "text": "je recois plus les codes sms donc je peux rien valider", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "app", "text": "app crashes every time i open it useless", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "virement appli", "text": "impossible de faire un virement depuis l appli erreur technique", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "solde appli", "text": "le solde affiche dans l appli est faux par rapport au distributeur", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "application", "text": "el application tetsakker wa7edha ki nhot el code", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "MAJ", "text": "depuis la mise a jour plus rien ne fonctionne bravo", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "espace client", "text": "impossible de me connecter a mon espace en ligne depuis 2 semaines", "category": "BANQUE_DIGITALE", "source": "gold", "unclassifiable": false}
+{"subject": "allocation", "text": "allocation touristique refusee sans motif et je pars dans 6 jours", "category": "OPERATIONS_INTERNATIONALES", "source": "gold", "unclassifiable": false}
+{"subject": "transfert", "text": "virement recu de france y a 15 jours toujours pas credite", "category": "OPERATIONS_INTERNATIONALES", "source": "gold", "unclassifiable": false}
+{"subject": "change", "text": "le taux applique n est pas celui affiche en agence ce jour la", "category": "OPERATIONS_INTERNATIONALES", "source": "gold", "unclassifiable": false}
+{"subject": "المنحة", "text": "طلبت المنحة السياحية و رفضوها بلا سبب و السفرة قريبة", "category": "OPERATIONS_INTERNATIONALES", "source": "gold", "unclassifiable": false}
+{"subject": "carte devise", "text": "ma carte devise n a jamais ete alimentee malgre le dossier complet", "category": "OPERATIONS_INTERNATIONALES", "source": "gold", "unclassifiable": false}
+{"subject": "swift", "text": "sender has the swift confirmation you still say nothing received", "category": "OPERATIONS_INTERNATIONALES", "source": "gold", "unclassifiable": false}
+{"subject": "devises", "text": "frais preleves sur un virement recu alors que c etait frais emetteur", "category": "OPERATIONS_INTERNATIONALES", "source": "gold", "unclassifiable": false}
+{"subject": "rapatriement", "text": "impossible de rapatrier les fonds de mon compte en devises", "category": "OPERATIONS_INTERNATIONALES", "source": "gold", "unclassifiable": false}
+{"subject": "URGENT", "text": "3 operations que je n ai jamais faites 2400dt disparus de mon compte", "category": "FRAUDE_OPERATION_NON_AUTORISEE", "source": "gold", "unclassifiable": false}
+{"subject": "fraude", "text": "retraits a tunis alors que j etais en italie avec ma carte sur moi", "category": "FRAUDE_OPERATION_NON_AUTORISEE", "source": "gold", "unclassifiable": false}
+{"subject": "عمليات", "text": "فما عمليات في الحساب متاعي ما عملتهاش، 3000 دينار طاروا", "category": "FRAUDE_OPERATION_NON_AUTORISEE", "source": "gold", "unclassifiable": false}
+{"subject": "sms arnaque", "text": "j ai repondu a un sms de votre banque et depuis on m a vide le compte", "category": "FRAUDE_OPERATION_NON_AUTORISEE", "source": "gold", "unclassifiable": false}
+{"subject": "achats inconnus", "text": "des achats internet que je n ai jamais passes pour 890dt", "category": "FRAUDE_OPERATION_NON_AUTORISEE", "source": "gold", "unclassifiable": false}
+{"subject": "piratage", "text": "quelqu un s est connecte a mon espace et a ajoute un beneficiaire", "category": "FRAUDE_OPERATION_NON_AUTORISEE", "source": "gold", "unclassifiable": false}
+{"subject": "flous", "text": "5adhou flous men 7sabi bla ma na3ref, mouch ana eli 3malt hedhi", "category": "FRAUDE_OPERATION_NON_AUTORISEE", "source": "gold", "unclassifiable": false}
+{"subject": "unauthorized", "text": "several transactions i never made totalling 1500dt", "category": "FRAUDE_OPERATION_NON_AUTORISEE", "source": "gold", "unclassifiable": false}
+{"subject": "vol", "text": "ma carte etait dans mon portefeuille et pourtant elle a servi a sfax", "category": "FRAUDE_OPERATION_NON_AUTORISEE", "source": "gold", "unclassifiable": false}
+{"subject": "attente", "text": "1h30 d attente avec 2 guichets sur 5 ouverts c est chaque fois pareil", "category": "AGENCE_QUALITE_SERVICE", "source": "gold", "unclassifiable": false}
+{"subject": "chargee clientele", "text": "ma chargee de clientele ne repond ni au tel ni aux mails", "category": "AGENCE_QUALITE_SERVICE", "source": "gold", "unclassifiable": false}
+{"subject": "الوكالة", "text": "الانتظار في الوكالة يفوت الساعة و الموظفين قاعدين يهدرو", "category": "AGENCE_QUALITE_SERVICE", "source": "gold", "unclassifiable": false}
+{"subject": "accueil", "text": "un agent m a parle mal devant tout le monde j attends des excuses", "category": "AGENCE_QUALITE_SERVICE", "source": "gold", "unclassifiable": false}
+{"subject": "horaires", "text": "l agence ferme a 11h alors que l affiche dit 13h", "category": "AGENCE_QUALITE_SERVICE", "source": "gold", "unclassifiable": false}
+{"subject": "agence", "text": "el agence mte3 lac 2 dima zahma w famech kan guichet wahed", "category": "AGENCE_QUALITE_SERVICE", "source": "gold", "unclassifiable": false}
+{"subject": "personnes agees", "text": "ma mere de 78 ans a attendu debout 1h aucune priorite", "category": "AGENCE_QUALITE_SERVICE", "source": "gold", "unclassifiable": false}
+{"subject": "branch", "text": "nobody at the branch could answer a simple question about my account", "category": "AGENCE_QUALITE_SERVICE", "source": "gold", "unclassifiable": false}
+{"subject": "probleme", "text": "bonjour j ai un probleme merci de me rappeler", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "reclamation", "text": "ca fait 3 fois que j appelle personne ne fait rien", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "?", "text": "chnowa hedha??", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "URGENT", "text": "RAPPELEZ MOI IMMEDIATEMENT", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "aide", "text": "السلام عليكم نحب نستفسر على حاجة", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "compte", "text": "je ne comprends rien a ce qui se passe sur mon compte", "category": null, "source": "gold", "unclassifiable": true}
 {"subject": "bonjour", "text": "bonjour", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "info", "text": "je voudrais des renseignements", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "question", "text": "est ce que vous pouvez m aider", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "svp", "text": "merci de me rappeler", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "reclamation", "text": "toujours les memes problemes avec vous", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "nul", "text": "nul", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "mauvais", "text": "service catastrophique", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "aide", "text": "je ne sais pas quoi faire", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "appel", "text": "rappelez moi au plus vite", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "خدمة", "text": "الخدمة خايبة", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "yezzi", "text": "yezzi barcha", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "help", "text": "please help me", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "probleme", "text": "ca ne fonctionne pas", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "reclamation", "text": "deuxieme reclamation ce mois ci", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "service", "text": "votre service est une catastrophe", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "info", "text": "3andi soual", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "hello", "text": "i need help with my account please", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "reclamation formelle", "text": "je souhaite deposer une reclamation formelle", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "mochkla", "text": "3andi mochkla, chkoun najjem y3awenni", "category": null, "source": "gold", "unclassifiable": true}
 {"subject": "suivi", "text": "ou en est mon dossier", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "dossier", "text": "aucune nouvelle de ma demande", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "?", "text": "vous faites quoi la", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "client", "text": "je suis client depuis 15 ans et voila comment on me traite", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "scandale", "text": "c est un scandale", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "avocat", "text": "je vais voir mon avocat", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "stop", "text": "arretez tout", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "merci", "text": "merci de traiter rapidement", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "رد", "text": "ننتظر الرد منكم", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "mochkla", "text": "3andi mochkla kbira barcha", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "reponse", "text": "j attends une reponse depuis longtemps", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "test", "text": "test", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "...", "text": "........", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "plainte", "text": "je porte plainte", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "assez", "text": "trop c est trop", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "service", "text": "inadmissible", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "suivi dossier", "text": "quel est le statut", "category": null, "source": "gold", "unclassifiable": true}
-{"subject": "rappel", "text": "personne ne me rappelle jamais", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "رد", "text": "مازلت نستنى الرد متاعكم", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "merci", "text": "merci de traiter ma demande rapidement", "category": null, "source": "gold", "unclassifiable": true}
+{"subject": "banque", "text": "je suis client chez vous depuis 15 ans et voila comment on me traite", "category": null, "source": "gold", "unclassifiable": true}
