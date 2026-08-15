@@ -16,12 +16,11 @@ RUN pip install --no-cache-dir . \
     && apt-get autoremove -y
 
 COPY app ./app
-COPY data ./data
 
-# Only the operational scripts ship. harvest.py, generate_dataset.py, corpus.py
-# and gold.py are dev-time tooling and are deliberately absent from the runtime
-# image — that is the difference between "uses AI" and "requires AI".
-COPY scripts/__init__.py scripts/seed.py scripts/train.py ./scripts/
+# Only the operational scripts ship. gold.py and evaluate.py are dev-time
+# tooling and stay out of the runtime image; nothing in production ever needs
+# to evaluate the lexicon, only to apply it.
+COPY scripts/__init__.py scripts/seed.py scripts/seed_data.py ./scripts/
 
 EXPOSE 8000
 
