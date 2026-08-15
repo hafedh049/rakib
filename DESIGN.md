@@ -16,8 +16,25 @@ density.
 ## Color
 
 Strategy: **Restrained.** Tinted neutrals plus one accent, with a strictly rationed semantic
-vocabulary. The accent is teal — chosen because it is not Ooredoo red, not Orange orange and
-not Tunisie Telecom blue, so the product cannot be mistaken for any operator's own property.
+vocabulary.
+
+The bank's identity is black and red, which creates the one conflict this product cannot
+afford: red already means *danger*. The resolution separates them by **role and placement**,
+not only by hue.
+
+- **Interactive is graphite**, never red. Buttons, focus rings and active states run on
+  near-black. That is the *noir*, and it reads institutional rather than alarming.
+- **Brand red is chrome only** — the mark, the masthead rule, the active nav indicator. It
+  never lands on a datum or a state.
+- **Danger is oxblood**, darker and less saturated than the brand red, so the two are
+  distinguishable even side by side.
+
+Because brand red never appears on a state and danger never appears on chrome, position alone
+disambiguates them before colour is even considered. On dark, `--primary` inverts to near-white:
+a red button would fight the breach badges sitting beside it in the queue.
+
+Neutrals carry a 0.004–0.008 chroma bias toward the brand's own red so they read as chosen.
+They are **not** warmed by default — the bias points at the identity, nothing else.
 
 All values OKLCH.
 
@@ -25,14 +42,17 @@ All values OKLCH.
 
 | Role | Light | Dark |
 |---|---|---|
-| `--bg` | `oklch(1 0 0)` — literal white | `oklch(0.19 0.012 210)` |
-| `--surface` | `oklch(0.985 0.004 190)` | `oklch(0.235 0.014 210)` |
-| `--surface-2` | `oklch(0.965 0.006 190)` | `oklch(0.275 0.016 210)` |
-| `--ink` | `oklch(0.22 0.015 210)` | `oklch(0.96 0.004 190)` |
-| `--ink-muted` | `oklch(0.46 0.014 210)` | `oklch(0.72 0.012 200)` |
-| `--line` | `oklch(0.90 0.006 200)` | `oklch(0.33 0.016 210)` |
-| `--primary` | `oklch(0.52 0.10 185)` | `oklch(0.72 0.11 185)` |
-| `--primary-ink` | `oklch(0.99 0 0)` | `oklch(0.17 0.02 200)` |
+| Role | Light | Dark |
+|---|---|---|
+| `--bg` | `oklch(1 0 0)` — literal white | `oklch(0.165 0.006 25)` |
+| `--surface` | `oklch(0.985 0.003 25)` | `oklch(0.208 0.008 25)` |
+| `--surface-2` | `oklch(0.962 0.005 25)` | `oklch(0.252 0.010 25)` |
+| `--ink` | `oklch(0.19 0.008 25)` | `oklch(0.96 0.003 25)` |
+| `--ink-muted` | `oklch(0.45 0.010 25)` | `oklch(0.72 0.008 25)` |
+| `--line` | `oklch(0.89 0.005 25)` | `oklch(0.31 0.010 25)` |
+| `--primary` (graphite) | `oklch(0.22 0.010 25)` | `oklch(0.95 0.004 25)` |
+| `--primary-ink` | `oklch(0.99 0 0)` | `oklch(0.17 0.008 25)` |
+| `--brand` (chrome only) | `oklch(0.55 0.215 27)` | `oklch(0.63 0.21 27)` |
 
 `--ink-muted` is deliberately darker than the usual "elegant grey": 4.6:1 on `--surface` in
 light, 4.8:1 in dark. Placeholders use `--ink-muted`, not a lighter step.
@@ -41,9 +61,22 @@ light, 4.8:1 in dark. Placeholders use `--ink-muted`, not a lighter step.
 
 - `--amber` `oklch(0.76 0.14 75)` — **reserved.** SLA warning and `needs_human_triage`. It
   appears nowhere else, so an amber pixel always means "a human needs to look at this".
-- `--danger` `oklch(0.58 0.19 25)` — SLA breach, P1, destructive actions.
-- `--success` `oklch(0.60 0.12 155)` — resolved, promoted model.
+- `--danger` `oklch(0.44 0.16 25)` light / `oklch(0.66 0.17 25)` dark — SLA breach, P1,
+  destructive actions. Oxblood, deliberately not the brand red.
+- `--success` `oklch(0.50 0.12 155)` — resolved, within deadline.
 - `--info` = `--primary`.
+
+### The mark
+
+The official artwork is a registered trademark and is **not** committed. `Brandmark`
+loads `public/brand/uib.svg` and falls back to a typographic composition when it is
+absent, so the repository can be shared and archived without redistributing it.
+
+A permanent, non-dismissible notice sits above the masthead on the portal. The site
+wears a real institution's identity and collects contact details from the public;
+without that line a visitor arriving from a search engine cannot tell it from the
+official form. It is not dismissible on purpose — a notice you can close is a notice
+nobody reads.
 
 ### Priority is an intensity ramp, not a rainbow
 

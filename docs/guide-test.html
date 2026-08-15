@@ -562,14 +562,14 @@
       <span class="ar">رقيب</span>
     </div>
     <p class="lede">
-      Plateforme intelligente de gestion des réclamations pour un opérateur télécom
-      tunisien. Dossier technique et protocole de test manuel.
+      Plateforme de gestion des réclamations pour une banque tunisienne, conforme à la
+      circulaire BCT n°2022-08. Dossier technique et protocole de test manuel.
     </p>
     <div class="masthead-meta">
       <span><b>URL</b> reclamations.activiity.com</span>
       <span><b>Version</b> 0.1.0</span>
-      <span><b>Modèle</b> category_v1</span>
-      <span><b>Moteur</b> ml</span>
+      <span><b>Circulaire</b> BCT 2022-08</span>
+      <span><b>Moteur</b> lexicon</span>
     </div>
   </header>
 
@@ -639,8 +639,8 @@
           <tbody>
             <tr>
               <td><strong>Catégorie</strong></td>
-              <td class="mono">11 classes</td>
-              <td>Classifieur entraîné, avec probabilité calibrée et alternatives</td>
+              <td class="mono">12 classes</td>
+              <td>Lexique pondéré de 397 termes, avec part de preuve et alternatives</td>
             </tr>
             <tr>
               <td><strong>Priorité</strong></td>
@@ -649,7 +649,7 @@
             </tr>
             <tr>
               <td><strong>Service compétent</strong></td>
-              <td class="mono">7 services</td>
+              <td class="mono">8 services</td>
               <td>Dérivé de la catégorie&nbsp;; repli sur <code>GENERAL</code></td>
             </tr>
             <tr>
@@ -708,7 +708,6 @@
             <tr><td class="mono">/analytics</td><td>Statistiques</td><td>Agent +</td></tr>
             <tr><td class="mono">/admin/rules</td><td>Règles et simulateur</td><td>Admin</td></tr>
             <tr><td class="mono">/admin/kb</td><td>Base de connaissances</td><td>Admin</td></tr>
-            <tr><td class="mono">/admin/ml</td><td>Console du modèle</td><td>Admin</td></tr>
             <tr><td class="mono">/admin/users</td><td>Utilisateurs</td><td>Admin</td></tr>
             <tr><td class="mono">/admin/departments</td><td>Services</td><td>Admin</td></tr>
           </tbody>
@@ -731,7 +730,7 @@
             <b>Normalisation</b>
             <p>
               Nettoyage du texte&nbsp;; masquage des numéros de téléphone, adresses
-              électroniques et références de facture en jetons&nbsp;;
+              électroniques et références d'opération en jetons&nbsp;;
               repli des variantes orthographiques arabes (diacritiques, alef, teh
               marbouta)&nbsp;; translittération de l'arabizi <em>en conservant les
               deux graphies</em>.
@@ -756,8 +755,8 @@
             <b>Classification</b>
             <p>
               Le texte devient des nombres (motifs de mots et de caractères), puis un
-              classifieur linéaire calibré choisit l'une des 11 catégories et rend une
-              <strong>probabilité véritable</strong>, pas un score arbitraire.
+              lexique pondéré choisit l'une des 12 catégories et rend une
+              <strong>part de preuve</strong> — la fraction du poids total détenue par la catégorie gagnante, jamais présentée comme une probabilité calibrée.
             </p>
           </div>
         </div>
@@ -842,9 +841,9 @@
               </td>
             </tr>
             <tr>
-              <td class="mono">MLTriageEngine</td>
+              <td class="mono">LexiconTriageEngine</td>
               <td><span class="tag tag-ok">Par défaut</span></td>
-              <td>Le classifieur entraîné. C'est le moteur actif en production.</td>
+              <td>Le lexique pondéré. Moteur actif en production, déterministe et sans artefact.</td>
             </tr>
             <tr>
               <td class="mono">LLMTriageEngine</td>
@@ -934,12 +933,9 @@
         <table>
           <thead><tr><th>Composant</th><th>Version</th><th>Rôle</th></tr></thead>
           <tbody>
-            <tr><td>scikit-learn</td><td class="mono">1.5</td><td>TF-IDF, SVM linéaire, calibration sigmoïde</td></tr>
-            <tr><td>NumPy / SciPy</td><td class="mono">1.26 / 1.14</td><td>Algèbre et matrices creuses</td></tr>
+                        <tr><td>NumPy</td><td class="mono">1.26</td><td>Requis par rank-bm25 uniquement</td></tr>
             <tr><td>rank-bm25</td><td class="mono">0.2.2</td><td>Recherche documentaire (doublons, base de connaissances)</td></tr>
             <tr><td>RapidFuzz</td><td class="mono">3.10</td><td>Correspondance approximative de chaînes</td></tr>
-            <tr><td>fastText</td><td class="mono">0.9.2</td><td>Identification de langue (<code>lid.176.ftz</code>, 917&nbsp;Ko)</td></tr>
-            <tr><td>joblib</td><td class="mono">1.4</td><td>Sérialisation des artefacts de modèle</td></tr>
           </tbody>
         </table>
       </div>
@@ -985,17 +981,18 @@
             <tr><th>Code</th><th>Libellé</th><th>العربية</th><th>Service</th></tr>
           </thead>
           <tbody>
-            <tr><td class="mono">FACTURATION</td><td>Facturation</td><td dir="rtl">الفوترة</td><td>Facturation et Recouvrement</td></tr>
-            <tr><td class="mono">PAIEMENT_RECHARGE</td><td>Paiement et recharge</td><td dir="rtl">الدفع والتعبئة</td><td>Facturation et Recouvrement</td></tr>
-            <tr><td class="mono">RESEAU_MOBILE</td><td>Réseau mobile</td><td dir="rtl">الشبكة الجوالة</td><td>Réseau Mobile</td></tr>
-            <tr><td class="mono">ROAMING_INTERNATIONAL</td><td>Roaming et international</td><td dir="rtl">التجوال والدولي</td><td>Réseau Mobile</td></tr>
-            <tr><td class="mono">INTERNET_FIXE</td><td>Internet fixe</td><td dir="rtl">الأنترنت القار</td><td>Fixe et Intervention</td></tr>
-            <tr><td class="mono">INTERVENTION_TECHNIQUE</td><td>Intervention technique</td><td dir="rtl">التدخل الفني</td><td>Fixe et Intervention</td></tr>
-            <tr><td class="mono">OFFRES_ABONNEMENT</td><td>Offres et abonnement</td><td dir="rtl">العروض والاشتراك</td><td>Commercial et Offres</td></tr>
-            <tr><td class="mono">RESILIATION_PORTABILITE</td><td>Résiliation et portabilité</td><td dir="rtl">الفسخ ونقل الرقم</td><td>Commercial et Offres</td></tr>
-            <tr><td class="mono">SERVICE_CLIENT_AGENCE</td><td>Service client et agence</td><td dir="rtl">خدمة الحرفاء والوكالة</td><td>Relation Client</td></tr>
-            <tr><td class="mono">EQUIPEMENT</td><td>Équipement</td><td dir="rtl">التجهيزات</td><td>Relation Client</td></tr>
-            <tr><td class="mono">APPLICATION_MOBILE</td><td>Application mobile</td><td dir="rtl">التطبيق الجوال</td><td>Digital et SI</td></tr>
+            <tr><td class="mono">CARTE_BANCAIRE</td><td>Carte bancaire</td><td dir="rtl">البطاقة البنكية</td><td>Monétique</td></tr>
+            <tr><td class="mono">DAB_GAB</td><td>Distributeur (DAB/GAB)</td><td dir="rtl">الموزع الآلي</td><td>Monétique</td></tr>
+            <tr><td class="mono">PAIEMENT_TPE_ECOMMERCE</td><td>Paiement TPE et e-commerce</td><td dir="rtl">الدفع الإلكتروني</td><td>Monétique</td></tr>
+            <tr><td class="mono">VIREMENT_PRELEVEMENT</td><td>Virement et prélèvement</td><td dir="rtl">التحويل والاقتطاع</td><td>Opérations</td></tr>
+            <tr><td class="mono">CHEQUE_EFFET</td><td>Chèque et effet</td><td dir="rtl">الشيك والكمبيالة</td><td>Opérations</td></tr>
+            <tr><td class="mono">COMPTE_GESTION</td><td>Gestion du compte</td><td dir="rtl">التصرف في الحساب</td><td>Relation Clientèle</td></tr>
+            <tr><td class="mono">FRAIS_COMMISSIONS</td><td>Frais et commissions</td><td dir="rtl">المصاريف والعمولات</td><td>Relation Clientèle</td></tr>
+            <tr><td class="mono">AGENCE_QUALITE_SERVICE</td><td>Agence et qualité de service</td><td dir="rtl">الوكالة وجودة الخدمة</td><td>Relation Clientèle</td></tr>
+            <tr><td class="mono">CREDIT_FINANCEMENT</td><td>Crédit et financement</td><td dir="rtl">القرض والتمويل</td><td>Crédits</td></tr>
+            <tr><td class="mono">BANQUE_DIGITALE</td><td>Banque digitale</td><td dir="rtl">البنك الرقمي</td><td>Digital</td></tr>
+            <tr><td class="mono">OPERATIONS_INTERNATIONALES</td><td>Opérations internationales</td><td dir="rtl">العمليات الدولية</td><td>International</td></tr>
+            <tr><td class="mono">FRAUDE_OPERATION_NON_AUTORISEE</td><td>Fraude / opération non autorisée</td><td dir="rtl">عملية غير مصرح بها</td><td>Conformité et Fraude</td></tr>
           </tbody>
         </table>
       </div>
@@ -1036,7 +1033,7 @@
             <tr><td class="mono">MULTIPLE_OPEN</td><td>Plusieurs dossiers ouverts</td><td>historique</td><td class="num">+10</td></tr>
             <tr><td class="mono">AMOUNT_IN_DINARS</td><td>Montant contesté en dinars</td><td>regex</td><td class="num">+8</td></tr>
             <tr><td class="mono">SHOUTING</td><td>Message en majuscules</td><td>champ</td><td class="num">+8</td></tr>
-            <tr><td class="mono">INVOICE_REFERENCE</td><td>Référence de facture citée</td><td>regex</td><td class="num">+5</td></tr>
+            <tr><td class="mono">OPERATION_REFERENCE</td><td>Référence bancaire citée</td><td>regex</td><td class="num">+5</td></tr>
             <tr><td class="mono">HAS_ATTACHMENT</td><td>Pièce jointe fournie</td><td>champ</td><td class="num">+5</td></tr>
             <tr><td class="mono">DETAILED_REPORT</td><td>Description détaillée</td><td>longueur</td><td class="num">+5</td></tr>
             <tr><td class="mono">EXCLAMATION_STORM</td><td>Ponctuation excessive</td><td>champ</td><td class="num">+5</td></tr>
@@ -1088,42 +1085,16 @@
               <td class="mono">superviseur2@rakib.tn</td><td>Ines Bouzid</td>
               <td><span class="tag tag-p2">Superviseur</span></td><td class="no">tous</td>
             </tr>
-            <tr>
-              <td class="mono">agent.fact1@rakib.tn</td><td>Karim Jelassi</td>
-              <td><span class="tag tag-p3">Agent</span></td><td>Facturation</td>
-            </tr>
-            <tr>
-              <td class="mono">agent.fact2@rakib.tn</td><td>Rania Ayari</td>
-              <td><span class="tag tag-p3">Agent</span></td><td>Facturation</td>
-            </tr>
-            <tr>
-              <td class="mono">agent.mob1@rakib.tn</td><td>Yassine Chaouch</td>
-              <td><span class="tag tag-p3">Agent</span></td><td>Réseau Mobile</td>
-            </tr>
-            <tr>
-              <td class="mono">agent.mob2@rakib.tn</td><td>Nadia Belhaj</td>
-              <td><span class="tag tag-p3">Agent</span></td><td>Réseau Mobile</td>
-            </tr>
-            <tr>
-              <td class="mono">agent.fixe1@rakib.tn</td><td>Walid Mansouri</td>
-              <td><span class="tag tag-p3">Agent</span></td><td>Fixe et Intervention</td>
-            </tr>
-            <tr>
-              <td class="mono">agent.fixe2@rakib.tn</td><td>Olfa Hamdi</td>
-              <td><span class="tag tag-p3">Agent</span></td><td>Fixe et Intervention</td>
-            </tr>
-            <tr>
-              <td class="mono">agent.com1@rakib.tn</td><td>Bilel Khemiri</td>
-              <td><span class="tag tag-p3">Agent</span></td><td>Commercial et Offres</td>
-            </tr>
-            <tr>
-              <td class="mono">agent.rc1@rakib.tn</td><td>Amel Zouari</td>
-              <td><span class="tag tag-p3">Agent</span></td><td>Relation Client</td>
-            </tr>
-            <tr>
-              <td class="mono">agent.si1@rakib.tn</td><td>Hamza Ben Romdhane</td>
-              <td><span class="tag tag-p3">Agent</span></td><td>Digital et SI</td>
-            </tr>
+            <tr><td class="mono">agent.mon1@rakib.tn</td><td>Karim Jelassi</td><td><span class="tag tag-p3">Agent</span></td><td>Monétique</td></tr>
+            <tr><td class="mono">agent.mon2@rakib.tn</td><td>Rania Ayari</td><td><span class="tag tag-p3">Agent</span></td><td>Monétique</td></tr>
+            <tr><td class="mono">agent.ope1@rakib.tn</td><td>Yassine Chaouch</td><td><span class="tag tag-p3">Agent</span></td><td>Opérations</td></tr>
+            <tr><td class="mono">agent.ope2@rakib.tn</td><td>Nadia Belhaj</td><td><span class="tag tag-p3">Agent</span></td><td>Opérations</td></tr>
+            <tr><td class="mono">agent.cre1@rakib.tn</td><td>Walid Mansouri</td><td><span class="tag tag-p3">Agent</span></td><td>Crédits</td></tr>
+            <tr><td class="mono">agent.rc1@rakib.tn</td><td>Olfa Hamdi</td><td><span class="tag tag-p3">Agent</span></td><td>Relation Clientèle</td></tr>
+            <tr><td class="mono">agent.rc2@rakib.tn</td><td>Bilel Khemiri</td><td><span class="tag tag-p3">Agent</span></td><td>Relation Clientèle</td></tr>
+            <tr><td class="mono">agent.dig1@rakib.tn</td><td>Amel Zouari</td><td><span class="tag tag-p3">Agent</span></td><td>Banque Digitale</td></tr>
+            <tr><td class="mono">agent.int1@rakib.tn</td><td>Hamza Ben Romdhane</td><td><span class="tag tag-p3">Agent</span></td><td>International</td></tr>
+            <tr><td class="mono">agent.frd1@rakib.tn</td><td>Sofiene Kacem</td><td><span class="tag tag-p3">Agent</span></td><td>Conformité et Fraude</td></tr>
           </tbody>
         </table>
       </div>
@@ -1255,18 +1226,18 @@
         </div>
         <ol>
           <li>Aller sur <code>/portal</code> — aucune connexion requise.</li>
-          <li>Objet&nbsp;: <em>Facture de janvier anormalement élevée</em>.</li>
+          <li>Objet&nbsp;: <em>Retrait débité sans distribution de billets</em>.</li>
           <li>Coller le message ci-dessous.</li>
           <li>Renseigner un téléphone (<code>20145879</code>) <em>ou</em> un courriel.</li>
           <li>Envoyer et <strong>noter la référence</strong>.</li>
         </ol>
-        <div class="copyblock" data-copy>C'est inacceptable ! Ma facture de janvier s'élève à 187 dinars alors que mon forfait est à 45 dinars. Cela fait trois semaines que personne ne me répond. Si ce n'est pas réglé cette semaine, mon avocat va porter plainte.</div>
+        <div class="copyblock" data-copy>C'est inacceptable ! J'ai retiré 300 dinars au distributeur, aucun billet n'est sorti et mon compte a bien été débité. Cela fait trois semaines que personne ne me répond. Si ce n'est pas réglé cette semaine, mon avocat va porter plainte.</div>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
             Référence au format <code>REC-2026-000NN</code>. Catégorie
-            <strong>Facturation</strong>, priorité <span class="tag tag-p1">P1</span>,
-            service <strong>Facturation et Recouvrement</strong>. Règles déclenchées
+            <strong>Distributeur (DAB/GAB)</strong>, priorité <span class="tag tag-p1">P1</span>,
+            service <strong>Monétique</strong>. Règles déclenchées
             attendues&nbsp;: menace juridique, vocabulaire d'urgence, montant en
             dinars, problème persistant.
           </p>
@@ -1341,7 +1312,7 @@
           C'est l'épreuve distinctive du projet&nbsp;: aucun modèle du marché ne sait
           étiqueter la derja.
         </p>
-        <div class="copyblock" data-copy>3andi mochkla fel internet, 7atta lyoum ma7alouhech. El fatoura mte3i hedha chhar barcha ghalia w ana ma badeltech fel offre.</div>
+        <div class="copyblock" data-copy>3andi mochkla, el distributeur 5a l flous w ma5rejch waraq. 3malt reclamation w 7atta lyoum ma7alouhech.</div>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
@@ -1361,13 +1332,13 @@
           Cas plus difficile&nbsp;: pas un seul chiffre à la place d'une lettre. Le
           détecteur ne peut pas s'appuyer sur le motif arabizi.
         </p>
-        <div class="copyblock" data-copy>nhabet nbadel operateur, 3malt talab fasakh men jomaa w hatta hadhek ma jawebnich. barcha flous w el khedma khayba.</div>
+        <div class="copyblock" data-copy>nhabet nsakker el compte, 3malt talab men jomaa w hatta hadhek ma jawebnich. barcha frais w el khedma khayba.</div>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
             Toujours <code>ar-tn</code>. Catégorie attendue&nbsp;:
-            <strong>Résiliation et portabilité</strong>, avec la règle
-            <em>risque de résiliation</em> déclenchée.
+            <strong>Gestion du compte</strong>, avec la règle
+            <em>risque de clôture</em> déclenchée.
           </p>
         </div>
       </div>
@@ -1377,13 +1348,12 @@
           <span class="test-id">B3</span>
           <p class="test-title">Arabe en écriture arabe</p>
         </div>
-        <div class="copyblock" dir="rtl" data-copy>من ثلاثة أيام ما فماش شبكة في الحي كامل، لا مكالمات لا أنترنت. عملت إعلام في الوكالة و ما تحل شيء. هذا غير مقبول.</div>
+        <div class="copyblock" dir="rtl" data-copy>الموزع خذا 500 دينار و ما خرجش شيء. عملت إعلام في الوكالة و ما تحل شيء. هذا غير مقبول.</div>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
             Langue <code>ar</code>, source <code>script</code> (décidée sans modèle).
-            Catégorie <strong>Réseau mobile</strong>, avec la règle
-            <em>panne collective</em> déclenchée par «&nbsp;الحي كامل&nbsp;».
+            Catégorie <strong>Distributeur (DAB/GAB)</strong>, langue <code>ar</code> décidée par le script.
           </p>
         </div>
       </div>
@@ -1397,12 +1367,11 @@
           Contre-épreuve indispensable&nbsp;: un système qui met tout en P1 ne
           priorise rien.
         </p>
-        <div class="copyblock" data-copy>Bonjour, je souhaiterais connaître les démarches pour changer mon offre mobile vers un forfait supérieur. Merci d'avance pour votre retour.</div>
+        <div class="copyblock" data-copy>Bonjour, je souhaiterais connaître les démarches pour obtenir un chéquier sur mon compte courant. Merci d'avance pour votre retour.</div>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
-            <span class="tag tag-p3">P3</span>, catégorie <strong>Offres et
-            abonnement</strong>, service <strong>Commercial et Offres</strong>. Aucune
+            <span class="tag tag-p3">P3</span>, catégorie <strong>Chèque et effet</strong>, service <strong>Opérations</strong>. Aucune
             règle d'urgence déclenchée.
           </p>
         </div>
@@ -1432,7 +1401,7 @@
         <ol>
           <li>Redéposer, avec le <strong>même contact qu'en A1</strong>, le texte ci-dessous.</li>
         </ol>
-        <div class="copyblock" data-copy>Facture de janvier de 187 dinars toujours pas corrigée, et toujours aucune réponse de votre part depuis trois semaines.</div>
+        <div class="copyblock" data-copy>Retrait de 300 dinars toujours pas remboursé, et toujours aucune réponse de votre part depuis trois semaines.</div>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
@@ -1451,7 +1420,7 @@
           <p class="test-title">Lecture de l'analyse et de son explication</p>
         </div>
         <ol>
-          <li>Se connecter en <code>agent.fact1@rakib.tn</code>.</li>
+          <li>Se connecter en <code>agent.mon1@rakib.tn</code>.</li>
           <li>Ouvrir la réclamation de A1 depuis <code>/inbox</code>.</li>
           <li>Repérer&nbsp;: catégorie et confiance, catégories alternatives, langue détectée, échéance SLA.</li>
           <li>Repérer surtout <strong>les règles déclenchées et les mots exacts</strong> qui les ont déclenchées.</li>
@@ -1535,14 +1504,14 @@
           <p class="test-title">Cloisonnement d'un agent</p>
         </div>
         <ol>
-          <li>Connecté en <code>agent.fact1@rakib.tn</code> (Facturation).</li>
+          <li>Connecté en <code>agent.mon1@rakib.tn</code> (Monétique).</li>
           <li>Parcourir <code>/inbox</code> et relever les services présents.</li>
-          <li>Tenter d'ouvrir directement l'identifiant d'une réclamation «&nbsp;Réseau mobile&nbsp;».</li>
+          <li>Tenter d'ouvrir directement l'identifiant d'une réclamation «&nbsp;Crédit&nbsp;».</li>
         </ol>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
-            La file ne contient que Facturation, plus ses propres affectations.
+            La file ne contient que Monétique, plus ses propres affectations.
             L'accès direct par URL est <strong>refusé côté serveur</strong> — pas
             seulement masqué dans l'interface.
           </p>
@@ -1659,19 +1628,24 @@
       <div class="test">
         <div class="test-head">
           <span class="test-id">E3</span>
-          <p class="test-title">Console du modèle</p>
+          <p class="test-title">Taux de correction — l'indicateur de l'article 9</p>
         </div>
         <ol>
-          <li>En admin, ouvrir <code>/admin/ml</code>.</li>
-          <li>Relever la version active, ses scores mesurés, l'historique des versions.</li>
-          <li>Relever le nombre de corrections accumulées.</li>
+          <li>En superviseur, ouvrir <code>/analytics</code>.</li>
+          <li>Relever le taux de correction : la part des catégorisations automatiques
+              qu'un agent a dû changer.</li>
+          <li>Corriger une catégorie dans la file, puis recharger et vérifier que le
+              taux a bougé.</li>
         </ol>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
-            Version <code>category_v1</code>, macro-F1 <code>0,9928</code> sur
-            l'échantillon de contrôle et <code>0,7607</code> sur le jeu de référence
-            indépendant. Voir la section 12 pour la lecture honnête de ces chiffres.
+            L'article 9 exige des indicateurs clés de performance. Celui-ci est le
+            plus honnête&nbsp;: il mesure combien de fois un humain a été en
+            désaccord avec le moteur. Lu avec la part de preuve, il dit aussi si les
+            seuils d'abstention sont bien réglés — si les décisions les plus sûres
+            sont souvent corrigées, le lexique est trop hardi&nbsp;; si les moins
+            sûres ne le sont jamais, il est trop prudent.
           </p>
         </div>
       </div>
@@ -1704,8 +1678,8 @@
         </div>
         <ol>
           <li>En admin, ouvrir <code>/admin/kb</code>.</li>
-          <li>Créer un article court sur la contestation de facture.</li>
-          <li>Rouvrir une réclamation de facturation et regarder les suggestions.</li>
+          <li>Créer un article court sur le retrait non distribué.</li>
+          <li>Rouvrir une réclamation de carte et regarder les suggestions.</li>
         </ol>
         <div class="expect">
           <span class="label">Résultat attendu</span>
@@ -1724,9 +1698,9 @@
           <p class="test-title">Mise à jour en temps réel</p>
         </div>
         <ol>
-          <li>Fenêtre 1&nbsp;: <code>/inbox</code>, connecté en agent Facturation.</li>
+          <li>Fenêtre 1&nbsp;: <code>/inbox</code>, connecté en agent Monétique.</li>
           <li>Fenêtre 2 (navigation privée)&nbsp;: <code>/portal</code>.</li>
-          <li>Déposer une réclamation de facturation depuis la fenêtre 2.</li>
+          <li>Déposer une réclamation sur un distributeur depuis la fenêtre 2.</li>
           <li>Regarder la fenêtre 1 <strong>sans la rafraîchir</strong>.</li>
         </ol>
         <div class="expect">
@@ -1812,12 +1786,12 @@
         </p>
         <div class="copyblock code" data-copy>curl -s -X POST https://reclamations.activiity.com/api/v1/complaints \
   -H "Content-Type: application/json" \
-  -d '{"subject":"Test API","body":"Aucun signal depuis quatre jours dans tout le quartier, cest inacceptable.","claimant":{"full_name":"Test","phone":"+21620145879"},"channel":"WEB"}'</div>
+  -d '{"subject":"Test API","body":"Le distributeur a debite mon compte sans delivrer les billets, cest inacceptable.","claimant":{"full_name":"Test","phone":"+21620145879"},"channel":"WEB"}'</div>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
             Réponse <code>201</code> avec une référence. La réclamation apparaît dans
-            la file de l'agent Réseau mobile, analysée.
+            la file de l'agent Monétique, analysée.
           </p>
         </div>
       </div>
@@ -1845,21 +1819,24 @@
       <div class="test">
         <div class="test-head">
           <span class="test-id">G4</span>
-          <p class="test-title">Dégradation maîtrisée</p>
+          <p class="test-title">Le plafond légal de l'article 8</p>
         </div>
         <p style="font-size:0.925rem;margin-bottom:0">
-          Épreuve de conception plutôt que de clic. Si le modèle entraîné disparaît, le
-          système <strong>ne s'arrête pas</strong>&nbsp;: il bascule sur le moteur à
-          règles seules, continue de router et de prioriser, et signale son état
-          dégradé sur <code>/health/ready</code>.
+          Ouvrir une réclamation récente et comparer les deux échéances affichées&nbsp;:
+          l'objectif interne, en heures, et le plafond légal, en <strong>jours
+          ouvrables</strong> à partir de l'accusé de réception.
         </p>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
-            Comportement couvert par les tests automatisés (<code>test_classifier.py</code>
-            pointe le répertoire d'artefacts vers un dossier vide). Un jury peut poser
-            la question&nbsp;: la réponse est «&nbsp;dégradé mais opérationnel, et
-            visible&nbsp;».
+            La plus courte des deux gouverne&nbsp;: une banque peut être plus rapide
+            que la réglementation, jamais plus lente. Le plafond dépend de la
+            catégorie (2 jours ouvrables pour une fraude, 10 pour un dossier de
+            crédit) et ne dépasse jamais quinze. Le mot «&nbsp;ouvrables&nbsp;»
+            compte&nbsp;: quinze jours ouvrables depuis le 13 août tombent le
+            4 septembre, soit 22 jours calendaires, et la clôture passe de 13h30
+            (séance unique d'été) à 17h00 en septembre. Une implémentation en jours
+            calendaires déclarerait le dépassement une semaine trop tôt.
           </p>
         </div>
       </div>
@@ -1874,7 +1851,7 @@
       </p>
 
       <div class="figures">
-        <div class="figure good"><span class="v">17</span><span class="k">fichiers de test</span></div>
+        <div class="figure good"><span class="v">15</span><span class="k">fichiers de test</span></div>
         <div class="figure good"><span class="v">88&nbsp;%</span><span class="k">couverture du cœur</span></div>
         <div class="figure good"><span class="v">0</span><span class="k">erreur ruff</span></div>
         <div class="figure good"><span class="v">97</span><span class="k">fichiers typés (mypy)</span></div>
@@ -1884,9 +1861,8 @@
         <table>
           <thead><tr><th>Fichier</th><th>Couvre</th></tr></thead>
           <tbody>
-            <tr><td class="mono">test_normalize.py</td><td>Nettoyage, masquage, repli arabe, translittération arabizi</td></tr>
+            <tr><td class="mono">test_normalize.py</td><td>Nettoyage, masquage, repli des accents latins et arabes, arabizi</td></tr>
             <tr><td class="mono">test_language_and_engine.py</td><td>Identification de langue, derja, moteur à règles seules</td></tr>
-            <tr><td class="mono">test_classifier.py</td><td>Entraînement, calibration, garde-fou de promotion, mode dégradé</td></tr>
             <tr><td class="mono">test_rules_engine.py</td><td>Les 20 règles, pondérations, seuils de priorité</td></tr>
             <tr><td class="mono">test_triage_pipeline.py</td><td>Chaîne complète des six étapes</td></tr>
             <tr><td class="mono">test_rules_api.py</td><td>Lecture, édition, validation, simulateur</td></tr>
@@ -1895,9 +1871,8 @@
             <tr><td class="mono">test_auth.py</td><td>Inscription, connexion, rafraîchissement, jetons de suivi</td></tr>
             <tr><td class="mono">test_rbac.py</td><td>Hiérarchie des rôles, gardes de routes, filtre de périmètre</td></tr>
             <tr><td class="mono">test_security.py</td><td>Hachage argon2, signature JWT, expiration</td></tr>
-            <tr><td class="mono">test_sla.py</td><td>Calendrier ouvré tunisien, alertes, dépassements, escalade</td></tr>
+            <tr><td class="mono">test_sla.py</td><td>Calendrier ouvré, plafond légal de l'article 8, alertes, escalade</td></tr>
             <tr><td class="mono">test_events.py</td><td>Bus Redis Streams, groupes de consommateurs, flux SSE</td></tr>
-            <tr><td class="mono">test_learning.py</td><td>Corrections, déclenchement du réentraînement, promotion</td></tr>
             <tr><td class="mono">test_kb.py</td><td>Recherche BM25, suggestions, comptage d'usage</td></tr>
             <tr><td class="mono">test_analytics.py</td><td>Agrégations et leur cloisonnement RBAC</td></tr>
           </tbody>
@@ -1935,54 +1910,60 @@ mypy app/                                      # types</div>
       </p>
 
       <p>
-        Le classifieur a été évalué de trois façons, sur trois jeux de données
-        différents&nbsp;:
+        Le classifieur est mesuré contre le jeu de référence écrit à la main
+        (<code>scripts/gold.py</code>), via <code>python -m scripts.evaluate</code>&nbsp;:
       </p>
 
       <div class="figures">
-        <div class="figure good">
-          <span class="v">0,993</span>
-          <span class="k">Contrôle — même source que l'entraînement</span>
+        <div class="figure warn">
+          <span class="v">0,600</span>
+          <span class="k">macro-F1 sur le jeu de référence</span>
         </div>
         <div class="figure warn">
-          <span class="v">0,761</span>
-          <span class="k">Référence — indépendante, vérifiée à la main</span>
+          <span class="v">37&nbsp;%</span>
+          <span class="k">taux d'abstention</span>
         </div>
-        <div class="figure bad">
-          <span class="v">0,493</span>
-          <span class="k">Réel — réclamations collectées en ligne</span>
+        <div class="figure good">
+          <span class="v">88&nbsp;%</span>
+          <span class="k">inclassables correctement renvoyés</span>
         </div>
       </div>
 
-      <div class="panel panel-warn">
-        <h4>L'écart est le résultat, pas l'échec</h4>
+      <div class="panel panel-note">
+        <h4>Un seul chiffre valable, et il est modeste</h4>
         <p>
-          La plupart des projets d'étudiants ne publient que le premier chiffre et
-          annoncent «&nbsp;99&nbsp;% de précision&nbsp;».
-          <strong>C'est l'écart entre les trois qui constitue la véritable
-          conclusion.</strong> Il indique que le modèle a davantage appris le
-          <em>style d'écriture</em> de ses données d'entraînement que la
-          <em>substance</em> du problème — le défaut le plus répandu en apprentissage
-          automatique appliqué.
+          Le jeu de référence est écrit à la main, indépendamment du lexique, et
+          contient volontairement des messages sans réponse correcte unique. C'est
+          la seule mesure honnête ici&nbsp;: il n'y a pas de jeu de contrôle, parce
+          qu'un lexique ne peut rien mémoriser. L'écart entre score de contrôle et
+          score réel qui domine tant de rapports n'existe tout simplement pas.
         </p>
       </div>
 
-      <h3>La cause, diagnostiquée</h3>
+      <h3>Ce que l'abstention veut dire</h3>
       <p>
-        La collecte de données réelles est déséquilibrée&nbsp;: <strong>506 des 656
-        lignes étiquetées relèvent d'une seule catégorie</strong> (application mobile),
-        parce que les avis publics disponibles portent massivement sur les
-        applications. Les dix autres catégories reposent donc sur du texte rédigé pour
-        l'occasion — d'où un score de contrôle excellent et un score réel faible.
+        Un texte formulé hors du vocabulaire marque zéro et part vers un agent.
+        <strong>Ce n'est pas un échec&nbsp;:</strong> la réclamation est routée par
+        mots-clés de service, reçoit son accusé de réception et son échéance légale,
+        et l'article 9 de la circulaire n'exige nulle part une classification
+        automatique — il demande une base centralisée, des accusés automatisés, une
+        alerte sur dépassement et des indicateurs. Les quatre existent.
+      </p>
+      <p>
+        Le taux d'abstention est en revanche l'indicateur à surveiller&nbsp;: s'il
+        monte, le vocabulaire s'éloigne de la façon dont les clients écrivent, et
+        c'est un administrateur qui le corrige en une minute depuis la console —
+        sans réentraînement, sans redéploiement.
       </p>
 
-      <h3>La correction identifiée</h3>
+      <h3>La netteté du vocabulaire se lit dans les chiffres</h3>
       <p>
-        La réponse n'est pas de changer d'algorithme, mais de corriger la distribution
-        d'entraînement&nbsp;: élargir la collecte et faire étiqueter un volume
-        important de réclamations <em>réelles</em>, puis réentraîner le modèle local
-        dessus. L'exécution reste hors ligne, locale et rapide&nbsp;; seule la
-        préparation des données change.
+        Part de preuve moyenne par catégorie sur le jeu de démonstration&nbsp;:
+        <strong>distributeur 0,933</strong>, frais et commissions 0,878, crédit
+        0,777, carte bancaire 0,678, <strong>banque digitale 0,673</strong>. Le
+        gradient est parlant&nbsp;: un distributeur se nomme d'une seule façon, une
+        application de mille. C'est exactement l'information dont un superviseur a
+        besoin pour savoir quel lexique élargir en premier.
       </p>
 
       <h4>Performance mesurée</h4>
@@ -1992,7 +1973,7 @@ mypy app/                                      # types</div>
           <tbody>
             <tr>
               <td>Analyse complète (6 étapes)</td>
-              <td class="num">≈ 40 ms</td>
+              <td class="num">2 – 4 ms</td>
               <td class="tight"><span class="tag tag-ok">conforme</span></td>
             </tr>
             <tr>
@@ -2045,16 +2026,16 @@ mypy app/                                      # types</div>
               </td>
             </tr>
             <tr>
-              <td><strong>Écran d'étiquetage ML</strong></td>
+              <td><strong>Export XML ROGS760</strong></td>
               <td class="tight"><span class="tag tag-p3">Secondaire</span></td>
-              <td>Les points d'entrée existent, sans interface dédiée.</td>
+              <td>La déclaration annuelle à la BCT est spécifiée dans <code>bct.py</code> mais pas encore générée.</td>
             </tr>
             <tr>
               <td><strong>Image conteneur de 1,2 Go</strong></td>
               <td class="tight"><span class="tag tag-p3">Technique</span></td>
               <td>
-                La cible était 800&nbsp;Mo. Aucune dépendance d'apprentissage profond
-                n'est en cause&nbsp;; c'est la pile scientifique.
+                La pile scientifique ayant été retirée avec le modèle, la taille
+                devrait être largement sous la cible — à remesurer.
               </td>
             </tr>
             <tr>
@@ -2074,11 +2055,11 @@ mypy app/                                      # types</div>
               </td>
             </tr>
             <tr>
-              <td><strong>Jeu de démonstration réduit</strong></td>
+              <td><strong>Motivation du rejet non imposée</strong></td>
               <td class="tight"><span class="tag tag-p3">Données</span></td>
               <td>
-                Soixante réclamations&nbsp;: les graphiques sont clairsemés, mais
-                authentiques.
+                Le champ existe (article 8), mais l'API n'interdit pas encore de
+                clôturer un rejet sans le renseigner.
               </td>
             </tr>
           </tbody>

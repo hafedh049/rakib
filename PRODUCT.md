@@ -8,7 +8,7 @@ product
 
 Three populations, on opposite sides of the same complaint, in very different conditions.
 
-**Claimants** — Tunisian telecom customers, on a phone, usually annoyed and often mid-problem
+**Claimants** — Tunisian bank customers, on a phone, usually annoyed and often out of pocket
 (no network, a bill they think is wrong, a recharge that vanished). They write in French, in
 Arabic, or in Latin-script derja, frequently in one sentence and rarely with a reference number
 to hand. Many have no email address; a phone number is their identity. Their job: report the
@@ -51,7 +51,8 @@ marks, no "Oops!", no apologising for the customer's problem in the UI chrome.
 ## Anti-references
 
 - **The three Tunisian operators' identities.** Not Ooredoo red, not Orange orange, not
-  Tunisie Telecom blue. This is not their product and must not borrow their equity.
+  The mark is the bank's own; the interface around it is deliberately restrained so the
+  red reads as identity, never as alarm.
 - **shadcn/ui straight out of the box.** Slate-and-blue defaults, uniform card grids, the same
   rounded rectangle for everything. Competent and completely forgettable.
 - **The dashboard-hero template.** Four big gradient stat tiles above the fold with no

@@ -25,9 +25,10 @@ Trois choses en découlent, et ce sont les trois qu'il faut regarder :
    confiance, le système le dit et demande un humain. 70 % des messages
    volontairement inclassables du jeu de test sont correctement renvoyés en
    triage humain.
-3. **Le système fonctionne sans modèle.** Supprimez `ml_artifacts/`, redémarrez :
-   le routage se fait par mots-clés pondérés par IDF, et `/health/ready`
-   l'annonce explicitement.
+3. **Rien n'est appris, tout est réglable.** La catégorie sort d'un lexique
+   pondéré de 397 termes, éditable depuis la console : même entrée, même
+   sortie, toujours. Aucun artefact, aucune dérive, aucun réentraînement à
+   justifier devant un auditeur.
 
 ---
 
@@ -173,14 +174,14 @@ résultat est ignoré) — p50 de 51 ms à 34 ms.
 ## Structure
 
 ```
-backend/            FastAPI · Mongo/Beanie · arq · scikit-learn
-  app/intelligence/ normalize · language · classify · rules · dedup · suggest · training
-  app/services/     complaint · triage · assignment · sla · learning · analytics · kb
-  scripts/          harvest · labeling · generate_dataset · build_dataset · train · seed
-  ml_artifacts/     vectorizer + classifieur + lid.176.ftz (committés, 6,4 Mo)
-  data/             train · gold · wild · synthetic · harvested (committés)
+backend/            FastAPI · Mongo/Beanie · arq
+  app/domain/       taxonomy · bct (circulaire 2022-08) · calendar_tn · kb_seed
+  app/intelligence/ normalize · language · lexicon · rules · dedup · suggest
+  app/services/     complaint · triage · assignment · sla · analytics · kb
+  scripts/          seed · seed_data · gold · evaluate
+  data/             gold.jsonl — jeu de référence écrit à la main
 frontend/           React 19 · Vite · Tailwind v4 · TanStack Query
-deploy/             manifests k3s · deploy.sh · benchmark.py
+deploy/             manifests k3s · deploy.sh · benchmark.py · visual_check.mjs
 PRODUCT.md          registre, utilisateurs, principes
 DESIGN.md           thème, couleurs, typographie, motion, RTL
 ```
