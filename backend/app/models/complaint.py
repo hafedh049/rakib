@@ -57,9 +57,48 @@ class Claimant(BaseModel):
     full_name: str
     email: str | None = None
     phone: str | None = None
-    #: N de ligne, CIN or contract reference — whatever identifies them to the operator.
+    #: Account number, CIN or contract reference — whatever identifies them.
     external_id: str | None = None
     is_vip: bool = False
+
+    # -- Annexe 1 and Annexe 3 of the circulaire ---------------------------
+    #: Annexe 3-I. Drives the "repartition par nature de reclamant" table.
+    nature: str | None = None
+    #: Annexe 1, for legal persons: identifiant au Registre National des
+    #: Entreprises.
+    identifiant_rne: str | None = None
+    #: Annexe 3-II, individuals only. Collected for the annual declaration and
+    #: nothing else — never an input to triage, routing or priority.
+    genre: str | None = None
+    tranche_age: str | None = None
+
+
+class Reglementaire(BaseModel):
+    """What circulaire BCT n°2022-08 requires us to hold beyond the basics.
+
+    Kept in its own block so a regulatory obligation is visibly regulatory, and
+    so an audit under Article 12 can be answered by pointing at one field set.
+    """
+
+    #: Article 8: the fifteen-working-day clock runs from the acknowledgement,
+    #: not from receipt. Stamped when the acknowledgement is actually issued.
+    accuse_reception_at: datetime | None = None
+    #: Annexe 1: "Investigations menees par l'etablissement".
+    investigations_menees: str | None = None
+    #: Annexe 1: "Demarches entreprises par l'etablissement pour regler le
+    #: probleme".
+    demarches_entreprises: str | None = None
+    #: Article 8: "motiver toute reponse rejetant en partie ou en totalite les
+    #: revendications du client". A rejection without this is a compliance
+    #: defect, so the service refuses to record one.
+    motivation: str | None = None
+    #: Article 2: set when the message is not a reclamation at all (a request
+    #: for information, a matter before the courts, an employment dispute...).
+    #: Such a message is still handled, but must not inflate the declaration.
+    hors_perimetre: str | None = None
+    #: Derived from the category so Annexe 3-IV can be produced without
+    #: recomputing the mapping over historical rows.
+    objet_bct: str | None = None
 
 
 class Attachment(BaseModel):
@@ -114,12 +153,28 @@ class Assignment(BaseModel):
 
 
 class SLA(BaseModel):
+    """Two deadlines, and the earlier one wins.
+
+    `due_at` is the internal target — hours, differentiated by priority, so an
+    urgent complaint is chased long before the law requires. `legal_due_at` is
+    the Article 8 ceiling in *jours ouvrables* from the acknowledgement. A bank
+    may be faster than the regulation; it may never be slower, so the effective
+    deadline is min(internal, legal) and `legal_breached` is tracked separately
+    because missing the second is a reportable event, not a KPI wobble.
+    """
+
     due_at: datetime | None = None
     hours: int | None = None
     breached: bool = False
     warned: bool = False          # 80% of the budget consumed
     escalation_level: int = 0
     resolved_at: datetime | None = None
+
+    #: Article 8 ceiling. Never later than 15 jours ouvrables after the
+    #: acknowledgement, whatever the internal target says.
+    legal_due_at: datetime | None = None
+    legal_days: int | None = None
+    legal_breached: bool = False
 
 
 class Message(BaseModel):
@@ -161,6 +216,7 @@ class Complaint(Document):
     analysis: Analysis = Field(default_factory=Analysis)
     assignment: Assignment | None = None
     sla: SLA = Field(default_factory=SLA)
+    reglementaire: Reglementaire = Field(default_factory=Reglementaire)
     status: Status = Status.NEW
     triage_state: TriageState = TriageState.PENDING
     messages: list[Message] = Field(default_factory=list)

@@ -16,6 +16,8 @@ from app.core.logging import get_logger
 from app.core.pagination import Page, clamp_limit, cursor_filter, encode_cursor
 from app.core.security import create_tracking_token
 from app.deps import department_scope
+from app.domain.bct import delai_jours_ouvrables
+from app.domain.calendar_tn import add_business_days
 from app.domain.taxonomy import (
     ALL_CATEGORIES,
     GENERAL_DEPARTMENT_CODE,
@@ -334,6 +336,26 @@ def _apply_sla_for_priority(complaint: Complaint, priority: int) -> None:
     complaint.sla.due_at = complaint.created_at + timedelta(hours=hours)
     complaint.sla.breached = False
     complaint.sla.warned = False
+    apply_legal_deadline(complaint)
+
+
+def apply_legal_deadline(complaint: Complaint) -> None:
+    """Article 8: at most fifteen jours ouvrables from the acknowledgement.
+
+    Two clocks, and the earlier one governs. The internal target above is a
+    service commitment; this one is the law, so it is computed independently and
+    the effective `due_at` is never allowed past it. An unclassified complaint
+    gets the full ceiling — we may not invent a shorter deadline for something we
+    have not understood.
+    """
+    start = complaint.reglementaire.accuse_reception_at or complaint.created_at
+    days = delai_jours_ouvrables(complaint.analysis.category)
+    complaint.sla.legal_days = days
+    complaint.sla.legal_due_at = add_business_days(start, days)
+
+    if complaint.sla.due_at and complaint.sla.due_at > complaint.sla.legal_due_at:
+        # The internal target overshoots the law — the law wins.
+        complaint.sla.due_at = complaint.sla.legal_due_at
 
 
 async def _assign_department(
@@ -351,6 +373,7 @@ async def _assign_department(
         complaint.sla.due_at = complaint.created_at + timedelta(
             hours=department.default_sla_hours
         )
+        apply_legal_deadline(complaint)
 
 
 async def route_to_category_department(complaint: Complaint, category: str | None) -> None:

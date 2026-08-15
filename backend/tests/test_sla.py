@@ -275,3 +275,81 @@ async def test_sweep_with_frozen_time(monkeypatch):
     )
     result = await sla_service.sweep()
     assert result["breached"] == 1
+
+
+# ------------------------------------------------------- Article 8: legal ceiling
+def _complaint_at(moment, category=None):
+    from app.models.complaint import Claimant, Complaint
+
+    complaint = Complaint(
+        ref="REC-2026-90001",
+        claimant=Claimant(full_name="Test"),
+        subject="s",
+        body="b",
+        created_at=moment,
+    )
+    complaint.analysis.category = category
+    return complaint
+
+
+def test_legal_deadline_defaults_to_the_full_ceiling_when_uncategorised():
+    """We may not invent a shorter deadline for something we have not understood."""
+    from app.domain.bct import DELAI_LEGAL_JOURS_OUVRABLES
+    from app.services.complaint_service import apply_legal_deadline
+
+    complaint = _complaint_at(datetime(2026, 8, 13, 10, 0, tzinfo=UTC))
+    apply_legal_deadline(complaint)
+    assert complaint.sla.legal_days == DELAI_LEGAL_JOURS_OUVRABLES == 15
+
+
+def test_legal_deadline_is_differentiated_by_category():
+    """Article 8 allows a delay reflecting "la nature et la complexite"."""
+    from app.services.complaint_service import apply_legal_deadline
+
+    fraud = _complaint_at(
+        datetime(2026, 8, 13, 10, 0, tzinfo=UTC), "FRAUDE_OPERATION_NON_AUTORISEE"
+    )
+    credit = _complaint_at(
+        datetime(2026, 8, 13, 10, 0, tzinfo=UTC), "CREDIT_FINANCEMENT"
+    )
+    apply_legal_deadline(fraud)
+    apply_legal_deadline(credit)
+
+    assert fraud.sla.legal_days == 2
+    assert credit.sla.legal_days == 10
+    assert fraud.sla.legal_due_at < credit.sla.legal_due_at
+
+
+def test_no_internal_target_may_outlive_the_legal_ceiling():
+    """A bank may be faster than the regulation; it may never be slower."""
+    from app.services.complaint_service import apply_legal_deadline
+
+    complaint = _complaint_at(
+        datetime(2026, 8, 13, 10, 0, tzinfo=UTC), "FRAUDE_OPERATION_NON_AUTORISEE"
+    )
+    complaint.sla.due_at = datetime(2026, 12, 1, tzinfo=UTC)
+    apply_legal_deadline(complaint)
+    assert complaint.sla.due_at == complaint.sla.legal_due_at
+
+
+def test_the_clock_counts_working_days_not_calendar_days():
+    """Two jours ouvrables from a Thursday is Monday, not Saturday."""
+    from app.domain.calendar_tn import add_business_days
+
+    thursday = datetime(2026, 8, 13, 10, 0, tzinfo=UTC)
+    assert add_business_days(thursday, 2).date().weekday() == 0  # Monday
+    # Fifteen working days spans well over three calendar weeks.
+    assert (add_business_days(thursday, 15).date() - thursday.date()).days >= 20
+
+
+def test_the_clock_starts_at_the_acknowledgement_not_at_receipt():
+    """Article 8 counts from the accuse de reception."""
+    from app.services.complaint_service import apply_legal_deadline
+
+    complaint = _complaint_at(datetime(2026, 8, 3, 10, 0, tzinfo=UTC), "CARTE_BANCAIRE")
+    apply_legal_deadline(complaint)
+    from_receipt = complaint.sla.legal_due_at
+
+    complaint.reglementaire.accuse_reception_at = datetime(2026, 8, 13, 10, 0, tzinfo=UTC)
+    apply_legal_deadline(complaint)
+    assert complaint.sla.legal_due_at > from_receipt

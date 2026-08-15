@@ -179,3 +179,43 @@ def business_seconds_between(start: datetime, end: datetime) -> float:
         total += max(0.0, (segment_end - current).total_seconds())
         current = _next_day_open(close)
     return total
+
+
+def add_business_days(start: datetime, days: int) -> datetime:
+    """Deadline `days` *jours ouvrables* after `start`, ending at close of business.
+
+    The circulaire counts in working days, not hours: Article 8 gives at most
+    fifteen of them from the acknowledgement. So a complaint acknowledged on the
+    Thursday before Aïd is not late because four calendar days passed — none of
+    them was a working day.
+
+    The clock starts on the next working day when `start` itself is a weekend or
+    a holiday, and the deadline lands at the close of business on the final day,
+    which is what "you have until the fifteenth day" means to a person.
+    """
+    if days <= 0:
+        return start
+
+    day = start.date()
+    remaining = days
+    while remaining > 0:
+        day += timedelta(days=1)
+        if is_business_day(day):
+            remaining -= 1
+
+    window = business_hours(day)
+    close = window[1] if window else time(17, 0)
+    return datetime.combine(day, close, tzinfo=start.tzinfo)
+
+
+def business_days_between(start: datetime, end: datetime) -> int:
+    """Whole working days elapsed, for the regulatory delay indicator."""
+    if end <= start:
+        return 0
+    count = 0
+    day = start.date()
+    while day < end.date():
+        day += timedelta(days=1)
+        if is_business_day(day):
+            count += 1
+    return count
