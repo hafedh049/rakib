@@ -20,21 +20,30 @@ from app.intelligence.rules.lexicons import (
     CHURN_AR,
     CHURN_FR,
     CHURN_TN,
+    FRAUDE_AR,
+    FRAUDE_FR,
+    FRAUDE_TN,
     LEGAL_AR,
     LEGAL_FR,
+    MEDIATEUR_AR,
+    MEDIATEUR_FR,
     PROFANITY,
     URGENCY_AR,
     URGENCY_FR,
     URGENCY_TN,
 )
 
-#: Collective-outage wording. Many claimants describing one incident is an
-#: incident cluster, and the first report of it should be escalated fast.
-OUTAGE_COLLECTIVE = [
-    "tout le quartier", "toute la rue", "tous les voisins", "tout l'immeuble",
-    "toute la zone", "toute la region", "plusieurs clients", "tout le monde",
-    "الحي الكل", "الجيران الكل", "كامل المنطقه", "الكل",
-    "el 7ouma kamla", "el jiran", "ga3", "lkol",
+#: Collective-incident wording. In a bank this is an ATM out of order for a whole
+#: branch, a failed batch of salary transfers, or an outage of the mobile app —
+#: many claimants describing one incident, where the first report should be
+#: escalated fast because the rest are already on their way.
+INCIDENT_COLLECTIF = [
+    "tous les clients", "plusieurs clients", "tout le monde", "toute l'agence",
+    "tous les collegues", "tous mes collegues", "toute l'entreprise",
+    "tous les salaries", "personne n'arrive", "aucun client", "toutes les cartes",
+    "tous les distributeurs", "l'application est down", "le service est down",
+    "الحرفاء الكل", "الكل", "كل الحرفاء", "الوكاله الكل", "كل الزملاء",
+    "el clients kamel", "ga3", "lkol", "el 3omal kamel",
 ]
 
 DEFAULT_RULES: list[dict[str, Any]] = [
@@ -76,11 +85,45 @@ DEFAULT_RULES: list[dict[str, Any]] = [
         "kind": "lexicon", "weight": 20, "order": 31,
         "config": {"terms": CHURN_AR + CHURN_TN, "lang": "ar", "cap": 1},
     },
+    # ------------------------------------------------------------------- fraude
+    # The heaviest signals in the system. An unauthorised debit is money already
+    # gone, and unlike a tariff dispute the bank's own delay compounds the
+    # customer's loss. Weighted so that a bare fraud claim is P2 on its own, and
+    # reaches P1 as soon as any single aggravating signal joins it.
+    {
+        "code": "FRAUDE_SUSPECTEE_FR", "label": "Fraude ou opération non autorisée (FR)",
+        "kind": "lexicon", "weight": 55, "order": 5,
+        "config": {"terms": FRAUDE_FR, "lang": "fr", "cap": 1},
+    },
+    {
+        "code": "FRAUDE_SUSPECTEE_AR", "label": "Fraude ou opération non autorisée (AR)",
+        "kind": "lexicon", "weight": 55, "order": 6,
+        "config": {"terms": FRAUDE_AR, "lang": "ar", "cap": 1},
+    },
+    {
+        "code": "FRAUDE_SUSPECTEE_TN", "label": "Fraude ou opération non autorisée (derja)",
+        "kind": "lexicon", "weight": 55, "order": 7,
+        "config": {"terms": FRAUDE_TN, "lang": "ar-tn", "cap": 1},
+    },
+    # ---------------------------------------------------------------- médiation
+    # Naming the mediator or the central bank means the customer already judges
+    # the internal path to have failed. Under the décret n°2006-1881 they must
+    # come to the bank first, so this is the last exit before the file leaves us.
+    {
+        "code": "MEDIATEUR_BANCAIRE_FR", "label": "Recours au médiateur / BCT (FR)",
+        "kind": "lexicon", "weight": 35, "order": 25,
+        "config": {"terms": MEDIATEUR_FR, "lang": "fr", "cap": 1},
+    },
+    {
+        "code": "MEDIATEUR_BANCAIRE_AR", "label": "Recours au médiateur / BCT (AR)",
+        "kind": "lexicon", "weight": 35, "order": 26,
+        "config": {"terms": MEDIATEUR_AR, "lang": "ar", "cap": 1},
+    },
     # ---------------------------------------------------------------- incidents
     {
-        "code": "OUTAGE_COLLECTIVE", "label": "Panne collective signalée",
+        "code": "INCIDENT_COLLECTIF", "label": "Incident collectif signalé",
         "kind": "lexicon", "weight": 20, "order": 40,
-        "config": {"terms": OUTAGE_COLLECTIVE, "cap": 1},
+        "config": {"terms": INCIDENT_COLLECTIF, "cap": 1},
     },
     {
         "code": "PROFANITY", "label": "Propos agressifs",
@@ -89,7 +132,7 @@ DEFAULT_RULES: list[dict[str, Any]] = [
     },
     # ------------------------------------------------------------------- client
     {
-        "code": "VIP_CLAIMANT", "label": "Client VIP / compte entreprise",
+        "code": "VIP_CLAIMANT", "label": "Client entreprise ou patrimonial",
         "kind": "field", "weight": 25, "order": 50,
         "config": {"path": "claimant_is_vip", "op": "eq", "value": True},
     },
@@ -131,15 +174,31 @@ DEFAULT_RULES: list[dict[str, Any]] = [
     },
     # ------------------------------------------------------------------ patterns
     {
-        "code": "INVOICE_REFERENCE", "label": "Référence de facture citée",
+        "code": "OPERATION_REFERENCE", "label": "Référence bancaire citée",
         "kind": "regex", "weight": 5, "order": 70,
-        "config": {"pattern": r"\b(?:facture|fact|inv)[\s.:#-]*\d{4,}\b", "flags": "i"},
+        "config": {
+            "pattern": r"\b(?:rib|iban|compte|carte|operation|transaction|"
+                       r"virement|cheque|ref)[\s.:#\-n°]*\d{4,}\b",
+            "flags": "i",
+        },
     },
     {
         "code": "AMOUNT_IN_DINARS", "label": "Montant contesté en dinars",
         "kind": "regex", "weight": 8, "order": 71,
         "config": {
-            "pattern": r"\b\d{2,5}(?:[.,]\d{1,3})?\s*(?:dinars?|dt|tnd|دينار)\b",
+            "pattern": r"\b\d{2,6}(?:[.,]\d{1,3})?\s*(?:dinars?|dt|tnd|دينار)\b",
+            "flags": "i",
+        },
+    },
+    {
+        # Fires in addition to the rule above, so any amount scores 8 and a large
+        # one scores 20. Four digits is 1 000 DT — roughly a Tunisian monthly
+        # salary, and the point at which a disputed debit stops being an
+        # annoyance and starts being a hardship.
+        "code": "MONTANT_ELEVE", "label": "Montant élevé (≥ 1 000 DT)",
+        "kind": "regex", "weight": 12, "order": 73,
+        "config": {
+            "pattern": r"\b\d{4,6}(?:[.,]\d{1,3})?\s*(?:dinars?|dt|tnd|دينار)\b",
             "flags": "i",
         },
     },
@@ -158,17 +217,20 @@ DEFAULT_RULES: list[dict[str, Any]] = [
         "kind": "category_weight", "weight": 1, "order": 80,
         "config": {
             "map": {
-                Category.FACTURATION: 10,
-                Category.PAIEMENT_RECHARGE: 10,
-                Category.INTERNET_FIXE: 8,
-                Category.RESEAU_MOBILE: 8,
-                Category.INTERVENTION_TECHNIQUE: 8,
-                Category.RESILIATION_PORTABILITE: 6,
-                Category.ROAMING_INTERNATIONAL: 6,
-                Category.SERVICE_CLIENT_AGENCE: 4,
-                Category.OFFRES_ABONNEMENT: 4,
-                Category.EQUIPEMENT: 4,
-                Category.APPLICATION_MOBILE: 2,
+                # Ordered by how much of the customer's money is already gone
+                # and how long it stays gone, not by how loudly they complain.
+                Category.FRAUDE_OPERATION_NON_AUTORISEE: 15,
+                Category.DAB_GAB: 12,
+                Category.CARTE_BANCAIRE: 10,
+                Category.VIREMENT_PRELEVEMENT: 10,
+                Category.PAIEMENT_TPE_ECOMMERCE: 10,
+                Category.CHEQUE_EFFET: 8,
+                Category.CREDIT_FINANCEMENT: 8,
+                Category.COMPTE_GESTION: 6,
+                Category.OPERATIONS_INTERNATIONALES: 6,
+                Category.FRAIS_COMMISSIONS: 6,
+                Category.BANQUE_DIGITALE: 4,
+                Category.AGENCE_QUALITE_SERVICE: 2,
             }
         },
     },

@@ -40,9 +40,8 @@ LEGAL_FR = [
     "mise en demeure", "huissier", "constat d'huissier", "inc",
     "institut national de la consommation", "protection du consommateur",
     "organisation de defense du consommateur", "instance", "regulateur",
-    "instance nationale des telecommunications", "intt", "poursuites",
-    "poursuites judiciaires", "action en justice", "contentieux", "litige",
-    "recours", "mediateur", "arbitrage", "dommages et interets", "prejudice",
+    "poursuites", "poursuites judiciaires", "action en justice", "contentieux",
+    "litige", "recours", "arbitrage", "dommages et interets", "prejudice",
     "inpdp", "donnees personnelles", "loi", "reglementation", "sanction",
 ]
 
@@ -52,23 +51,73 @@ LEGAL_AR = [
     "متابعه قضائيه", "قانون", "حقي", "حقوقي",
 ]
 
+# --------------------------------------------------------------------------- médiation
+#: Invoking the banking mediator is a distinct signal from a generic legal
+#: threat: under the décret n°2006-1881 the customer must come to the bank
+#: first, so naming the mediator means the internal path is being judged to have
+#: failed. Article 2 of the circulaire also puts a complaint *already* seized by
+#: the mediator outside its scope entirely — see HorsPerimetre.SAISINE_MEDIATEUR.
+MEDIATEUR_FR = [
+    "mediateur", "mediateur bancaire", "mediation", "mediation bancaire",
+    "saisir le mediateur", "banque centrale", "bct", "banque centrale de tunisie",
+    "observatoire de l'inclusion financiere", "oif", "autorite de controle",
+    "je saisirai", "je vais saisir", "escalader a la banque centrale",
+]
+
+MEDIATEUR_AR = [
+    "الوسيط البنكي", "الوسيط", "وساطه", "البنك المركزي", "البنك المركزي التونسي",
+    "مرصد الادماج المالي", "نشكي للبنك المركزي", "سلطه الرقابه",
+]
+
+# ----------------------------------------------------------------------------- fraude
+#: The highest-weight signal in a banking complaint system. An unauthorised debit
+#: is money already gone; it is also the one category where the bank's own delay
+#: compounds the customer's loss.
+FRAUDE_FR = [
+    "fraude", "frauduleux", "frauduleuse", "operation non autorisee",
+    "operations non autorisees", "transaction non autorisee", "debit non autorise",
+    "prelevement non autorise", "sans mon accord", "sans mon autorisation",
+    "je n'ai jamais autorise", "je n'ai pas effectue", "je n'ai jamais effectue",
+    "ce n'est pas moi", "piratage", "pirate", "compte pirate", "carte piratee",
+    "hameconnage", "phishing", "skimming", "usurpation", "usurpation d'identite",
+    "vol de carte", "carte volee", "detournement", "retrait non effectue",
+    "debit inconnu", "operation inconnue", "je ne reconnais pas",
+]
+
+FRAUDE_AR = [
+    "احتيال", "عمليه غير مصرح بها", "عمليات غير مصرح بها", "خصم غير مصرح به",
+    "بدون علمي", "بدون موافقتي", "ما عملتهاش", "موش انا", "قرصنه", "تم اختراق",
+    "سرقه البطاقه", "بطاقتي مسروقه", "تصيد", "انتحال", "عمليه ما نعرفهاش",
+]
+
+FRAUDE_TN = [
+    "ma3maltehech", "mouch ana", "sara9ou", "sar9ouli", "piratage",
+    "5ada flous", "khada flousi", "bla ma na3ref", "ma3ndich 3lem",
+    "3malou 3ملية", "flous tar", "flousi mchew",
+]
+
 # ----------------------------------------------------------------------------- churn
 CHURN_FR = [
-    "resilier", "resiliation", "annuler mon abonnement", "annulation",
-    "changer d'operateur", "changer operateur", "concurrent", "portabilite",
-    "porter mon numero", "quitter", "je pars", "je vous quitte", "fermer ma ligne",
-    "cloturer mon compte", "arreter le service", "ne plus jamais",
-    "aller ailleurs", "autre operateur", "chez la concurrence", "desabonner",
+    "cloturer mon compte", "cloture de compte", "fermer mon compte",
+    "fermer mes comptes", "changer de banque", "changer de banques",
+    "transferer mes avoirs", "transferer mon compte", "domicilier ailleurs",
+    "domiciliation ailleurs", "rapatrier mes fonds", "retirer mon argent",
+    "retirer tous mes fonds", "concurrence", "une autre banque", "chez la concurrence",
+    "quitter la banque", "je pars", "je vous quitte", "resilier ma carte",
+    "resilier mes services", "ne plus jamais", "aller ailleurs",
+    "mon salaire sera domicilie ailleurs", "arreter la relation",
 ]
 
 CHURN_TN = [
-    "nhabet nbadel", "nbadel operateur", "nhab nfasakh", "fasakh", "nsakker",
-    "nemchi l", "3andhom ahsen", "bech nbadel", "nekhrej",
+    "nhabet nsakker", "nsakker el compte", "nsakker sahbi", "nbadel banque",
+    "nhab nbadel banka", "nemchi l banque okhra", "3andhom ahsen",
+    "bech nekhrej flousi", "nekhou flousi", "nhawel flousi",
 ]
 
 CHURN_AR = [
-    "نفسخ", "فسخ", "نبدل مشغل", "نقل الرقم", "نسكر الخط", "نمشي لعند",
-    "الغاء الاشتراك", "ما نحبش نكمل",
+    "نغلق حسابي", "غلق الحساب", "نسكر الحساب", "نبدل بنك", "بنك اخر",
+    "نحول حسابي", "نسحب فلوسي", "نسحب اموالي", "ما نحبش نكمل معاكم",
+    "نمشي لبنك اخر",
 ]
 
 # ------------------------------------------------------------------------- profanity
@@ -131,6 +180,11 @@ LEXICONS: dict[str, list[str]] = {
     "CHURN_FR": CHURN_FR,
     "CHURN_AR": CHURN_AR,
     "CHURN_TN": CHURN_TN,
+    "MEDIATEUR_FR": MEDIATEUR_FR,
+    "MEDIATEUR_AR": MEDIATEUR_AR,
+    "FRAUDE_FR": FRAUDE_FR,
+    "FRAUDE_AR": FRAUDE_AR,
+    "FRAUDE_TN": FRAUDE_TN,
     "PROFANITY": PROFANITY,
     "POSITIVE_FR": POSITIVE_FR,
     "POSITIVE_AR": POSITIVE_AR,
@@ -146,5 +200,6 @@ POSITIVE_TERMS = set(POSITIVE_FR) | set(POSITIVE_AR) | set(POSITIVE_TN)
 NEGATIVE_TERMS = (
     set(NEGATIVE_FR) | set(NEGATIVE_AR) | set(NEGATIVE_TN)
     | set(URGENCY_FR) | set(URGENCY_AR) | set(URGENCY_TN)
+    | set(FRAUDE_FR) | set(FRAUDE_AR) | set(FRAUDE_TN)
     | set(PROFANITY)
 )
