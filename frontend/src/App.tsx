@@ -132,6 +132,27 @@ export function App() {
               </Protected>
             }
           />
+          <Route
+            path="/admin/users"
+            element={
+              <Protected minimum="admin">
+                <Suspense fallback={<RouteFallback />}>
+                  <AdminUsers />
+                </Suspense>
+              </Protected>
+            }
+          />
+          <Route
+            path="/admin/departments"
+            element={
+              <Protected minimum="admin">
+                <Suspense fallback={<RouteFallback />}>
+                  <AdminDepartments />
+                </Suspense>
+              </Protected>
+            }
+          />
+        </Route>
 
         <Route path="*" element={<Navigate to="/portal" replace />} />
       </Routes>

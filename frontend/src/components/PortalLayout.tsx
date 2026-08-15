@@ -1,6 +1,8 @@
 import { useEffect, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { AcademicNotice } from '@/components/AcademicNotice'
+import { Brandmark } from '@/components/Brandmark'
 import { useT, type Locale } from '@/i18n'
 import { useAuth } from '@/lib/auth'
 
@@ -30,28 +32,19 @@ export function PortalLayout({
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg text-ink">
+      <AcademicNotice />
+      {/* The one place brand red is allowed to run edge to edge. */}
+      <div aria-hidden className="h-1 w-full bg-brand" />
       <header className="border-b border-line">
         <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between gap-4 px-5">
-          <Link to="/portal" className="flex items-center gap-2.5">
-            <span
-              aria-hidden
-              className="grid size-8 place-items-center rounded-[var(--radius-control)] bg-primary text-primary-ink"
-            >
-              <svg viewBox="0 0 24 24" className="size-4" fill="none" strokeWidth="2.2">
-                <path
-                  d="M12 3.5 4.5 7v5.5c0 4.2 3 7.5 7.5 8.5 4.5-1 7.5-4.3 7.5-8.5V7L12 3.5Z"
-                  stroke="currentColor"
-                  strokeLinejoin="round"
-                />
-                <circle cx="12" cy="11.5" r="2.4" stroke="currentColor" />
-              </svg>
-            </span>
-            <span>
+          <Link to="/portal" className="flex items-center gap-3">
+            <Brandmark size="md" />
+            <span className="hidden border-s border-line ps-3 sm:block">
               <span className="block text-sm leading-tight font-semibold">
-                {t('brand')}
+                {t('brandTagline')}
               </span>
               <span className="block text-2xs leading-tight text-ink-muted">
-                {t('brandTagline')}
+                {t('brandSubtitle')}
               </span>
             </span>
           </Link>

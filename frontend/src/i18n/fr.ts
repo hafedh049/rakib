@@ -1,5 +1,7 @@
 export const fr = {
   brand: 'Rakib',
+  'academic.notice': "Projet de fin d'études — plateforme de démonstration, sans affiliation officielle. Aucune réclamation déposée ici n'est traitée par la banque.",
+  brandSubtitle: 'Service Réclamations',
   brandTagline: 'Gestion des réclamations',
 
   // ---- portal -------------------------------------------------------------
@@ -190,7 +192,6 @@ export const fr = {
   'analysis.relatedHelp':
     'Meme problème signalé par d’autres clients — probablement un incident collectif.',
   'analysis.needsTriage': 'Vérification humaine requise',
-  'analysis.engine': 'Moteur',
   'analysis.engine': 'Moteur',
   'analysis.latency': 'Durée',
   'analysis.stages': 'Étapes',

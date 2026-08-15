@@ -9,6 +9,8 @@ import type { TranslationKey } from './fr'
  */
 export const ar: Partial<Record<TranslationKey, string>> = {
   brand: 'رقيب',
+  'academic.notice': 'مشروع ختم دروس — منصة تجريبية غير رسمية. الشكاوى المودعة هنا لا تعالج من طرف البنك.',
+  brandSubtitle: 'مصلحة الشكاوى',
   brandTagline: 'إدارة الشكاوى',
 
   'portal.title': 'تقديم شكوى',

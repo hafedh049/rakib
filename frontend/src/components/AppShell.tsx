@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
+import { Brandmark } from '@/components/Brandmark'
 import { useT } from '@/i18n'
 import { useAuth } from '@/lib/auth'
 import { initials } from '@/lib/format'
@@ -76,10 +77,10 @@ export function AppShell() {
           menuOpen ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full',
         )}
       >
-        <div className="flex h-14 items-center gap-2 border-b border-line px-4">
-          <Mark />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{t('brand')}</p>
+        <div className="flex h-14 items-center gap-2.5 border-b border-line px-4">
+          <Brandmark size="sm" />
+          <div className="min-w-0 border-s border-line ps-2.5">
+            <p className="truncate text-xs font-semibold">{t('brandSubtitle')}</p>
             <p className="truncate text-2xs text-ink-muted">{t('brandTagline')}</p>
           </div>
         </div>
@@ -162,7 +163,7 @@ export function AppShell() {
           <Button variant="ghost" onClick={() => setMenuOpen(true)} aria-label="Menu">
             ☰
           </Button>
-          <span className="text-sm font-semibold">{t('brand')}</span>
+          <Brandmark size="sm" />
           <ConnectionDot connected={connected} />
         </header>
 
@@ -238,20 +239,3 @@ function ConnectionDot({
   )
 }
 
-function Mark() {
-  return (
-    <span
-      aria-hidden
-      className="grid size-8 shrink-0 place-items-center rounded-[var(--radius-control)] bg-primary text-primary-ink"
-    >
-      <svg viewBox="0 0 24 24" className="size-4" fill="none" strokeWidth="2.2">
-        <path
-          d="M12 3.5 4.5 7v5.5c0 4.2 3 7.5 7.5 8.5 4.5-1 7.5-4.3 7.5-8.5V7L12 3.5Z"
-          stroke="currentColor"
-          strokeLinejoin="round"
-        />
-        <circle cx="12" cy="11.5" r="2.4" stroke="currentColor" />
-      </svg>
-    </span>
-  )
-}

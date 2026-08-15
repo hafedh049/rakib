@@ -27,24 +27,41 @@
 }
 
 :root {
-  /* light — the portal's home */
+  /* light — the portal's home.
+
+     Neutrals carry a 0.004-0.008 chroma bias toward the brand's own red, so
+     they read as chosen rather than inherited. They are not warmed "because
+     banks feel warm" — the bias points at the identity, nothing else. */
   --bg: oklch(1 0 0);
-  --surface: oklch(0.985 0.004 190);
-  --surface-2: oklch(0.965 0.006 190);
-  --ink: oklch(0.22 0.015 210);
-  --ink-muted: oklch(0.46 0.014 210);
-  --line: oklch(0.9 0.006 200);
-  --primary: oklch(0.52 0.1 185);
-  --primary-hover: oklch(0.46 0.1 185);
+  --surface: oklch(0.985 0.003 25);
+  --surface-2: oklch(0.962 0.005 25);
+  --ink: oklch(0.19 0.008 25);
+  --ink-muted: oklch(0.45 0.010 25);
+  --line: oklch(0.89 0.005 25);
+
+  /* Interactive = graphite, not red. Buttons, focus rings and active states run
+     on near-black so that red keeps its meaning. This is the "noir". */
+  --primary: oklch(0.22 0.010 25);
+  --primary-hover: oklch(0.33 0.013 25);
   --primary-ink: oklch(0.99 0 0);
-  --primary-soft: oklch(0.95 0.03 185);
+  --primary-soft: oklch(0.955 0.008 25);
+
+  /* The "rouge". Reserved for brand chrome — the mark, the masthead rule, the
+     active nav indicator. It never lands on a piece of data or a state, which
+     is what keeps it from being confused with `--danger` below. */
+  --brand: oklch(0.55 0.215 27);
+  --brand-hover: oklch(0.48 0.20 27);
+  --brand-ink: oklch(0.99 0 0);
+  --brand-soft: oklch(0.955 0.03 27);
 
   /* Reserved. An amber pixel always means "a human must look at this". */
   --amber: oklch(0.68 0.13 75);
   --amber-soft: oklch(0.95 0.05 80);
-  --danger: oklch(0.55 0.19 25);
-  --danger-soft: oklch(0.95 0.04 25);
-  --success: oklch(0.55 0.12 155);
+  /* Oxblood, not the brand red: separated by weight as well as placement, so a
+     breach badge is never mistaken for branding. */
+  --danger: oklch(0.44 0.16 25);
+  --danger-soft: oklch(0.95 0.035 25);
+  --success: oklch(0.50 0.12 155);
   --success-soft: oklch(0.95 0.04 155);
 
   --shadow-panel:
@@ -62,21 +79,30 @@
 
 /* The console asks for dark; the portal always stays light (see [data-register]). */
 [data-theme='dark'] {
-  --bg: oklch(0.19 0.012 210);
-  --surface: oklch(0.235 0.014 210);
-  --surface-2: oklch(0.275 0.016 210);
-  --ink: oklch(0.96 0.004 190);
-  --ink-muted: oklch(0.72 0.012 200);
-  --line: oklch(0.33 0.016 210);
-  --primary: oklch(0.72 0.11 185);
-  --primary-hover: oklch(0.78 0.11 185);
-  --primary-ink: oklch(0.17 0.02 200);
-  --primary-soft: oklch(0.3 0.04 185);
+  --bg: oklch(0.165 0.006 25);
+  --surface: oklch(0.208 0.008 25);
+  --surface-2: oklch(0.252 0.010 25);
+  --ink: oklch(0.96 0.003 25);
+  --ink-muted: oklch(0.72 0.008 25);
+  --line: oklch(0.31 0.010 25);
+
+  /* Inverted on dark: a near-white control on graphite. Red would fight the
+     breach badges sitting beside it in the queue. */
+  --primary: oklch(0.95 0.004 25);
+  --primary-hover: oklch(1 0 0);
+  --primary-ink: oklch(0.17 0.008 25);
+  --primary-soft: oklch(0.28 0.010 25);
+
+  /* Lifted so it survives the dark ground, still chrome-only. */
+  --brand: oklch(0.63 0.21 27);
+  --brand-hover: oklch(0.70 0.20 27);
+  --brand-ink: oklch(0.99 0 0);
+  --brand-soft: oklch(0.29 0.06 27);
 
   --amber: oklch(0.79 0.13 75);
   --amber-soft: oklch(0.32 0.06 70);
-  --danger: oklch(0.68 0.17 25);
-  --danger-soft: oklch(0.31 0.07 25);
+  --danger: oklch(0.66 0.17 25);
+  --danger-soft: oklch(0.30 0.07 25);
   --success: oklch(0.72 0.12 155);
   --success-soft: oklch(0.29 0.05 155);
 
@@ -93,6 +119,10 @@
   --color-ink-muted: var(--ink-muted);
   --color-line: var(--line);
   --color-primary: var(--primary);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
   --color-primary-hover: var(--primary-hover);
   --color-primary-ink: var(--primary-ink);
   --color-primary-soft: var(--primary-soft);
