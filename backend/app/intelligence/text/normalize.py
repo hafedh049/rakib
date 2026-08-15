@@ -87,11 +87,54 @@ class NormalizedText:
 
     @property
     def indexable(self) -> str:
-        """Both scripts concatenated — what we store and search over."""
-        return f"{self.text} {self.transliterated}".strip() if self.transliterated else self.text
+        """Both scripts concatenated and accent-folded — what we match against.
+
+        `text` keeps its accents because it is shown to people. `indexable` does
+        not, because every lexicon, keyword and rule term in this system is
+        written unaccented. Without this fold, "chèque" never matched "cheque"
+        and a complaint typed in correct French simply failed to categorise —
+        while the same sentence typed carelessly worked. Users who write well
+        must not get worse service.
+        """
+        combined = (
+            f"{self.text} {self.transliterated}".strip()
+            if self.transliterated
+            else self.text
+        )
+        return fold_latin_accents(combined)
 
 
 # ------------------------------------------------------------------------ pipeline
+def fold_latin_accents(text: str) -> str:
+    """Strip diacritics from Latin letters, leaving other scripts untouched.
+
+    Decomposing to NFD and dropping combining marks would also strip Arabic
+    vowel points, which `normalize` has already handled deliberately and which
+    carry meaning we do not want to re-process here. So the fold is applied only
+    to characters in the Latin ranges.
+    """
+    decomposed = unicodedata.normalize("NFD", text)
+    return unicodedata.normalize(
+        "NFC",
+        "".join(
+            character
+            for character in decomposed
+            if not (
+                unicodedata.combining(character)
+                and character in LATIN_COMBINING_MARKS
+            )
+        ),
+    )
+
+
+#: Combining marks that sit on Latin letters in French, Italian, Spanish and the
+#: Latin-script spellings Tunisians use. Arabic marks are deliberately absent.
+LATIN_COMBINING_MARKS = frozenset(
+    "̀́̂̃̄̆̇̈̊̋"
+    "̧̨̌"
+)
+
+
 def strip_signatures(text: str) -> str:
     """Drop quoted history and signature blocks.
 

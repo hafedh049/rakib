@@ -18,7 +18,7 @@ export const fr = {
   'portal.phone': 'Téléphone',
   'portal.contactHint':
     'Un email ou un téléphone suffit. Sans email, conservez le lien de suivi affiche après l envoi.',
-  'portal.externalId': 'N° de ligne ou référence client',
+  'portal.externalId': 'N° de compte ou référence client',
   'portal.optional': 'facultatif',
   'portal.submit': 'Envoyer la réclamation',
   'portal.submitting': 'Envoi en cours...',
@@ -61,7 +61,7 @@ export const fr = {
   'portal.backToList': 'Retour à mes réclamations',
   'portal.attachments': 'Pièces jointes',
   'portal.attachmentsHint':
-    'Photo de la facture, capture d écran, justificatif. JPG, PNG, PDF — 10 Mo maximum par fichier.',
+    'Relevé, capture d’écran, justificatif. JPG, PNG, PDF — 10 Mo maximum par fichier.',
   'portal.addFiles': 'Ajouter des fichiers',
   'portal.uploading': 'Envoi des pièces jointes...',
   'portal.removeFile': 'Retirer',
@@ -330,21 +330,22 @@ export const fr = {
 
   'lang.fr': 'Français',
   'lang.ar': 'Arabe',
+  'category.CARTE_BANCAIRE': 'Carte bancaire',
+  'category.DAB_GAB': 'Distributeur (DAB/GAB)',
+  'category.PAIEMENT_TPE_ECOMMERCE': 'Paiement TPE et e-commerce',
+  'category.VIREMENT_PRELEVEMENT': 'Virement et prélèvement',
+  'category.CHEQUE_EFFET': 'Chèque et effet',
+  'category.COMPTE_GESTION': 'Gestion du compte',
+  'category.CREDIT_FINANCEMENT': 'Crédit et financement',
+  'category.FRAIS_COMMISSIONS': 'Frais et commissions',
+  'category.BANQUE_DIGITALE': 'Banque digitale',
+  'category.OPERATIONS_INTERNATIONALES': 'Opérations internationales',
+  'category.FRAUDE_OPERATION_NON_AUTORISEE': 'Fraude / opération non autorisée',
+  'category.AGENCE_QUALITE_SERVICE': 'Agence et qualité de service',
   'lang.ar-tn': 'Derja',
   'lang.en': 'Anglais',
   'lang.other': 'Autre',
 
-  'category.FACTURATION': 'Facturation',
-  'category.PAIEMENT_RECHARGE': 'Paiement et recharge',
-  'category.RESEAU_MOBILE': 'Réseau mobile',
-  'category.INTERNET_FIXE': 'Internet fixe',
-  'category.INTERVENTION_TECHNIQUE': 'Intervention technique',
-  'category.OFFRES_ABONNEMENT': 'Offres et abonnement',
-  'category.RESILIATION_PORTABILITE': 'Résiliation et portabilite',
-  'category.SERVICE_CLIENT_AGENCE': 'Service client et agence',
-  'category.EQUIPEMENT': 'Équipement',
-  'category.ROAMING_INTERNATIONAL': 'Roaming et international',
-  'category.APPLICATION_MOBILE': 'Application mobile',
 } as const
 
 export type TranslationKey = keyof typeof fr

@@ -49,7 +49,7 @@ CLAIMANTS = [
 
 #: (category, subject, body)
 COMPLAINTS: list[tuple[str, str, str]] = [
-    (Category.DAB_GAB, "Retrait de 300 dinars debite sans billets",
+    (Category.DAB_GAB, "Retrait de 300 dinars débité sans billets",
      "J'ai effectue un retrait de 300 dinars au distributeur de l'agence du "
      "centre-ville le 08 a 18h40. Aucun billet n'est sorti mais mon compte a "
      "bien ete debite. Reference OP4471902. Je demande le remboursement."),
@@ -59,69 +59,69 @@ COMPLAINTS: list[tuple[str, str, str]] = [
     (Category.DAB_GAB, "Distributeur hors service depuis trois semaines",
      "Le distributeur de Mourouj 5 est hors service depuis trois semaines. "
      "C'est le seul de la zone et tous les clients doivent se deplacer."),
-    (Category.CARTE_BANCAIRE, "Carte avalee par le distributeur",
+    (Category.CARTE_BANCAIRE, "Carte avalée par le distributeur",
      "Ma carte CIB a ete avalee par le distributeur le 12 du mois. Je me suis "
      "presente le lendemain, on m'a dit d'attendre une semaine. Je n'ai "
      "toujours aucune nouvelle et je suis sans moyen de paiement."),
-    (Category.CARTE_BANCAIRE, "Carte bloquee sans aucun motif",
+    (Category.CARTE_BANCAIRE, "Carte bloquée sans aucun motif",
      "Ma carte est bloquee depuis dix jours sans qu'aucun motif ne m'ait ete "
      "communique. Mon compte est approvisionne et je n'ai recu ni SMS ni "
      "courrier m'expliquant ce blocage."),
-    (Category.CARTE_BANCAIRE, "Renouvellement de carte jamais recu",
+    (Category.CARTE_BANCAIRE, "Renouvellement de carte jamais reçu",
      "J'ai demande le renouvellement de ma carte il y a un mois et regle les "
      "frais correspondants. Elle n'est jamais arrivee a l'agence et personne "
      "n'est en mesure de me dire ou elle se trouve."),
-    (Category.PAIEMENT_TPE_ECOMMERCE, "Double debit sur un paiement",
+    (Category.PAIEMENT_TPE_ECOMMERCE, "Double débit sur un paiement",
      "Un paiement de 245 dinars chez un commercant de Sousse apparait deux "
      "fois sur mon releve. Le commercant confirme n'avoir encaisse qu'une "
      "seule fois et m'a remis son ticket."),
-    (Category.PAIEMENT_TPE_ECOMMERCE, "Code 3D Secure jamais recu",
+    (Category.PAIEMENT_TPE_ECOMMERCE, "Code 3D Secure jamais reçu",
      "Je ne recois jamais le code de confirmation par SMS lors de mes achats "
      "en ligne, ce qui fait echouer toutes mes transactions depuis deux "
      "semaines. Mon numero est pourtant a jour a l'agence."),
-    (Category.VIREMENT_PRELEVEMENT, "Virement de 1500 dinars non recu",
+    (Category.VIREMENT_PRELEVEMENT, "Virement de 1500 dinars non reçu",
      "J'ai emis un virement de 1500 dinars le 05 vers un compte de la meme "
      "banque. Le beneficiaire ne l'a toujours pas recu apres deux semaines et "
      "mon compte a bien ete debite."),
-    (Category.VIREMENT_PRELEVEMENT, "Virement de salaire non credite",
+    (Category.VIREMENT_PRELEVEMENT, "Virement de salaire non crédité",
      "Mon virement de salaire n'a pas ete credite ce mois alors que mon "
      "employeur confirme l'avoir emis le 28. Cela fait dix jours et je suis "
      "a decouvert."),
     (Category.VIREMENT_PRELEVEMENT, "التحويل ما وصلش",
      "عملت تحويل 800 دينار من اسبوعين و المستفيد ما وصلوش، و الفلوس تنقصت "
      "من الحساب متاعي. نحب حل بسرعة."),
-    (Category.CHEQUE_EFFET, "Cheque rejete a tort",
+    (Category.CHEQUE_EFFET, "Chèque rejeté à tort",
      "Un de mes cheques d'un montant de 680 dinars a ete rejete pour defaut "
      "de provision alors que mon compte etait crediteur ce jour-la. Ce rejet "
      "me cause un prejudice serieux aupres de mon fournisseur."),
-    (Category.CHEQUE_EFFET, "Chequier commande et non delivre",
+    (Category.CHEQUE_EFFET, "Chéquier commandé et non délivré",
      "J'ai commande un chequier il y a un mois. Il n'est jamais arrive a "
      "l'agence et les frais ont pourtant ete preleves."),
-    (Category.COMPTE_GESTION, "Cloture demandee et jamais effectuee",
+    (Category.COMPTE_GESTION, "Clôture demandée et jamais effectuée",
      "J'ai demande la cloture de mon compte il y a deux mois en agence, avec "
      "un courrier signe. Le compte est toujours actif et des frais continuent "
      "d'etre preleves."),
-    (Category.COMPTE_GESTION, "Releves non recus depuis quatre mois",
+    (Category.COMPTE_GESTION, "Relevés non reçus depuis quatre mois",
      "Je ne recois plus mes releves de compte depuis quatre mois, ni par "
      "courrier ni sur l'espace en ligne. J'en ai besoin pour ma comptabilite."),
     (Category.COMPTE_GESTION, "الحساب مسكر بلا اعلام",
      "سكرو الحساب متاعي بلا ما يعلموني و ما فهمتش علاش. كنت نحب نسحب فلوس "
      "و لقيت الحساب موقوف."),
-    (Category.CREDIT_FINANCEMENT, "Echeance prelevee deux fois",
+    (Category.CREDIT_FINANCEMENT, "Échéance prélevée deux fois",
      "L'echeance de mon credit logement a ete prelevee deux fois ce mois, "
      "soit 420 dinars debites en trop. Je demande la restitution immediate."),
-    (Category.CREDIT_FINANCEMENT, "Mainlevee non delivree",
+    (Category.CREDIT_FINANCEMENT, "Mainlevée non délivrée",
      "J'ai solde mon credit par anticipation il y a six semaines. La "
      "mainlevee de l'hypotheque n'a toujours pas ete delivree, ce qui bloque "
      "la vente de mon bien."),
-    (Category.CREDIT_FINANCEMENT, "Dossier de credit sans reponse",
+    (Category.CREDIT_FINANCEMENT, "Dossier de crédit sans réponse",
      "Mon dossier de credit auto d'un montant de 12000 dinars est sans "
      "reponse depuis deux mois. Aucun interlocuteur ne peut me dire ou il en "
      "est."),
-    (Category.FRAIS_COMMISSIONS, "Agios injustifies",
+    (Category.FRAIS_COMMISSIONS, "Agios injustifiés",
      "Des agios de 187 dinars ont ete preleves sur mon compte alors que je "
      "n'ai jamais ete a decouvert. Je demande le detail du calcul."),
-    (Category.FRAIS_COMMISSIONS, "Frais de tenue de compte non annonces",
+    (Category.FRAIS_COMMISSIONS, "Frais de tenue de compte non annoncés",
      "Des frais de tenue de compte de 30 dinars sont preleves chaque "
      "trimestre sans que cela ne figure dans la convention que j'ai signee."),
     (Category.FRAIS_COMMISSIONS, "مصاريف ما فهمتهاش",
@@ -131,25 +131,25 @@ COMPLAINTS: list[tuple[str, str, str]] = [
      "L'application mobile est inaccessible depuis une semaine : elle se "
      "ferme immediatement apres la saisie du code. J'ai desinstalle et "
      "reinstalle sans resultat."),
-    (Category.BANQUE_DIGITALE, "Code d'acces bloque",
+    (Category.BANQUE_DIGITALE, "Code d'accès bloqué",
      "Mon code d'acces a l'espace en ligne est bloque depuis la derniere mise "
      "a jour. La procedure de deblocage envoie un lien qui n'arrive jamais."),
     (Category.BANQUE_DIGITALE, "el application ma tekhdemch",
      "el application ma tekhdemch men jomaa, ki nhot el code tetsakker "
      "wa7edha. nzelt w rje3t nzelt w nafs el mochkel."),
-    (Category.OPERATIONS_INTERNATIONALES, "Allocation touristique refusee",
+    (Category.OPERATIONS_INTERNATIONALES, "Allocation touristique refusée",
      "Ma demande d'allocation touristique a ete refusee sans motif ecrit "
      "alors que je remplis toutes les conditions et que mon voyage est dans "
      "dix jours."),
-    (Category.OPERATIONS_INTERNATIONALES, "Transfert depuis la France non credite",
+    (Category.OPERATIONS_INTERNATIONALES, "Transfert depuis la France non crédité",
      "Un transfert de 3000 euros emis depuis la France il y a trois semaines "
      "n'est toujours pas credite sur mon compte. Le donneur d'ordre dispose "
      "de la confirmation SWIFT."),
-    (Category.FRAUDE_OPERATION_NON_AUTORISEE, "Operations non autorisees",
+    (Category.FRAUDE_OPERATION_NON_AUTORISEE, "Opérations non autorisées",
      "Je constate sur mon releve plusieurs operations que je n'ai jamais "
      "effectuees, pour un total de 4500 dinars. Ma carte est en ma possession "
      "et je n'ai communique mon code a personne. C'est inacceptable."),
-    (Category.FRAUDE_OPERATION_NON_AUTORISEE, "Compte vide apres un SMS frauduleux",
+    (Category.FRAUDE_OPERATION_NON_AUTORISEE, "Compte vidé après un SMS frauduleux",
      "J'ai recu un SMS se presentant comme provenant de la banque et "
      "demandant mes identifiants. Depuis, des virements de 6000 dinars ont "
      "quitte mon compte sans mon accord. Mon avocat va porter plainte."),
@@ -160,7 +160,7 @@ COMPLAINTS: list[tuple[str, str, str]] = [
      "L'attente a l'agence du centre-ville depasse systematiquement une "
      "heure, avec deux guichets ouverts sur cinq. La situation dure depuis "
      "des mois."),
-    (Category.AGENCE_QUALITE_SERVICE, "Chargee de clientele injoignable",
+    (Category.AGENCE_QUALITE_SERVICE, "Chargée de clientèle injoignable",
      "Ma chargee de clientele est injoignable depuis trois semaines : ni le "
      "telephone ni les courriels n'aboutissent, et aucun remplacant n'est "
      "designe."),

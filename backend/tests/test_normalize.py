@@ -193,3 +193,37 @@ def test_pipeline_is_idempotent_on_already_clean_text():
 
 def test_attachment_flag_reaches_the_features():
     assert normalize(body="voir piece jointe", has_attachment=True).features.has_attachment
+
+
+# ------------------------------------------------------------- accent folding
+def test_indexable_folds_french_accents():
+    """Every lexicon term is written unaccented, so the match text must be too.
+
+    Without this, "chèque" never matched "cheque": a complaint typed in correct
+    French failed to categorise while the same sentence typed carelessly worked.
+    """
+    normalized = normalize("Chèque rejeté à tort", "Échéance prélevée deux fois")
+    assert "cheque" in normalized.indexable
+    assert "rejete" in normalized.indexable
+    assert "echeance" in normalized.indexable
+    assert "prelevee" in normalized.indexable
+
+
+def test_display_text_keeps_its_accents():
+    """Only the match text is folded — people still read `text`."""
+    normalized = normalize("Chèque rejeté", "Mainlevée non délivrée")
+    assert "è" in normalized.text or "é" in normalized.text
+
+
+def test_accent_folding_leaves_arabic_alone():
+    """Arabic marks were already handled deliberately; do not re-process them."""
+    normalized = normalize("الموزع", "الموزع خذا الفلوس و ما خرجش")
+    assert "الموزع" in normalized.indexable
+
+
+def test_an_accented_complaint_classifies_like_its_bare_twin():
+    from app.intelligence.lexicon.classifier import classify
+
+    accented = classify(normalize("Chèque rejeté à tort", "défaut de provision").indexable)
+    bare = classify(normalize("Cheque rejete a tort", "defaut de provision").indexable)
+    assert accented.category == bare.category is not None
