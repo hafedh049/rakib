@@ -39,7 +39,7 @@ interface AnalysisResponse {
   related: { id: string; ref: string; subject: string }[]
   traces: {
     engine: string
-    model_version: string
+    engine_version: string
     outcome: string
     error: string | null
     total_latency_ms: number

@@ -1,7 +1,7 @@
 """arq worker configuration.
 
 Background jobs and cron live here: triage (phase 6), SLA sweeps (phase 7) and
-there is no retraining any more (the classifier is deterministic). The event-stream consumer is a
+categorisation is deterministic, so nothing is ever retrained. The event-stream consumer is a
 separate process (workers/notify_worker.py) because it is a stream consumer, not
 a job queue.
 """

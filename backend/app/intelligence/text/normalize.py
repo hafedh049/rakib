@@ -195,7 +195,7 @@ def normalize(
 ) -> NormalizedText:
     """Full pipeline: subject + body in, canonical text and features out.
 
-    The subject is repeated once. That doubles its weight in the TF-IDF space
+    The subject is repeated once. That doubles its weight when terms are matched
     for free, without a custom feature (spec 5.3).
     """
     raw = f"{subject} {subject} {body}".strip() if subject else body.strip()

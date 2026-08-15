@@ -52,7 +52,7 @@ def test_english_is_detected():
 
 
 def test_arabizi_is_labelled_ar_tn():
-    """fastText has no derja label; this is our own decision layer."""
+    """Latin-script Tunisian is our own decision layer."""
     result = lid.detect(
         normalize(body="3andi mochkla fel internet, 7atta lyoum ma7alouhech, yezzi")
     )
@@ -64,15 +64,14 @@ def test_arabizi_is_labelled_ar_tn():
     "text",
     [
         # No digit substitution at all — the arabizi pattern misses these, and
-        # fastText called them "other" and English-at-0.64 respectively.
+        # Pure lexical derja: no digit substitution to lean on.
         "el fatoura mte3i hedha chhar 210 dinar w ana ma badeltech fel offre",
         "nhabet nbadel operateur, 3malt talab fasakh men jomaa",
         "9adech hedha? barcha flous w el khedma khayba",
     ],
 )
 def test_plain_derja_is_not_mistaken_for_french_or_english(text):
-    """fastText has no derja label, so a confident verdict on it is confidently
-    wrong. Derja is decided before fastText and regardless of its confidence."""
+    """Derja is decided first, before French or English are even considered."""
     assert lid.detect(normalize(body=text)).code == "ar-tn"
 
 
@@ -88,11 +87,6 @@ def test_french_is_not_swallowed_by_the_derja_rule():
 
 def test_language_detection_never_raises_on_empty_text():
     assert lid.detect(normalize(body="")).code in {"fr", "en", "ar", "ar-tn", "other"}
-
-
-def test_lid_model_is_present_in_artifacts():
-    """lid.176.ftz is committed; if it goes missing we degrade, but loudly."""
-    assert lid.model_available() is True
 
 
 # ------------------------------------------------------------------------- routing
@@ -222,4 +216,4 @@ def test_engine_health_reports_degraded(engine):
     health = engine.health()
     assert health.ready is True
     assert health.degraded is True
-    assert health.model_loaded is False
+    assert health.engine_ready is False

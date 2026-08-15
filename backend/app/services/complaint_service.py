@@ -303,16 +303,8 @@ async def patch_complaint(
         event_payload(complaint, changed=list(changed), actor_id=str(actor.id)),
     )
     if "category" in changed or "department" in changed:
-        # A human disagreed with the engine — capture it as a labelled sample.
-        from app.services import learning_service
-
-        if complaint.analysis.category:
-            await learning_service.record_correction(
-                complaint,
-                new_category=complaint.analysis.category,
-                previous_category=changed.get("category", (None, None))[0],
-                actor=actor,
-            )
+        # A human disagreed with the engine. The `corrected` flag drives the
+        # correction rate in the KPI report; the event lets the console react.
         await publish(
             EventName.TRIAGE_CORRECTED,
             event_payload(

@@ -132,7 +132,7 @@ async def triage_complaint(complaint: Complaint) -> Complaint:
             complaint_id=complaint.id,
             complaint_ref=complaint.ref,
             engine=getattr(engine, "name", "unknown"),
-            model_version="unknown",
+            engine_version="unknown",
             outcome="failed",
             error=str(exc),
         ).insert()
@@ -179,7 +179,7 @@ async def triage_complaint(complaint: Complaint) -> Complaint:
         needs_human_triage=needs_human,
         triage_reason=reason,
         engine=output.engine,
-        model_version=output.model_version,
+        engine_version=output.engine_version,
         latency_ms=output.latency_ms,
         analyzed_at=datetime.now(UTC),
     )
@@ -202,7 +202,7 @@ async def triage_complaint(complaint: Complaint) -> Complaint:
             actor_type="engine",
             meta={
                 "engine": output.engine,
-                "model_version": output.model_version,
+                "engine_version": output.engine_version,
                 "category": output.category,
                 "confidence": output.category_confidence,
                 "priority": output.priority,
@@ -246,7 +246,7 @@ async def triage_complaint(complaint: Complaint) -> Complaint:
         complaint_id=complaint.id,
         complaint_ref=complaint.ref,
         engine=output.engine,
-        model_version=output.model_version,
+        engine_version=output.engine_version,
         stages=[TraceStage(**stage) for stage in output.stages],
         total_latency_ms=output.latency_ms,
         outcome="ok",

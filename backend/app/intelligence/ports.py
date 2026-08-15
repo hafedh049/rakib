@@ -72,7 +72,7 @@ class TriageOutput:
     needs_human_triage: bool = False
     triage_reason: str | None = None
     engine: str = "rules"
-    model_version: str = "none"
+    engine_version: str = "none"
     latency_ms: int = 0
     stages: list[dict] = field(default_factory=list)
 
@@ -82,8 +82,7 @@ class EngineHealth:
     name: str
     ready: bool
     degraded: bool
-    model_loaded: bool
-    model_version: str | None = None
+    engine_version: str | None = None
     detail: str | None = None
 
 

@@ -1,4 +1,4 @@
-"""Cold-start engine: no trained model required.
+"""Keyword routing without categorisation.
 
 Routes by keyword overlap between the complaint and each department's keyword
 set, weighted by IDF so a term shared by every department ("ligne") counts for
@@ -38,7 +38,7 @@ TOP_KEYWORDS = 8
 
 
 class RulesOnlyTriageEngine:
-    """The engine the system falls back to when `ml_artifacts/` is empty."""
+    """Routes by department keyword only, leaving the category to an agent."""
 
     name: ClassVar[str] = "rules"
 
@@ -104,7 +104,7 @@ class RulesOnlyTriageEngine:
             needs_human_triage=True,
             triage_reason="no_model",
             engine=self.name,
-            model_version="rules-v1",
+            engine_version="rules-v1",
             latency_ms=latency_ms,
             stages=stages,
         )
@@ -114,11 +114,10 @@ class RulesOnlyTriageEngine:
             name=self.name,
             ready=True,
             degraded=True,
-            model_loaded=False,
-            model_version="rules-v1",
+            engine_version="rules-v1",
             detail=(
-                "Aucun modele entraine: routage par mots-cles, categorisation "
-                "laissee a un agent."
+                "Routage par mots-cles du departement, categorisation laissee "
+                "a un agent."
             ),
         )
 
@@ -159,7 +158,7 @@ def route_by_keywords(
 
 
 def top_keywords(text: str, limit: int = TOP_KEYWORDS) -> list[str]:
-    """Frequency-ranked content words — a cheap stand-in until TF-IDF exists."""
+    """Frequency-ranked content words, for the summary line in the queue."""
     counts: dict[str, int] = {}
     for token in TOKEN_RE.findall(text):
         if len(token) < 4 or token.startswith("<"):

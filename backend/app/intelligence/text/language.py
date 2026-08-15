@@ -1,23 +1,16 @@
-"""Language identification: fr | ar | ar-tn | en | other. Rule-based, no model.
+"""Language identification: fr | ar | ar-tn | en | other. Rule-based.
 
-This module used to lean on fastText's `lid.176.ftz`. That artifact was dropped
-with the rest of the trained components: a 917 KB model file *is* a trained
-model, and shipping one while claiming the system trains nothing is a
-contradiction an examiner finds in thirty seconds.
+Four decisions, three of which need nothing but the text itself:
 
-Losing it costs less than it appears, because three of the four decisions never
-used it:
-
-*   **Arabic** is decided by script ratio. Unambiguous, no model needed.
-*   **Derja** was never a fastText label at all. It has always been decided here,
-    by arabizi patterns and a marker set — precisely because fastText called
-    "3andi mochkla fel internet" Romanian and "nhabet nbadel operateur" English
-    at 0.64 confidence. A confident verdict from a model with no label for the
-    language is confidently wrong.
-*   **French vs English** is the only decision that used it, and stopword
-    overlap settles it: the two share almost no function words.
-
-`ar-tn` remains our own call, taken before anything else looks at the text.
+*   **Arabic** is decided by script ratio. Unambiguous.
+*   **Derja** is decided by arabizi patterns and a marker set, before anything
+    else looks at the text. Tunisian written in Latin script is a language no
+    general-purpose identifier has a label for, so it has to be decided here:
+    "3andi mochkla fel internet" and "nhabet nbadel operateur" are Tunisian, and
+    anything without that label will confidently call them something else.
+*   **French vs English** falls to stopword overlap, which settles it cleanly —
+    the two share almost no function words.
+*   Everything else is "other", reported honestly rather than guessed.
 """
 
 from dataclasses import dataclass
@@ -35,9 +28,7 @@ ARABIC_SCRIPT_THRESHOLD = 0.50
 
 #: Latin-script derja that carries no digit substitution. The arabizi pattern
 #: alone catches "3andi" and "7atta" but misses "el fatoura mte3i hedha chhar",
-#: which is just as Tunisian. fastText labelled that one "other" and
-#: "nhabet nbadel operateur" as English at 0.64 — it has no derja label, so a
-#: confident verdict on this text is confidently wrong.
+#: which is just as Tunisian — hence this second, purely lexical, list.
 DERJA_MARKERS = {
     "el", "eli", "hedha", "hedhi", "hakka", "kifeh", "chnowa", "chneya", "chkoun",
     "wa9tech", "9adech", "barcha", "barsha", "yezzi", "walou", "chwaya", "tawa",
@@ -68,14 +59,9 @@ ENGLISH_MARKERS = {
 class LanguageResult:
     code: str
     confidence: float
-    #: "fasttext" | "script" | "arabizi" | "heuristic" — surfaced in the trace so
+    #: "script" | "derja" | "heuristic" — surfaced in the trace so
     #: a degraded run is visible rather than silent.
     source: str
-
-
-def model_available() -> bool:
-    """Always False: there is no model. Kept so /health/ready keeps its shape."""
-    return False
 
 
 def detect(normalized: NormalizedText) -> LanguageResult:

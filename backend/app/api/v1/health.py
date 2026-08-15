@@ -5,7 +5,6 @@ from fastapi import APIRouter, Response, status
 from app import db
 from app.config import settings
 from app.events import bus
-from app.intelligence.text import language as lid
 from app.notifiers.sse import broker
 from app.services import triage
 
@@ -22,7 +21,7 @@ async def health() -> dict[str, Any]:
 async def ready(response: Response) -> dict[str, Any]:
     """Readiness, including the degraded-mode indicator required by spec 11.
 
-    Deleting `ml_artifacts/` and restarting must still yield a working system —
+    The engine loads no artifact, so readiness is about Mongo and Redis —
     and that state has to be visible here rather than inferred.
     """
     engine = triage.health()
@@ -42,10 +41,9 @@ async def ready(response: Response) -> dict[str, Any]:
         "engine": {
             "configured_backend": settings.triage_backend,
             "active_engine": engine.name,
-            "model_loaded": engine.model_loaded,
-            "model_version": engine.model_version,
+            "engine_ready": engine.engine_ready,
+            "engine_version": engine.engine_version,
             "degraded": engine.degraded,
             "detail": engine.detail,
-            "language_id_model": lid.model_available(),
         },
     }

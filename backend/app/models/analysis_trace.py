@@ -22,7 +22,7 @@ class AnalysisTrace(Document):
     complaint_id: PydanticObjectId
     complaint_ref: str
     engine: str
-    model_version: str
+    engine_version: str
     stages: list[TraceStage] = Field(default_factory=list)
     total_latency_ms: int = 0
     outcome: str = "ok"          # ok | failed | skipped

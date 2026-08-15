@@ -209,9 +209,9 @@ export function AnalysisPanel({
           <span className="font-medium text-ink">{analysis.engine ?? '—'}</span>
         </span>
         <span>
-          {t('analysis.model')}{' '}
+          {t('analysis.engine')}{' '}
           <span className="ltr-isolate font-medium text-ink">
-            {analysis.model_version ?? '—'}
+            {analysis.engine_version ?? '—'}
           </span>
         </span>
         {analysis.latency_ms !== null && (

@@ -30,9 +30,6 @@ const AdminRules = lazy(() =>
 const AdminKb = lazy(() =>
   import('./routes/AdminKb').then((m) => ({ default: m.AdminKb })),
 )
-const AdminMl = lazy(() =>
-  import('./routes/AdminMl').then((m) => ({ default: m.AdminMl })),
-)
 const AdminUsers = lazy(() =>
   import('./routes/AdminUsers').then((m) => ({ default: m.AdminUsers })),
 )
@@ -135,37 +132,6 @@ export function App() {
               </Protected>
             }
           />
-          <Route
-            path="/admin/ml"
-            element={
-              <Protected minimum="supervisor">
-                <Suspense fallback={<RouteFallback />}>
-                  <AdminMl />
-                </Suspense>
-              </Protected>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <Protected minimum="admin">
-                <Suspense fallback={<RouteFallback />}>
-                  <AdminUsers />
-                </Suspense>
-              </Protected>
-            }
-          />
-          <Route
-            path="/admin/departments"
-            element={
-              <Protected minimum="admin">
-                <Suspense fallback={<RouteFallback />}>
-                  <AdminDepartments />
-                </Suspense>
-              </Protected>
-            }
-          />
-        </Route>
 
         <Route path="*" element={<Navigate to="/portal" replace />} />
       </Routes>

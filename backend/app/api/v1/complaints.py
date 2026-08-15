@@ -291,7 +291,7 @@ async def analysis(complaint_id: PydanticObjectId, user: AgentUser) -> dict[str,
         "traces": [
             {
                 "engine": t.engine,
-                "model_version": t.model_version,
+                "engine_version": t.engine_version,
                 "outcome": t.outcome,
                 "error": t.error,
                 "total_latency_ms": t.total_latency_ms,

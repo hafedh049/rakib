@@ -100,7 +100,7 @@ class Analysis(BaseModel):
     needs_human_triage: bool = False
     triage_reason: str | None = None
     engine: str | None = None
-    model_version: str | None = None
+    engine_version: str | None = None
     latency_ms: int | None = None
     analyzed_at: datetime | None = None
 
@@ -166,7 +166,8 @@ class Complaint(Document):
     messages: list[Message] = Field(default_factory=list)
     timeline: list[TimelineEntry] = Field(default_factory=list)
     satisfaction: Satisfaction | None = None
-    #: A human changed the category or department — a training signal (spec 5.8).
+    #: A human changed the category or department. Feeds the correction rate,
+    #: which is one of the key performance indicators Article 9 requires.
     corrected: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

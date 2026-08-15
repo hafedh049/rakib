@@ -2,21 +2,18 @@
 
 Scores every category by the weighted terms it matches, discounts terms that
 several categories share, and declares a winner only when it clears the runner-up
-by a margin. Below that margin the classifier says so rather than guessing —
-the same contract the trained model had, honoured by different means.
+by a margin. Below that margin it says so rather than guessing.
 
-Two properties a trained classifier could not offer, and which matter more in a
-bank than a few points of accuracy:
+Two properties matter more here than raw accuracy would:
 
 *   **Traceability.** The verdict carries the exact terms that produced it, so
     an agent — or an auditor under Article 12 — can see why, not just what.
 *   **Determinism.** The same complaint always yields the same category. There
-    is no model version to reconcile, no drift, and no retraining to justify.
+    is no version to reconcile and no drift to monitor.
 
-What it gives up is generalisation: a complaint phrased entirely outside the
-lexicon scores zero and goes to a human. That is a real cost and it is measured
-in scripts/evaluate.py against the same gold and wild sets the trained model
-was held to.
+The cost is generalisation: a complaint phrased entirely outside the lexicon
+scores zero and goes to a human. That cost is measured, not assumed — see
+scripts/evaluate.py.
 """
 
 import math

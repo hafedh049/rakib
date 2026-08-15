@@ -28,15 +28,11 @@ class Settings(BaseSettings):
     tracking_token_ttl_days: int = 365
 
     triage_backend: Literal["lexicon", "rules"] = "lexicon"
-    ml_artifacts_dir: str = "./ml_artifacts"
     category_confidence_threshold: float = 0.55
     ambiguity_margin: float = 0.15
     dedup_auto_threshold: float = 0.82
     dedup_suggest_threshold: float = 0.65
     dedup_cross_claimant_threshold: float = 0.90
-    retrain_min_samples: int = 200
-    retrain_correction_trigger: int = 50
-    retrain_f1_tolerance: float = 0.02
 
     sla_business_hours: bool = False
     sla_timezone: str = "Africa/Tunis"
@@ -62,7 +58,6 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:5173"
     public_url: str = "http://localhost:5173"
 
-    openrouter_api_key: str = ""
 
     @property
     def sla_hours_by_priority(self) -> dict[int, int]:

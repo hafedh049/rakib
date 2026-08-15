@@ -18,9 +18,12 @@ from app.intelligence.ports import DedupCandidate
 
 SHINGLE_SIZE = 5
 
-WEIGHT_COSINE = 0.5
-WEIGHT_FUZZ = 0.3
-WEIGHT_JACCARD = 0.2
+#: Two complementary views of "the same complaint, said twice". The token-set
+#: ratio forgives reordering and small edits; shingle overlap catches copied
+#: passages. Neither is fooled by the same things, which is the point of using
+#: both — and both are exact, so a duplicate flag can be explained to a client.
+WEIGHT_FUZZ = 0.6
+WEIGHT_JACCARD = 0.4
 
 #: Same claimant is weak evidence on its own, so it nudges rather than decides.
 SAME_CLAIMANT_BONUS = 0.05
@@ -31,7 +34,6 @@ class DedupMatch:
     candidate_id: str
     score: float
     same_claimant: bool
-    cosine: float
     fuzz_ratio: float
     jaccard: float
 
@@ -54,47 +56,15 @@ def jaccard(left: str, right: str) -> float:
     return len(first & second) / len(first | second)
 
 
-def cosine_similarity(vectorizer, left: str, right: str) -> float:
-    """TF-IDF cosine using the classifier's own vectorizer.
-
-    Returns 0.0 when no vectorizer is available — the cold-start case, where the
-    remaining two signals carry the score (see `score_candidate`).
-    """
-    if vectorizer is None:
-        return 0.0
-    try:
-        matrix = vectorizer.transform([left, right])
-    except Exception:  # noqa: BLE001 — dedup must never break triage
-        return 0.0
-    first, second = matrix[0], matrix[1]
-    denominator = (first.multiply(first).sum() ** 0.5) * (
-        second.multiply(second).sum() ** 0.5
-    )
-    if denominator == 0:
-        return 0.0
-    return float(first.multiply(second).sum() / denominator)
-
-
 def score_candidate(
     text: str,
     subject: str,
     candidate: DedupCandidate,
     claimant_email: str | None,
-    vectorizer=None,
 ) -> DedupMatch:
-    cosine = cosine_similarity(vectorizer, text, candidate.normalized_text)
     ratio = fuzz.token_set_ratio(subject, candidate.subject) / 100.0
     overlap = jaccard(text, candidate.normalized_text)
-
-    if vectorizer is None:
-        # Cold start: redistribute the cosine weight over the two signals that
-        # do not need a trained model, rather than scoring everything lower.
-        total = WEIGHT_FUZZ + WEIGHT_JACCARD
-        score = (WEIGHT_FUZZ / total) * ratio + (WEIGHT_JACCARD / total) * overlap
-    else:
-        score = (
-            WEIGHT_COSINE * cosine + WEIGHT_FUZZ * ratio + WEIGHT_JACCARD * overlap
-        )
+    score = WEIGHT_FUZZ * ratio + WEIGHT_JACCARD * overlap
 
     same_claimant = bool(
         claimant_email
@@ -108,7 +78,6 @@ def score_candidate(
         candidate_id=candidate.id,
         score=round(score, 4),
         same_claimant=same_claimant,
-        cosine=round(cosine, 4),
         fuzz_ratio=round(ratio, 4),
         jaccard=round(overlap, 4),
     )

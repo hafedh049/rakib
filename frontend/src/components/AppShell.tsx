@@ -50,7 +50,6 @@ const PRIMARY: NavItem[] = [
 const ADMIN: NavItem[] = [
   { to: '/admin/rules', labelKey: 'nav.rules', minimum: 'supervisor' },
   { to: '/admin/kb', labelKey: 'nav.kb', minimum: 'supervisor' },
-  { to: '/admin/ml', labelKey: 'nav.ml', minimum: 'supervisor' },
   { to: '/admin/users', labelKey: 'nav.users', minimum: 'admin' },
   { to: '/admin/departments', labelKey: 'nav.departments', minimum: 'admin' },
 ]

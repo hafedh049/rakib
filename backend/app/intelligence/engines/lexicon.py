@@ -1,4 +1,4 @@
-"""The production engine: deterministic, explainable, no trained model.
+"""The production engine: deterministic and explainable.
 
 Same six stages as before — normalise, language, classify, rules, dedup, decide
 — but the classify stage is a weighted lexicon rather than a learned model. The
@@ -126,7 +126,7 @@ class LexiconTriageEngine:
             needs_human_triage=verdict.category is None,
             triage_reason=None if verdict.category else verdict.reason,
             engine=self.name,
-            model_version=LEXICON_VERSION,
+            engine_version=LEXICON_VERSION,
             latency_ms=latency_ms,
             stages=stages,
         )
@@ -138,10 +138,9 @@ class LexiconTriageEngine:
             # Not degraded: this is the intended engine, not a fallback. There is
             # no model to be missing, so there is no degraded state to report.
             degraded=False,
-            model_loaded=False,
-            model_version=LEXICON_VERSION,
+            engine_version=LEXICON_VERSION,
             detail=(
                 f"Categorisation deterministe par lexique pondere "
-                f"({TERM_COUNT} termes). Aucun modele entraine, aucun artefact."
+                f"({TERM_COUNT} termes), editable depuis la console."
             ),
         )

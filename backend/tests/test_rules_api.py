@@ -155,6 +155,6 @@ async def test_ready_exposes_the_engine_state(client):
     body = (await client.get("/health/ready")).json()
     engine = body["engine"]
     assert engine["active_engine"] in {"ml", "rules"}
-    assert engine["model_loaded"] is (engine["active_engine"] == "ml")
-    assert engine["degraded"] is not engine["model_loaded"]
+    assert engine["engine_ready"] is (engine["active_engine"] == "ml")
+    assert engine["degraded"] is not engine["engine_ready"]
     assert engine["language_id_model"] is True

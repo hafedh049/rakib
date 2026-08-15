@@ -76,7 +76,7 @@ def test_same_claimant_gets_a_bonus():
 
 
 def test_cold_start_scores_without_a_vectorizer():
-    """No trained model yet: fuzz and shingles must still produce a usable score."""
+    """Token-set ratio and shingle overlap must produce a usable score."""
     match = score_candidate(
         TEXT_A, "Facture elevee", candidate("1", "Facture elevee", TEXT_B), None,
         vectorizer=None,

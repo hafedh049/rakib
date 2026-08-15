@@ -30,9 +30,9 @@ async def agents(_: SupervisorUser, days: Window = 30) -> list[dict[str, Any]]:
     return await analytics_service.agents(days)
 
 
-@router.get("/model")
-async def model(_: SupervisorUser) -> dict[str, Any]:
-    return await analytics_service.model_report()
+@router.get("/engine")
+async def engine(_: SupervisorUser) -> dict[str, Any]:
+    return await analytics_service.engine_report()
 
 
 @router.get("/rules")

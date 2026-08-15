@@ -55,7 +55,7 @@ export interface Analysis {
   needs_human_triage: boolean
   triage_reason: string | null
   engine: string | null
-  model_version: string | null
+  engine_version: string | null
   latency_ms: number | null
   analyzed_at: string | null
 }
@@ -241,41 +241,6 @@ export interface PublicComplaint {
     body: string
   }[]
   satisfaction_submitted: boolean
-}
-
-export interface ModelStatus {
-  engine: {
-    name: string
-    model_loaded: boolean
-    model_version: string | null
-    degraded: boolean
-    detail: string | null
-  }
-  active_version: number | null
-  active_metrics: Record<string, unknown>
-  available_versions: number[]
-  samples: {
-    total: number
-    corrections: number
-    manual: number
-    pending_corrections: number
-  }
-  retrain_trigger_at: number
-  f1_tolerance: number
-}
-
-export interface ModelVersion {
-  id: string
-  version: number
-  metrics: Record<string, unknown>
-  sample_count: number
-  class_counts: Record<string, number>
-  trained_at: string
-  promoted_at: string | null
-  active: boolean
-  promoted: boolean
-  rejection_reason: string | null
-  triggered_by: string
 }
 
 export interface Overview {

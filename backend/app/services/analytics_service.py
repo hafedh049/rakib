@@ -11,9 +11,7 @@ from typing import Any
 from app.core.logging import get_logger
 from app.models.complaint import CLOSED_STATUSES, Complaint, Status
 from app.models.kb_article import KBArticle
-from app.models.model_version import ModelVersion
 from app.models.rule import Rule
-from app.models.training_sample import SampleSource, TrainingSample
 from app.models.user import Role, User
 
 log = get_logger(__name__)
@@ -213,11 +211,15 @@ async def agents(days: int = DEFAULT_WINDOW_DAYS) -> list[dict[str, Any]]:
     ]
 
 
-async def model_report() -> dict[str, Any]:
-    """Accuracy over time, correction rate, and the active confusion matrix."""
-    versions = await ModelVersion.find_all().sort("version").to_list()
-    active = next((v for v in versions if v.active), None)
+async def engine_report() -> dict[str, Any]:
+    """How often the engine is overruled, and at what confidence.
 
+    Article 9 requires key performance indicators. The correction rate is the
+    honest one: the share of automatic categorisations an agent had to change.
+    Read together with the confidence buckets it also validates the abstention
+    thresholds — if the lowest bucket is rarely corrected, the engine is being
+    too cautious; if the highest bucket is often corrected, too bold.
+    """
     total_triaged = await Complaint.find({"analysis.category": {"$ne": None}}).count()
     corrected = await Complaint.find({"corrected": True}).count()
 
@@ -239,33 +241,13 @@ async def model_report() -> dict[str, Any]:
     ).to_list()
 
     return {
-        "active_version": active.version if active else None,
-        "history": [
-            {
-                "version": version.version,
-                "trained_at": version.trained_at,
-                "macro_f1": version.macro_f1,
-                "sample_count": version.sample_count,
-                "promoted": version.promoted,
-                "rejection_reason": version.rejection_reason,
-            }
-            for version in versions
-        ],
-        "confusion_matrix": (
-            active.metrics.get("confusion_matrix") if active else None
-        ),
-        "labels": active.metrics.get("labels") if active else None,
-        "per_class": active.metrics.get("per_class") if active else None,
         "corrections": {
             "triaged": total_triaged,
             "corrected": corrected,
-            # The headline number for the report: how often a human disagreed.
+            # The headline number: how often a human disagreed with the engine.
             "correction_rate": (
                 round(corrected / total_triaged, 4) if total_triaged else 0.0
             ),
-            "pending_samples": await TrainingSample.find(
-                {"source": str(SampleSource.CORRECTION), "used_in_version": None}
-            ).count(),
         },
         "confidence_buckets": [
             {

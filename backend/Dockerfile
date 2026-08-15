@@ -6,7 +6,6 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# build deps for fasttext (compiled once, dropped from the runtime layer)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential g++ curl \
     && rm -rf /var/lib/apt/lists/*
@@ -17,7 +16,6 @@ RUN pip install --no-cache-dir . \
     && apt-get autoremove -y
 
 COPY app ./app
-COPY ml_artifacts ./ml_artifacts
 COPY data ./data
 
 # Only the operational scripts ship. harvest.py, generate_dataset.py, corpus.py
