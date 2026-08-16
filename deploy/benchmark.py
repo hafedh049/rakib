@@ -19,6 +19,11 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
+#: Every row the benchmark creates carries this address so it can be removed
+#: again. A load test that leaves a thousand complaints behind does not just
+#: clutter the demo — it inflates the annual declaration to the regulator.
+BENCH_EMAIL = "benchmark@rakib.invalid"
+
 BODY = {
     "subject": "Retrait debite sans distribution de billets",
     "body": (
@@ -27,7 +32,10 @@ BODY = {
         "J ai deja appele le service client deux fois sans resultat."
     ),
     "channel": "web",
-    "claimant": {"full_name": "Charge de test", "email": "bench@example.tn"},
+    # Recognisable on purpose: these rows are real complaints in the real
+    # database and they land in the BCT declaration. Marking them makes the
+    # cleanup below exact rather than approximate.
+    "claimant": {"full_name": "Charge de test", "email": BENCH_EMAIL},
 }
 
 
@@ -74,6 +82,32 @@ def default_url() -> str:
     except Exception:  # noqa: BLE001 — fall through to the DNS name
         pass
     return "http://api.reclamations.svc.cluster.local:8000/api/v1/complaints"
+
+
+def cleanup() -> None:
+    """Delete the rows this benchmark created.
+
+    Runs by default. Skipping it is possible (--keep) but has to be asked for,
+    because the failure mode is silent: the complaints look real, they are
+    categorised and counted, and they only become visible as a wrong number in
+    a regulatory report months later.
+    """
+    script = "\n".join([
+        "import asyncio",
+        "from app import db",
+        "from app.models.complaint import Complaint",
+        "async def main():",
+        "    await db.init_db()",
+        f"    result = await Complaint.find({{'claimant.email': '{BENCH_EMAIL}'}}).delete()",
+        "    print('cleanup: deleted', result.deleted_count if result else 0)",
+        "    await db.close_db()",
+        "asyncio.run(main())",
+    ])
+    subprocess.run(
+        ["kubectl", "-n", "reclamations", "exec", "deploy/api", "--",
+         "python", "-c", script],
+        check=False,
+    )
 
 
 def main() -> None:
@@ -125,6 +159,9 @@ def main() -> None:
     print(f"p99           {percentile(0.99):.1f} ms")
     print(f"max           {latencies[-1]:.1f} ms")
     print()
+    if "--keep" not in sys.argv:
+        cleanup()
+
     print("target: POST /complaints under 100 ms p95 (spec section 9)")
     # A pass requires the requests to have worked. Timing failures fast is not
     # a performance result.
