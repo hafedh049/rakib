@@ -9,7 +9,17 @@
   --font-sans:
     system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
-  --font-arabic: 'IBM Plex Sans Arabic', 'Noto Sans Arabic', var(--font-sans);
+  /* No webfont is bundled, and that is a decision rather than an omission.
+     The system must run fully offline, so a CDN-hosted face is out; and a
+     self-hosted woff2 would add weight to a portal whose users are often on a
+     phone and a poor connection, to replace faces that already render Arabic
+     correctly on every target platform. The chain below names the good local
+     Arabic faces in order — IBM Plex and Noto if the machine happens to have
+     them, then the platform defaults: Segoe UI on Windows, Geeza Pro on Apple,
+     Droid/Noto Naskh on Android. */
+  --font-arabic:
+    'IBM Plex Sans Arabic', 'Noto Sans Arabic', 'Segoe UI', 'Geeza Pro',
+    'Noto Naskh Arabic', 'Droid Arabic Naskh', 'Tahoma', var(--font-sans);
 
   --text-2xs: 0.75rem;
   --text-xs: 0.8125rem;

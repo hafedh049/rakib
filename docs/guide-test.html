@@ -1840,6 +1840,84 @@
           </p>
         </div>
       </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">G5</span>
+          <p class="test-title">La déclaration annuelle ROGS760</p>
+        </div>
+        <p style="font-size:0.925rem;margin-bottom:0">
+          L'annexe 2 ajoute au dispositif de reporting la déclaration
+          <strong>ROGS760</strong>, annuelle, transmise en XML dans les 45 jours.
+          En superviseur&nbsp;:
+        </p>
+        <div class="copyblock code" data-copy>curl -H "Authorization: Bearer $TOKEN"   https://reclamations.activiity.com/api/v1/analytics/declaration/2026/xml</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Les quatre tableaux de l'annexe 3 renseignés&nbsp;: répartition par
+            nature de réclamant, particuliers par genre et tranche d'âge,
+            répartition par canal de réception, puis ventilation par objet avec
+            le <strong>délai moyen en jours ouvrables</strong> et les suites
+            réservées. Le total doit correspondre au nombre de réclamations de
+            l'année, et <code>HorsPerimetreExclues</code> indiquer combien ont
+            été écartées au titre de l'article 2.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">G6</span>
+          <p class="test-title">Article 2 — ce qui n'est pas une réclamation</p>
+        </div>
+        <p style="font-size:0.925rem;margin-bottom:0">
+          Déposer le message ci-dessous, puis rouvrir la déclaration de
+          l'épreuve précédente.
+        </p>
+        <div class="copyblock" data-copy>Bonjour, je souhaiterais connaître les démarches pour obtenir un chéquier sur mon compte courant. Merci d'avance.</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            La réclamation est <strong>reçue, accusée, routée et traitée
+            normalement</strong> — refuser de la traiter serait pire que de la
+            compter. Mais l'historique porte une entrée
+            <em>hors périmètre</em> avec le motif
+            <code>DEMANDE_INFORMATION</code>, et le compteur
+            <code>HorsPerimetreExclues</code> de la déclaration augmente d'une
+            unité sans que <code>TotalRecues</code> bouge. La détection est
+            volontairement prudente&nbsp;: un faux positif retirerait une vraie
+            réclamation d'un décompte réglementaire, seule erreur qui compte
+            ici.
+          </p>
+        </div>
+      </div>
+
+      <div class="test">
+        <div class="test-head">
+          <span class="test-id">G7</span>
+          <p class="test-title">Article 8 — un rejet doit être motivé</p>
+        </div>
+        <ol>
+          <li>Sur une réclamation ouverte, tenter un rejet avec une motivation
+              très courte (« non »).</li>
+          <li>Recommencer avec une motivation réelle et circonstanciée.</li>
+        </ol>
+        <div class="copyblock code" data-copy>POST /api/v1/complaints/{id}/reject
+{"motivation": "non"}</div>
+        <div class="expect">
+          <span class="label">Résultat attendu</span>
+          <p>
+            Le premier appel est refusé en citant l'article 8. Le second passe,
+            la motivation est enregistrée dans le registre <em>et</em> envoyée
+            au client — une motivation que le client ne voit jamais n'est pas
+            une motivation. L'obligation est portée par le service, pas par
+            l'interface&nbsp;: un rejet sans raison est un défaut qu'un audit au
+            titre de l'article 12 trouverait des mois plus tard, quand l'agent
+            qui savait sera parti.
+          </p>
+        </div>
+      </div>
     </section>
 
     <!-- ============================================================ 11 -->
@@ -1978,12 +2056,12 @@ mypy app/                                      # types</div>
             </tr>
             <tr>
               <td>p95 de bout en bout, 1 client</td>
-              <td class="num">191 ms</td>
-              <td class="tight"><span class="tag tag-p2">au-delà de la cible</span></td>
+              <td class="num">58 ms</td>
+              <td class="tight"><span class="tag tag-ok">conforme</span></td>
             </tr>
             <tr>
               <td>p95 de bout en bout, 20 clients</td>
-              <td class="num">865 ms</td>
+              <td class="num">501 ms</td>
               <td class="tight"><span class="tag tag-p2">au-delà de la cible</span></td>
             </tr>
           </tbody>
@@ -1991,9 +2069,13 @@ mypy app/                                      # types</div>
       </div>
       <p>
         La cible visée était de 100&nbsp;ms. Elle n'est pas atteinte, et la
-        décomposition mesurée attribue l'écart à la <strong>machine hôte partagée</strong>
-        (charge de 10 à 13 sur 16 cœurs) plutôt qu'à l'application ou au modèle. Le
-        chiffre est rapporté tel quel, avec sa cause.
+        décomposition mesurée attribue une <em>part</em> de l'écart à la
+        <strong>machine hôte partagée</strong>
+        (charge de 6 à 9 pendant la mesure). Mais pas toute&nbsp;: le débit plafonne
+        vers 60 requêtes par seconde, et un plateau aussi net signale une
+        contention dans le chemin de requête plutôt qu'une machine occupée. La
+        cible est tenue sans concurrence et ne l'est plus à partir de cinq
+        clients simultanés&nbsp;; le chiffre est rapporté tel quel.
       </p>
     </section>
 
@@ -2010,32 +2092,13 @@ mypy app/                                      # types</div>
           <thead><tr><th>Limite</th><th>Portée</th><th>Détail</th></tr></thead>
           <tbody>
             <tr>
-              <td><strong>Pas de réaffectation d'agent</strong></td>
-              <td class="tight"><span class="tag tag-p2">Démonstration</span></td>
-              <td>
-                Le serveur l'accepte, l'interface n'expose aucun bouton. À ne pas
-                promettre pendant une démonstration.
-              </td>
-            </tr>
-            <tr>
-              <td><strong>Notifications visuelles absentes</strong></td>
-              <td class="tight"><span class="tag tag-p2">Confort</span></td>
-              <td>
-                Les erreurs s'affichent en ligne&nbsp;; les mises à jour temps réel
-                arrivent en silence.
-              </td>
-            </tr>
-            <tr>
-              <td><strong>Export XML ROGS760</strong></td>
-              <td class="tight"><span class="tag tag-p3">Secondaire</span></td>
-              <td>La déclaration annuelle à la BCT est spécifiée dans <code>bct.py</code> mais pas encore générée.</td>
-            </tr>
-            <tr>
-              <td><strong>Image conteneur de 1,2 Go</strong></td>
+              <td><strong>Marque officielle non fournie</strong></td>
               <td class="tight"><span class="tag tag-p3">Technique</span></td>
               <td>
-                La pile scientifique ayant été retirée avec le modèle, la taille
-                devrait être largement sous la cible — à remesurer.
+                <code>Brandmark</code> charge <code>public/brand/uib.svg</code> et
+                retombe sur une composition typographique tant que le fichier
+                n'est pas déposé. L'artwork est une marque déposée et n'est
+                délibérément pas versionné.
               </td>
             </tr>
             <tr>
@@ -2052,14 +2115,6 @@ mypy app/                                      # types</div>
               <td>
                 Conséquence d'un choix de sécurité (jeton en mémoire uniquement).
                 Sans effet fonctionnel.
-              </td>
-            </tr>
-            <tr>
-              <td><strong>Motivation du rejet non imposée</strong></td>
-              <td class="tight"><span class="tag tag-p3">Données</span></td>
-              <td>
-                Le champ existe (article 8), mais l'API n'interdit pas encore de
-                clôturer un rejet sans le renseigner.
               </td>
             </tr>
           </tbody>

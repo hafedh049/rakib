@@ -66,6 +66,19 @@ light, 4.8:1 in dark. Placeholders use `--ink-muted`, not a lighter step.
 - `--success` `oklch(0.50 0.12 155)` — resolved, within deadline.
 - `--info` = `--primary`.
 
+### Arabic type
+
+No webfont is bundled. The system is required to run fully offline, which rules
+out a CDN-hosted face; and a self-hosted woff2 would add weight to a portal whose
+users are often on a phone and a poor connection, in order to replace faces that
+already render Arabic correctly on every platform we target. `--font-arabic`
+therefore names the good local faces in preference order and falls through to the
+platform default — Segoe UI on Windows, Geeza Pro on Apple, Noto Naskh on
+Android.
+
+If the bank later supplies a licensed face, self-host it and prepend it to that
+one token; nothing else changes.
+
 ### The mark
 
 The official artwork is a registered trademark and is **not** committed. `Brandmark`
