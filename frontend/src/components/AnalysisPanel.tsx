@@ -209,7 +209,7 @@ export function AnalysisPanel({
           <span className="font-medium text-ink">{analysis.engine ?? '—'}</span>
         </span>
         <span>
-          {t('analysis.engine')}{' '}
+          {t('analysis.engineVersion')}{' '}
           <span className="ltr-isolate font-medium text-ink">
             {analysis.engine_version ?? '—'}
           </span>

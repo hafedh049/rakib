@@ -92,6 +92,12 @@ export const ar: Partial<Record<TranslationKey, string>> = {
   'common.retry': 'إعادة المحاولة',
   'common.required': 'هذا الحقل إجباري',
 
+  'complaint.reassign': 'إعادة الإسناد إلى عون',
+  'complaint.unassigned': 'غير مسندة',
+  'complaint.reassigned': 'أعيد إسنادها إلى {name}',
+  'complaint.unassignedDone': 'تم رفع الإسناد',
+  'complaint.reassignFailed': 'فشلت إعادة الإسناد',
+  'analysis.engineVersion': 'الإصدار',
   'category.CARTE_BANCAIRE': 'البطاقة البنكية',
   'category.DAB_GAB': 'الموزع الآلي',
   'category.PAIEMENT_TPE_ECOMMERCE': 'الدفع الإلكتروني',

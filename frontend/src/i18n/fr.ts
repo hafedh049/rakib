@@ -192,6 +192,7 @@ export const fr = {
   'analysis.relatedHelp':
     'Meme problème signalé par d’autres clients — probablement un incident collectif.',
   'analysis.needsTriage': 'Vérification humaine requise',
+  'analysis.engineVersion': 'Version',
   'analysis.engine': 'Moteur',
   'analysis.latency': 'Durée',
   'analysis.stages': 'Étapes',
@@ -330,6 +331,10 @@ export const fr = {
 
   'lang.fr': 'Français',
   'lang.ar': 'Arabe',
+  'complaint.reassign': 'Réaffecter à un agent',
+  'complaint.reassigned': 'Réaffectée à {name}',
+  'complaint.unassignedDone': 'Affectation retirée',
+  'complaint.reassignFailed': 'La réaffectation a échoué',
   'category.CARTE_BANCAIRE': 'Carte bancaire',
   'category.DAB_GAB': 'Distributeur (DAB/GAB)',
   'category.PAIEMENT_TPE_ECOMMERCE': 'Paiement TPE et e-commerce',

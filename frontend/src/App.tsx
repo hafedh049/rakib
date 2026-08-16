@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
 import { Skeleton } from './components/ui'
 import { useAuth } from './lib/auth'
+import { ToastProvider } from './components/Toasts'
 import { SSEProvider } from './lib/sse'
 import type { Role } from './lib/types'
 import { Login } from './routes/Login'
@@ -60,7 +61,8 @@ function Protected({ minimum, children }: { minimum: Role; children: React.React
 
 export function App() {
   return (
-    <SSEProvider>
+    <ToastProvider>
+      <SSEProvider>
       <Routes>
         {/* ---- public portal (light, FR + AR RTL) ---- */}
         <Route path="/" element={<Navigate to="/portal" replace />} />
@@ -156,6 +158,7 @@ export function App() {
 
         <Route path="*" element={<Navigate to="/portal" replace />} />
       </Routes>
-    </SSEProvider>
+      </SSEProvider>
+    </ToastProvider>
   )
 }

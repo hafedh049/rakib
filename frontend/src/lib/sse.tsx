@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
+import { useToast, type ToastKind } from '../components/Toasts'
 import { API_BASE, getAccessToken } from './api'
 import { useAuth } from './auth'
 
@@ -34,8 +35,20 @@ const INVALIDATES: Record<string, string[]> = {
   'sla.warning': ['complaints', 'supervision'],
   'sla.breached': ['complaints', 'supervision', 'overview'],
   'complaint.escalated': ['complaints', 'supervision'],
-  'triage.corrected': ['complaints', 'complaint', 'model'],
-  'model.promoted': ['model', 'ml-status'],
+  'triage.corrected': ['complaints', 'complaint', 'engine'],
+}
+
+/**
+ * Stream events worth interrupting an agent for, and how they read.
+ *
+ * Deliberately not every event: the queue already refreshes itself, so a toast
+ * per arrival would be noise. Only the two that change what someone should do
+ * next — a deadline about to expire, and one already missed — plus escalation.
+ */
+const ANNOUNCE: Record<string, { message: string; kind: ToastKind }> = {
+  'sla.warning': { message: 'Une réclamation approche de son échéance', kind: 'warning' },
+  'sla.breached': { message: 'Échéance dépassée sur une réclamation', kind: 'danger' },
+  'complaint.escalated': { message: 'Une réclamation a été escaladée', kind: 'warning' },
 }
 
 const RECONNECT_MIN_MS = 1_000
@@ -43,6 +56,7 @@ const RECONNECT_MAX_MS = 30_000
 
 export function SSEProvider({ children }: { children: ReactNode }) {
   const { isStaff } = useAuth()
+  const { announce } = useToast()
   const queryClient = useQueryClient()
   const [connected, setConnected] = useState(false)
   const [lastEvent, setLastEvent] = useState<string | null>(null)
@@ -90,6 +104,8 @@ export function SSEProvider({ children }: { children: ReactNode }) {
           if (!name) continue // heartbeat or comment
 
           setLastEvent(name)
+          const notice = ANNOUNCE[name]
+          if (notice) announce(notice.message, notice.kind)
           for (const key of INVALIDATES[name] ?? []) {
             void queryClient.invalidateQueries({ queryKey: [key] })
           }
@@ -116,7 +132,7 @@ export function SSEProvider({ children }: { children: ReactNode }) {
       if (timer) window.clearTimeout(timer)
       setConnected(false)
     }
-  }, [isStaff, queryClient])
+  }, [isStaff, queryClient, announce])
 
   return (
     <SSEContext.Provider value={{ connected, lastEvent }}>

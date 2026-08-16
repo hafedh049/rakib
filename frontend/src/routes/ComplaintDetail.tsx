@@ -20,11 +20,12 @@ import {
   Toggle,
   cx,
 } from '@/components/ui'
+import { useToast } from '@/components/Toasts'
 import { useT } from '@/i18n'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { formatDateTime, formatRelative } from '@/lib/format'
-import type {
+import type { User,
   Complaint,
   Status,
   SuggestionResponse,
@@ -62,6 +63,7 @@ const STATUSES: Status[] = [
 export function ComplaintDetail() {
   const { id = '' } = useParams()
   const { t, locale } = useT()
+  const { notify } = useToast()
   const { can } = useAuth()
   const queryClient = useQueryClient()
 
@@ -92,6 +94,28 @@ export function ComplaintDetail() {
   const retriage = useMutation({
     mutationFn: () => api.post(`/complaints/${id}/retriage`),
     onSuccess: invalidate,
+  })
+
+  // Supervisors only — the API enforces the same rule, this just avoids
+  // showing a control that would be refused.
+  const { data: agents = [] } = useQuery<User[]>({
+    queryKey: ['staff'],
+    queryFn: () => api.get('/users?role=agent'),
+    enabled: can('supervisor'),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const reassign = useMutation({
+    mutationFn: (agentId: string) =>
+      api.patch(`/complaints/${id}`, { agent_id: agentId || null }),
+    onSuccess: (_result, agentId) => {
+      invalidate()
+      const name = agents.find((agent) => agent.id === agentId)?.full_name
+      notify(
+        name ? t('complaint.reassigned', { name }) : t('complaint.unassignedDone'),
+      )
+    },
+    onError: () => notify(t('complaint.reassignFailed'), 'danger'),
   })
 
   if (complaint.isLoading) {
@@ -165,6 +189,7 @@ export function ComplaintDetail() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Select
+            className="w-auto min-w-44"
             aria-label={t('complaint.changeStatus')}
             value={data.status}
             onChange={(event) => changeStatus.mutate(event.target.value as Status)}
@@ -175,6 +200,23 @@ export function ComplaintDetail() {
               </option>
             ))}
           </Select>
+
+          {can('supervisor') && (
+            <Select
+              className="w-auto min-w-52"
+              aria-label={t('complaint.reassign')}
+              value={data.assignment?.agent_id ?? ''}
+              disabled={reassign.isPending}
+              onChange={(event) => reassign.mutate(event.target.value)}
+            >
+              <option value="">{t('complaint.unassigned')}</option>
+              {agents.map((agent) => (
+                <option key={agent.id} value={agent.id}>
+                  {agent.full_name}
+                </option>
+              ))}
+            </Select>
+          )}
 
           {can('supervisor') && (
             <Button onClick={() => retriage.mutate()} loading={retriage.isPending}>

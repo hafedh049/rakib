@@ -273,3 +273,16 @@
     scrollbar-color: var(--line) transparent;
   }
 }
+
+/* Toast entrance. Reduced motion gets the end state with no travel. */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(0.5rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes toast-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
