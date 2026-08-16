@@ -1,0 +1,1368 @@
+<title>Rakib — Référence technique</title>
+
+<style>
+  :root {
+    --ground:      oklch(0.995 0.002 25);
+    --surface:     oklch(0.978 0.004 25);
+    --surface-2:   oklch(0.958 0.006 25);
+    --ink:         oklch(0.19 0.008 25);
+    --ink-muted:   oklch(0.45 0.010 25);
+    --ink-faint:   oklch(0.60 0.010 25);
+    --line:        oklch(0.89 0.005 25);
+    --line-strong: oklch(0.80 0.007 25);
+    --brand:       oklch(0.55 0.215 27);
+    --brand-soft:  oklch(0.962 0.030 27);
+    --amber:       oklch(0.60 0.13 75);
+    --amber-soft:  oklch(0.962 0.045 80);
+    --danger:      oklch(0.44 0.16 25);
+    --danger-soft: oklch(0.962 0.035 25);
+    --success:     oklch(0.48 0.12 155);
+    --success-soft:oklch(0.960 0.038 155);
+    --code-bg:     oklch(0.965 0.005 25);
+
+    --serif: ui-serif, "Iowan Old Style", "Source Serif 4", Cambria, Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+    --arabic: "Segoe UI", "Noto Naskh Arabic", "Geeza Pro", var(--sans);
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      oklch(0.160 0.006 25);
+      --surface:     oklch(0.205 0.008 25);
+      --surface-2:   oklch(0.248 0.010 25);
+      --ink:         oklch(0.96 0.003 25);
+      --ink-muted:   oklch(0.73 0.008 25);
+      --ink-faint:   oklch(0.58 0.010 25);
+      --line:        oklch(0.30 0.010 25);
+      --line-strong: oklch(0.41 0.012 25);
+      --brand:       oklch(0.64 0.21 27);
+      --brand-soft:  oklch(0.28 0.055 27);
+      --amber:       oklch(0.80 0.13 75);
+      --amber-soft:  oklch(0.29 0.055 70);
+      --danger:      oklch(0.66 0.17 25);
+      --danger-soft: oklch(0.28 0.065 25);
+      --success:     oklch(0.73 0.12 155);
+      --success-soft:oklch(0.27 0.050 155);
+      --code-bg:     oklch(0.185 0.007 25);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      oklch(0.160 0.006 25);
+    --surface:     oklch(0.205 0.008 25);
+    --surface-2:   oklch(0.248 0.010 25);
+    --ink:         oklch(0.96 0.003 25);
+    --ink-muted:   oklch(0.73 0.008 25);
+    --ink-faint:   oklch(0.58 0.010 25);
+    --line:        oklch(0.30 0.010 25);
+    --line-strong: oklch(0.41 0.012 25);
+    --brand:       oklch(0.64 0.21 27);
+    --brand-soft:  oklch(0.28 0.055 27);
+    --amber:       oklch(0.80 0.13 75);
+    --amber-soft:  oklch(0.29 0.055 70);
+    --danger:      oklch(0.66 0.17 25);
+    --danger-soft: oklch(0.28 0.065 25);
+    --success:     oklch(0.73 0.12 155);
+    --success-soft:oklch(0.27 0.050 155);
+    --code-bg:     oklch(0.185 0.007 25);
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem) 6rem;
+  }
+  @media (min-width: 1100px) {
+    .page { grid-template-columns: 15rem minmax(0, 1fr); gap: 3.25rem; align-items: start; }
+  }
+  main { min-width: 0; }
+
+  .masthead {
+    grid-column: 1 / -1;
+    padding: clamp(2.25rem, 5vw, 3.5rem) 0 1.75rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .masthead::before {
+    content: ''; position: absolute; inset-inline: 0; top: 0;
+    height: 3px; background: var(--brand);
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.71rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--brand); margin: 0 0 0.8rem;
+  }
+  .masthead h1 {
+    font-family: var(--serif); font-size: clamp(1.9rem, 5vw, 2.9rem);
+    font-weight: 600; letter-spacing: -0.022em; line-height: 1.08; margin: 0;
+    text-wrap: balance;
+  }
+  .masthead .lede {
+    font-family: var(--serif); font-size: clamp(1rem, 2vw, 1.18rem);
+    line-height: 1.55; color: var(--ink-muted); max-width: 58ch;
+    margin: 0.95rem 0 0; text-wrap: pretty;
+  }
+  .masthead-meta {
+    display: flex; flex-wrap: wrap; gap: 0.45rem 1.9rem; margin-top: 1.5rem;
+    font-family: var(--mono); font-size: 0.76rem; color: var(--ink-faint);
+  }
+  .masthead-meta b { color: var(--ink-muted); font-weight: 500; }
+
+  nav.toc { display: none; }
+  @media (min-width: 1100px) {
+    nav.toc {
+      display: block; position: sticky; top: 1.75rem; font-size: 0.81rem;
+      line-height: 1.4; border-inline-start: 2px solid var(--line);
+      padding-inline-start: 0.95rem; max-height: calc(100dvh - 3.5rem);
+      overflow-y: auto;
+    }
+    nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+    nav.toc a { color: var(--ink-muted); text-decoration: none; display: block; transition: color 140ms ease; }
+    nav.toc a:hover, nav.toc a:focus-visible { color: var(--brand); }
+    nav.toc .num { font-family: var(--mono); font-size: 0.69rem; color: var(--ink-faint); margin-inline-end: 0.38rem; }
+  }
+
+  section { margin-bottom: 3.5rem; scroll-margin-top: 1.5rem; }
+  h2 {
+    font-family: var(--serif); font-size: clamp(1.4rem, 3vw, 1.85rem);
+    font-weight: 600; letter-spacing: -0.015em; line-height: 1.2;
+    margin: 0 0 0.35rem; text-wrap: balance;
+    display: flex; align-items: baseline; gap: 0.65rem;
+  }
+  h2 .num { font-family: var(--mono); font-size: 0.66em; font-weight: 400; color: var(--brand); }
+  h2 + .sub {
+    color: var(--ink-muted); max-width: 68ch; margin: 0 0 1.7rem;
+    padding-bottom: 0.95rem; border-bottom: 1px solid var(--line); text-wrap: pretty;
+  }
+  h3 { font-size: 1rem; font-weight: 650; margin: 2rem 0 0.7rem; }
+  h4 {
+    font-family: var(--mono); font-size: 0.71rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint);
+    margin: 1.6rem 0 0.6rem;
+  }
+  p, li { max-width: 72ch; text-wrap: pretty; }
+  p { margin: 0 0 0.9rem; }
+  ul, ol { margin: 0 0 0.9rem; padding-inline-start: 1.3rem; }
+  li { margin-bottom: 0.35rem; }
+  strong { font-weight: 650; }
+  a { color: var(--brand); text-underline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 3px; }
+
+  code {
+    font-family: var(--mono); font-size: 0.86em; background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 4px; padding: 0.07em 0.34em;
+  }
+  pre {
+    font-family: var(--mono); font-size: 0.8rem; line-height: 1.6;
+    background: var(--code-bg); border: 1px solid var(--line);
+    border-radius: 8px; padding: 0.9rem 1rem; overflow-x: auto;
+    margin: 0 0 1.2rem;
+  }
+  pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+  .ar { font-family: var(--arabic); }
+
+  .scroll {
+    overflow-x: auto; margin: 0 0 1.3rem; border: 1px solid var(--line);
+    border-radius: 9px; background: var(--surface);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+  thead th {
+    text-align: start; font-family: var(--mono); font-size: 0.67rem; font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-faint);
+    padding: 0.65rem 0.85rem; border-bottom: 1px solid var(--line-strong); white-space: nowrap;
+  }
+  tbody td { padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--surface-2); }
+  td.mono, th.mono { font-family: var(--mono); font-size: 0.79rem; }
+  td.num { text-align: end; font-family: var(--mono); font-size: 0.81rem; white-space: nowrap; }
+  td.tight { white-space: nowrap; }
+  .yes { color: var(--success); font-weight: 650; }
+  .no { color: var(--ink-faint); }
+  .partial { color: var(--amber); font-weight: 650; }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 9px; padding: 1rem 1.15rem; margin: 0 0 1.3rem;
+  }
+  .panel > :last-child { margin-bottom: 0; }
+  .panel h4 { margin-top: 0; }
+  .panel-key { background: var(--brand-soft); border-color: var(--brand); }
+  .panel-key h4 { color: var(--brand); }
+  .panel-warn { background: var(--amber-soft); border-color: var(--amber); }
+  .panel-warn h4 { color: var(--amber); }
+
+  .verb {
+    display: inline-block; font-family: var(--mono); font-size: 0.66rem;
+    font-weight: 700; letter-spacing: 0.04em; padding: 0.1rem 0.36rem;
+    border-radius: 3px; border: 1px solid transparent; min-width: 3.4rem;
+    text-align: center;
+  }
+  .get    { background: var(--success-soft); color: var(--success); border-color: var(--success); }
+  .post   { background: var(--brand-soft);   color: var(--brand);   border-color: var(--brand); }
+  .patch  { background: var(--amber-soft);   color: var(--amber);   border-color: var(--amber); }
+  .delete { background: var(--danger-soft);  color: var(--danger);  border-color: var(--danger); }
+
+  .tag {
+    display: inline-block; font-family: var(--mono); font-size: 0.65rem;
+    font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 0.12rem 0.4rem; border-radius: 4px; border: 1px solid var(--line-strong);
+    background: var(--surface-2); color: var(--ink-muted); white-space: nowrap;
+  }
+
+  footer.colophon {
+    grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 1.3rem;
+    margin-top: 1rem; font-family: var(--mono); font-size: 0.72rem;
+    color: var(--ink-faint); line-height: 1.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Documentation technique complète</p>
+    <h1>Rakib <span class="ar" style="color:var(--brand)">رقيب</span></h1>
+    <p class="lede">
+      Plateforme de gestion des réclamations pour une banque tunisienne. Tri
+      déterministe, délais conformes à la circulaire BCT n°2022-08, exécution
+      intégralement hors ligne.
+    </p>
+    <div class="masthead-meta">
+      <span><b>Version</b> 0.1.0</span>
+      <span><b>Moteur</b> lexicon-v1</span>
+      <span><b>API</b> /api/v1</span>
+      <span><b>Circulaire</b> BCT n°2022-08</span>
+      <span><b>Démo</b> reclamations.activiity.com</span>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sommaire">
+    <ol>
+      <li><a href="#apercu"><span class="num">01</span>Aperçu</a></li>
+      <li><a href="#demarrage"><span class="num">02</span>Démarrage</a></li>
+      <li><a href="#config"><span class="num">03</span>Configuration</a></li>
+      <li><a href="#structure"><span class="num">04</span>Structure du dépôt</a></li>
+      <li><a href="#pipeline"><span class="num">05</span>Le pipeline</a></li>
+      <li><a href="#lexique"><span class="num">06</span>Le lexique</a></li>
+      <li><a href="#regles"><span class="num">07</span>Les 27 règles</a></li>
+      <li><a href="#taxonomie"><span class="num">08</span>Taxonomie</a></li>
+      <li><a href="#sla"><span class="num">09</span>Délais et calendrier</a></li>
+      <li><a href="#bct"><span class="num">10</span>Conformité BCT</a></li>
+      <li><a href="#modele"><span class="num">11</span>Modèle de données</a></li>
+      <li><a href="#api"><span class="num">12</span>Référence API</a></li>
+      <li><a href="#rbac"><span class="num">13</span>RBAC</a></li>
+      <li><a href="#front"><span class="num">14</span>Interface</a></li>
+      <li><a href="#comptes"><span class="num">15</span>Comptes</a></li>
+      <li><a href="#tests"><span class="num">16</span>Tests</a></li>
+      <li><a href="#deploiement"><span class="num">17</span>Déploiement</a></li>
+      <li><a href="#exploitation"><span class="num">18</span>Exploitation</a></li>
+      <li><a href="#connu"><span class="num">19</span>Problèmes connus</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============================================================== 01 -->
+    <section id="apercu">
+      <h2><span class="num">01</span>Aperçu</h2>
+      <p class="sub">Ce que fait le système, et les contraintes qui l'ont façonné.</p>
+
+      <p>
+        Une banque reçoit des réclamations par formulaire, courriel, téléphone,
+        courrier et guichet. Rakib les reçoit, les analyse en quelques
+        millisecondes, les route vers le service compétent, leur attribue une
+        priorité et une échéance <em>légale</em>, signale les doublons, et alerte
+        avant dépassement. Un agent traite ensuite&nbsp;: le système prépare et
+        propose, il n'envoie jamais.
+      </p>
+
+      <h3>Contraintes structurantes</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Contrainte</th><th>Conséquence</th></tr></thead>
+          <tbody>
+            <tr><td>Hors ligne intégral</td><td>Aucun appel réseau à l'inférence, aucune police servie par CDN, aucune dépendance à un service tiers</td></tr>
+            <tr><td>Aucun modèle entraîné</td><td>Catégorisation par lexique pondéré&nbsp;; déterminisme et traçabilité complets</td></tr>
+            <tr><td>Matériel modeste</td><td>Bi-cœur, 4 Go, sans carte graphique&nbsp;; image de 469 Mo</td></tr>
+            <tr><td>Conformité BCT 2022-08</td><td>Délais en jours ouvrables, registre annexe 1, déclaration ROGS760</td></tr>
+            <tr><td>Bilingue FR/AR + derja</td><td>RTL réel côté portail, détection de la derja latine</td></tr>
+            <tr><td>Jamais de réponse automatique</td><td>L'automatisation s'arrête à la porte de la décision</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Pile technique</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Couche</th><th>Technologies</th></tr></thead>
+          <tbody>
+            <tr><td>Serveur</td><td class="mono">Python 3.12 · FastAPI 0.115 · Uvicorn 0.32 · Pydantic 2.9</td></tr>
+            <tr><td>Données</td><td class="mono">MongoDB 7 · Beanie 1.27 · Motor 3.6</td></tr>
+            <tr><td>Tâches</td><td class="mono">Redis 7 · arq 0.26 (files + cron + Streams)</td></tr>
+            <tr><td>Recherche</td><td class="mono">rank-bm25 0.2 · RapidFuzz 3.10</td></tr>
+            <tr><td>Sécurité</td><td class="mono">PyJWT 2.9 · argon2-cffi 23.1</td></tr>
+            <tr><td>Stockage</td><td class="mono">MinIO (S3) via aioboto3 13.2</td></tr>
+            <tr><td>Interface</td><td class="mono">React 19 · TypeScript 5.7 · Vite 6 · Tailwind 4 · TanStack Query 5</td></tr>
+            <tr><td>Déploiement</td><td class="mono">Docker multi-étapes · k3s · Traefik · cert-manager</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================== 02 -->
+    <section id="demarrage">
+      <h2><span class="num">02</span>Démarrage</h2>
+      <p class="sub">De zéro à une instance peuplée, en local.</p>
+
+      <h4>Prérequis</h4>
+      <p>Docker et Docker Compose. Rien d'autre&nbsp;: Python, Node, MongoDB et
+      Redis sont fournis par les images.</p>
+
+      <h4>Lancer</h4>
+<pre><code>git clone &lt;dépôt&gt; &amp;&amp; cd PFE
+cp .env.example .env
+
+docker compose up --build
+# api · worker · notifier · web · mongo · redis · minio</code></pre>
+
+      <h4>Peupler</h4>
+<pre><code>docker compose exec api python -m scripts.seed --force --count 60</code></pre>
+      <p>
+        Crée 8 services, 13 comptes, 60 réclamations bancaires en français,
+        arabe et derja, puis exécute le pipeline sur chacune. L'âge d'une
+        réclamation suit son statut, de sorte que le tableau de bord ouvre sur
+        un mélange réaliste et non sur soixante lignes rouges.
+      </p>
+
+      <h4>Accéder</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Surface</th><th>URL locale</th><th>Accès</th></tr></thead>
+          <tbody>
+            <tr><td>Portail public</td><td class="mono">localhost:5173/portal</td><td>Anonyme</td></tr>
+            <tr><td>Console agents</td><td class="mono">localhost:5173/login</td><td class="mono">admin@rakib.tn / Rakib2026!</td></tr>
+            <tr><td>API</td><td class="mono">localhost:8000/api/v1</td><td>JWT</td></tr>
+            <tr><td>OpenAPI</td><td class="mono">localhost:8000/docs</td><td>Ouvert hors production</td></tr>
+            <tr><td>Santé</td><td class="mono">localhost:8000/health/ready</td><td>Ouvert</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================== 03 -->
+    <section id="config">
+      <h2><span class="num">03</span>Configuration</h2>
+      <p class="sub">
+        Toutes les variables, leur défaut, et celles qu'il faut impérativement
+        changer en production.
+      </p>
+
+      <h4>Application</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Variable</th><th>Défaut</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">APP_NAME</td><td class="mono">Rakib</td><td>Nom affiché</td></tr>
+            <tr><td class="mono">ENVIRONMENT</td><td class="mono">development</td><td><code>development</code> · <code>staging</code> · <code>production</code> · <code>test</code></td></tr>
+            <tr><td class="mono">LOG_LEVEL</td><td class="mono">INFO</td><td>Journalisation structurée (structlog)</td></tr>
+            <tr><td class="mono">API_PREFIX</td><td class="mono">/api/v1</td><td>Préfixe des routes</td></tr>
+            <tr><td class="mono">FRONTEND_URL</td><td class="mono">localhost:5173</td><td>Liens dans les courriels</td></tr>
+            <tr><td class="mono">PUBLIC_URL</td><td class="mono">localhost:5173</td><td>Base des liens de suivi</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Infrastructure</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Variable</th><th>Défaut</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">MONGO_URI</td><td class="mono">mongodb://localhost:27017/reclamations</td></tr>
+            <tr><td class="mono">REDIS_URL</td><td class="mono">redis://localhost:6379/0</td></tr>
+            <tr><td class="mono">S3_ENDPOINT</td><td class="mono">http://localhost:9000</td></tr>
+            <tr><td class="mono">S3_BUCKET</td><td class="mono">reclamations</td></tr>
+            <tr><td class="mono">S3_ACCESS_KEY / S3_SECRET_KEY</td><td class="mono">rakib / rakib-dev-secret</td></tr>
+            <tr><td class="mono">MAX_ATTACHMENT_MB</td><td class="mono">10</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel panel-warn">
+        <h4>À changer impérativement en production</h4>
+        <div class="scroll" style="margin-bottom:0">
+          <table>
+            <thead><tr><th>Variable</th><th>Défaut</th><th>Pourquoi</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">JWT_SECRET</td><td class="mono">change-me-in-production</td><td>Signature des jetons de session</td></tr>
+              <tr><td class="mono">TRACKING_TOKEN_SECRET</td><td class="mono">change-me-too</td><td>Signature des liens de suivi remis aux réclamants</td></tr>
+              <tr><td class="mono">S3_SECRET_KEY</td><td class="mono">rakib-dev-secret</td><td>Accès aux pièces jointes</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:0.8rem;margin-bottom:0;font-size:0.875rem">
+          Les deux secrets ne doivent pas être tournés à chaque déploiement&nbsp;:
+          changer <code>JWT_SECRET</code> déconnecte tout le monde, et changer
+          <code>TRACKING_TOKEN_SECRET</code> invalide tous les liens de suivi déjà
+          remis à des clients. Le script de déploiement les génère une fois puis
+          les laisse tranquilles.
+        </p>
+      </div>
+
+      <h4>Authentification</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Variable</th><th>Défaut</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">JWT_ALGORITHM</td><td class="mono">HS256</td><td>Algorithme de signature</td></tr>
+            <tr><td class="mono">JWT_ACCESS_TTL_MIN</td><td class="mono">15</td><td>Durée du jeton d'accès (minutes)</td></tr>
+            <tr><td class="mono">JWT_REFRESH_TTL_DAYS</td><td class="mono">7</td><td>Durée du jeton de rafraîchissement (jours)</td></tr>
+            <tr><td class="mono">TRACKING_TOKEN_TTL_DAYS</td><td class="mono">365</td><td>Validité d'un lien de suivi anonyme</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Moteur et seuils</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Variable</th><th>Défaut</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">TRIAGE_BACKEND</td><td class="mono">lexicon</td><td><code>lexicon</code> ou <code>rules</code> (routage seul)</td></tr>
+            <tr><td class="mono">CATEGORY_CONFIDENCE_THRESHOLD</td><td class="mono">0.55</td><td>Seuil de renvoi en triage humain</td></tr>
+            <tr><td class="mono">AMBIGUITY_MARGIN</td><td class="mono">0.15</td><td>Écart minimal avec la deuxième catégorie</td></tr>
+            <tr><td class="mono">DEDUP_AUTO_THRESHOLD</td><td class="mono">0.82</td><td>Liaison automatique d'un doublon</td></tr>
+            <tr><td class="mono">DEDUP_SUGGEST_THRESHOLD</td><td class="mono">0.65</td><td>Simple suggestion à l'agent</td></tr>
+            <tr><td class="mono">DEDUP_CROSS_CLAIMANT_THRESHOLD</td><td class="mono">0.90</td><td>Seuil relevé entre réclamants différents</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Délais et courriel</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Variable</th><th>Défaut</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">SLA_HOURS_P1 … P4</td><td class="mono">4 / 24 / 72 / 168</td><td>Objectifs internes par priorité (heures)</td></tr>
+            <tr><td class="mono">SLA_BUSINESS_HOURS</td><td class="mono">false</td><td>Horloge ouvrée pour l'objectif interne</td></tr>
+            <tr><td class="mono">SLA_TIMEZONE</td><td class="mono">Africa/Tunis</td><td>Fuseau du calendrier ouvré</td></tr>
+            <tr><td class="mono">SMTP_HOST / PORT</td><td class="mono">— / 587</td><td>Relais sortant&nbsp;; vide = pas d'envoi</td></tr>
+            <tr><td class="mono">SMTP_USERNAME / PASSWORD</td><td class="mono">—</td><td>Identifiants du relais</td></tr>
+            <tr><td class="mono">SMTP_FROM</td><td class="mono">—</td><td>Expéditeur</td></tr>
+            <tr><td class="mono">SMTP_STARTTLS</td><td class="mono">true</td><td>Chiffrement de la session</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Le plafond légal de l'article 8 <strong>ne dépend d'aucune variable</strong>.
+        Il est en dur dans <code>app/domain/bct.py</code>, avec l'article qui le
+        justifie&nbsp;: une obligation réglementaire n'est pas un réglage.
+      </p>
+    </section>
+
+    <!-- ============================================================== 04 -->
+    <section id="structure">
+      <h2><span class="num">04</span>Structure du dépôt</h2>
+      <p class="sub">Où se trouve quoi, et la règle de dépendance qui tient l'ensemble.</p>
+
+<pre><code>backend/
+  app/
+    domain/            connaissance métier pure, sans dépendance technique
+      taxonomy.py        12 catégories, 8 services, la correspondance
+      bct.py             circulaire 2022-08 : délais, annexes, objets
+      calendar_tn.py     jours ouvrables tunisiens, Ramadan, fêtes lunaires
+      kb_seed.py         18 articles de base de connaissances FR/AR
+    intelligence/      analyse — n'importe ni api/ ni models/
+      text/              normalisation, repli des accents, langue
+      lexicon/           termes pondérés + classifieur déterministe
+      rules/            moteur de règles, sous-catégories, périmètre art. 2
+      dedup/            BM25 + correspondance approximative
+      engines/          lexicon.py (défaut) · rules_only.py
+      ports.py          l'interface TriageEngine
+      pipeline.py       l'enchaînement des six étapes
+    models/            documents Beanie
+    services/          orchestration métier
+    api/v1/            routes HTTP
+    workers/           arq : tâches de fond et cron
+  scripts/             seed · seed_data · gold · evaluate
+  tests/               15 fichiers
+frontend/
+  src/routes/          écrans
+  src/components/      AppShell · PortalLayout · Brandmark · Toasts · ui
+  src/i18n/            fr.ts · ar.ts
+  src/lib/             api · auth · sse · types
+deploy/
+  k8s/rakib.yaml       manifestes
+  deploy.sh            build, import k3s, applique, vérifie
+  benchmark.py         charge, avec nettoyage
+  visual_check.mjs     captures + erreurs console (Playwright)</code></pre>
+
+      <div class="panel panel-key">
+        <h4>La règle de dépendance</h4>
+        <p>
+          <code>intelligence/</code> n'importe ni <code>api/</code> ni
+          <code>models/</code>&nbsp;: seules des structures de données simples
+          franchissent la frontière, définies dans <code>ports.py</code>. C'est
+          cette séparation qui a permis de changer de secteur puis de moteur sans
+          toucher au reste, et elle mérite d'être préservée.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================== 05 -->
+    <section id="pipeline">
+      <h2><span class="num">05</span>Le pipeline</h2>
+      <p class="sub">Six étapes, dans cet ordre, chacune consommant la précédente.</p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>#</th><th>Étape</th><th>Ce qu'elle fait</th><th class="num">Durée</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="mono">1</td><td class="mono">normalize</td>
+              <td>Retire signatures et historiques cités&nbsp;; masque téléphones, courriels et références en jetons&nbsp;; replie les accents latins et les variantes arabes&nbsp;; translittère l'arabizi en conservant les deux graphies</td>
+              <td class="num">0,42 ms</td>
+            </tr>
+            <tr>
+              <td class="mono">2</td><td class="mono">language</td>
+              <td><code>fr</code> · <code>ar</code> · <code>ar-tn</code> · <code>en</code>. L'arabe par ratio de script, la derja par motifs arabizi et marqueurs, le reste par mots outils</td>
+              <td class="num">0,14 ms</td>
+            </tr>
+            <tr>
+              <td class="mono">3</td><td class="mono">classify</td>
+              <td>Lexique pondéré, 397 termes&nbsp;; abstention explicite en dessous des seuils</td>
+              <td class="num">0,67 ms</td>
+            </tr>
+            <tr>
+              <td class="mono">4</td><td class="mono">rules</td>
+              <td>27 règles pondérées → score → P1/P2/P3&nbsp;; chaque déclenchement conserve les mots exacts</td>
+              <td class="num">0,93 ms</td>
+            </tr>
+            <tr>
+              <td class="mono">5</td><td class="mono">dedup</td>
+              <td>BM25 et correspondance approximative sur les réclamations récentes&nbsp;; seuil relevé entre réclamants différents</td>
+              <td class="num">2,0 ms</td>
+            </tr>
+            <tr>
+              <td class="mono">6</td><td class="mono">decide</td>
+              <td>Routage vers le service, objectif interne, plafond légal, affectation</td>
+              <td class="num">&lt; 0,1 ms</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h4>Le repli des accents, et pourquoi il compte</h4>
+        <p>
+          <code>text</code> conserve ses accents — il est lu par des humains.
+          <code>indexable</code> les replie, parce que tous les lexiques et
+          termes de règles sont écrits sans accent. Sans ce repli, «&nbsp;chèque&nbsp;»
+          ne correspondait jamais à «&nbsp;cheque&nbsp;» et une réclamation
+          rédigée en français correct échouait à se catégoriser, alors que la
+          même phrase tapée négligemment fonctionnait. Le repli est restreint aux
+          marques combinantes latines&nbsp;: les points-voyelles arabes sont
+          traités séparément et ne doivent pas être retouchés ici.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================== 06 -->
+    <section id="lexique">
+      <h2><span class="num">06</span>Le lexique</h2>
+      <p class="sub">Comment une catégorie est décidée, et comment le système dit qu'il ne sait pas.</p>
+
+      <p>
+        397 termes répartis sur 12 catégories, en deux niveaux&nbsp;:
+        <strong>décisif</strong> (poids 3,0 — nomme le produit ou l'incident&nbsp;:
+        «&nbsp;chéquier&nbsp;», «&nbsp;allocation touristique&nbsp;») et
+        <strong>appui</strong> (poids 1,0 — vocabulaire de sous-catégorie, bien
+        plus partagé&nbsp;: «&nbsp;deux fois&nbsp;» sert aux cartes, aux
+        distributeurs, aux paiements et au crédit).
+      </p>
+
+      <p>
+        Chaque terme est ensuite pondéré par une <strong>fréquence inverse de
+        catégorie</strong>&nbsp;: un terme réclamé par plusieurs catégories pèse
+        moins qu'un terme discriminant — même principe que le routage par
+        service, et même raison, sinon le terme banal noie le terme utile.
+      </p>
+
+      <h4>Conditions pour qu'une catégorie soit retenue</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Seuil</th><th class="num">Valeur</th><th>Motif d'abstention si non atteint</th></tr></thead>
+          <tbody>
+            <tr><td>Score brut minimal</td><td class="num">2.0</td><td class="mono">insufficient_evidence</td></tr>
+            <tr><td>Part de preuve du gagnant</td><td class="num">40 %</td><td class="mono">evidence_too_spread</td></tr>
+            <tr><td>Avance sur le suivant</td><td class="num">×1.3</td><td class="mono">margin_too_narrow</td></tr>
+            <tr><td>Aucun terme reconnu</td><td class="num">—</td><td class="mono">no_signal</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel panel-warn">
+        <h4>La « confiance » n'est pas une probabilité</h4>
+        <p>
+          Le chiffre affiché est une <strong>part de preuve</strong>&nbsp;: la
+          fraction du poids total détenue par la catégorie gagnante. Il n'est pas
+          calibré et ne prétend pas l'être. Le présenter comme une probabilité
+          serait une inexactitude, et la sortie du moteur porte de toute façon
+          les termes exacts qui ont décidé — information plus utile qu'un
+          pourcentage.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================== 07 -->
+    <section id="regles">
+      <h2><span class="num">07</span>Les 27 règles</h2>
+      <p class="sub">
+        Toutes modifiables depuis <code>/admin/rules</code>, sans redéploiement.
+        Un poids négatif abaisse la priorité.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Code</th><th>Type</th><th class="num">Poids</th><th>Déclencheur</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">FRAUDE_SUSPECTEE_FR</td><td>lexique</td><td class="num">+55</td><td>Opération non autorisée, compte piraté</td></tr>
+            <tr><td class="mono">FRAUDE_SUSPECTEE_AR</td><td>lexique</td><td class="num">+55</td><td>Idem, écriture arabe</td></tr>
+            <tr><td class="mono">FRAUDE_SUSPECTEE_TN</td><td>lexique</td><td class="num">+55</td><td>Idem, derja</td></tr>
+            <tr><td class="mono">MEDIATEUR_BANCAIRE_FR</td><td>lexique</td><td class="num">+35</td><td>Le client évoque le médiateur</td></tr>
+            <tr><td class="mono">MEDIATEUR_BANCAIRE_AR</td><td>lexique</td><td class="num">+35</td><td>Idem, écriture arabe</td></tr>
+            <tr><td class="mono">LEGAL_LEXICON_FR</td><td>lexique</td><td class="num">+30</td><td>Avocat, plainte, tribunal</td></tr>
+            <tr><td class="mono">LEGAL_LEXICON_AR</td><td>lexique</td><td class="num">+30</td><td>Idem, écriture arabe</td></tr>
+            <tr><td class="mono">VIP_CLAIMANT</td><td>champ</td><td class="num">+25</td><td>Compte entreprise ou client signalé</td></tr>
+            <tr><td class="mono">CHURN_LEXICON_FR</td><td>lexique</td><td class="num">+20</td><td>Menace de clôture ou de départ</td></tr>
+            <tr><td class="mono">CHURN_LEXICON_AR</td><td>lexique</td><td class="num">+20</td><td>Idem, arabe et derja</td></tr>
+            <tr><td class="mono">INCIDENT_COLLECTIF</td><td>lexique</td><td class="num">+20</td><td>Plusieurs clients touchés, agence entière</td></tr>
+            <tr><td class="mono">REPEAT_CLAIMANT_30D</td><td>historique</td><td class="num">+20</td><td>Réclamations répétées sur 30 jours</td></tr>
+            <tr><td class="mono">URGENCY_LEXICON_FR</td><td>lexique</td><td class="num">+15</td><td>Vocabulaire d'urgence</td></tr>
+            <tr><td class="mono">URGENCY_LEXICON_AR</td><td>lexique</td><td class="num">+15</td><td>Idem, écriture arabe</td></tr>
+            <tr><td class="mono">URGENCY_LEXICON_TN</td><td>lexique</td><td class="num">+15</td><td>Idem, derja</td></tr>
+            <tr><td class="mono">MONTANT_ELEVE</td><td>regex</td><td class="num">+12</td><td>Montant à quatre chiffres ou plus</td></tr>
+            <tr><td class="mono">DURATION_WEEKS</td><td>regex</td><td class="num">+12</td><td>Problème persistant en semaines ou mois</td></tr>
+            <tr><td class="mono">PROFANITY</td><td>lexique</td><td class="num">+10</td><td>Propos agressifs</td></tr>
+            <tr><td class="mono">MULTIPLE_OPEN</td><td>historique</td><td class="num">+10</td><td>Plusieurs dossiers ouverts</td></tr>
+            <tr><td class="mono">AMOUNT_IN_DINARS</td><td>regex</td><td class="num">+8</td><td>Montant contesté explicite</td></tr>
+            <tr><td class="mono">SHOUTING</td><td>champ</td><td class="num">+8</td><td>Message en majuscules</td></tr>
+            <tr><td class="mono">OPERATION_REFERENCE</td><td>regex</td><td class="num">+5</td><td>Référence d'opération citée</td></tr>
+            <tr><td class="mono">HAS_ATTACHMENT</td><td>champ</td><td class="num">+5</td><td>Pièce justificative fournie</td></tr>
+            <tr><td class="mono">DETAILED_REPORT</td><td>longueur</td><td class="num">+5</td><td>Description circonstanciée</td></tr>
+            <tr><td class="mono">EXCLAMATION_STORM</td><td>champ</td><td class="num">+5</td><td>Ponctuation excessive</td></tr>
+            <tr><td class="mono">CATEGORY_WEIGHTS</td><td>catégorie</td><td class="num">×1</td><td>Socle propre à chaque catégorie</td></tr>
+            <tr><td class="mono">VERY_SHORT</td><td>longueur</td><td class="num">&minus;8</td><td>Message trop court pour être actionnable</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        La fraude domine volontairement le barème&nbsp;: c'est la seule catégorie
+        où le préjudice <em>continue de croître</em> tant que personne n'agit.
+        Le médiateur vient juste après, parce qu'un client qui l'évoque est déjà
+        au bord d'une procédure formelle.
+      </p>
+    </section>
+
+    <!-- ============================================================== 08 -->
+    <section id="taxonomie">
+      <h2><span class="num">08</span>Taxonomie</h2>
+      <p class="sub">
+        12 catégories, 8 services. Changer de secteur d'activité, c'est remplacer
+        <code>taxonomy.py</code> — rien au-dessus ne code en dur la banque.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Catégorie</th><th>Libellé</th><th class="ar">العربية</th><th>Service</th><th class="num">Délai</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">FRAUDE_OPERATION_NON_AUTORISEE</td><td>Fraude / opération non autorisée</td><td class="ar">عملية غير مصرح بها</td><td>Conformité et Fraude</td><td class="num">2 j.o.</td></tr>
+            <tr><td class="mono">CARTE_BANCAIRE</td><td>Carte bancaire</td><td class="ar">البطاقة البنكية</td><td>Monétique et Cartes</td><td class="num">5 j.o.</td></tr>
+            <tr><td class="mono">DAB_GAB</td><td>Distributeur (DAB/GAB)</td><td class="ar">الموزع الآلي</td><td>Monétique et Cartes</td><td class="num">5 j.o.</td></tr>
+            <tr><td class="mono">VIREMENT_PRELEVEMENT</td><td>Virement et prélèvement</td><td class="ar">التحويل والاقتطاع</td><td>Opérations Bancaires</td><td class="num">5 j.o.</td></tr>
+            <tr><td class="mono">BANQUE_DIGITALE</td><td>Banque digitale</td><td class="ar">البنك الرقمي</td><td>Banque Digitale</td><td class="num">5 j.o.</td></tr>
+            <tr><td class="mono">PAIEMENT_TPE_ECOMMERCE</td><td>Paiement TPE et e-commerce</td><td class="ar">الدفع الإلكتروني</td><td>Monétique et Cartes</td><td class="num">7 j.o.</td></tr>
+            <tr><td class="mono">CHEQUE_EFFET</td><td>Chèque et effet</td><td class="ar">الشيك والكمبيالة</td><td>Opérations Bancaires</td><td class="num">7 j.o.</td></tr>
+            <tr><td class="mono">COMPTE_GESTION</td><td>Gestion du compte</td><td class="ar">التصرف في الحساب</td><td>Relation Clientèle</td><td class="num">7 j.o.</td></tr>
+            <tr><td class="mono">FRAIS_COMMISSIONS</td><td>Frais et commissions</td><td class="ar">المصاريف والعمولات</td><td>Relation Clientèle</td><td class="num">7 j.o.</td></tr>
+            <tr><td class="mono">CREDIT_FINANCEMENT</td><td>Crédit et financement</td><td class="ar">القرض والتمويل</td><td>Crédits et Financement</td><td class="num">10 j.o.</td></tr>
+            <tr><td class="mono">OPERATIONS_INTERNATIONALES</td><td>Opérations internationales</td><td class="ar">العمليات الدولية</td><td>Opérations Internationales</td><td class="num">10 j.o.</td></tr>
+            <tr><td class="mono">AGENCE_QUALITE_SERVICE</td><td>Agence et qualité de service</td><td class="ar">الوكالة وجودة الخدمة</td><td>Relation Clientèle</td><td class="num">10 j.o.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Un huitième service, <code>GENERAL</code> (Service Général), ne porte
+        aucune catégorie&nbsp;: c'est la file de secours pour tout ce qui n'est
+        pas routable automatiquement. <strong>Il n'existe volontairement aucune
+        catégorie «&nbsp;AUTRE&nbsp;»</strong>&nbsp;: une classe fourre-tout
+        absorbe tous les cas difficiles et détruit sa propre précision. Une
+        réclamation inclassable passe sous le seuil et devient
+        <code>needs_human_triage</code>.
+      </p>
+
+      <h4>Statuts et canaux</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Statuts</th><th>Canaux</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="mono">new · triaged · assigned · in_progress · pending_claimant · resolved · closed · rejected</td>
+              <td class="mono">web · email · agence · phone · courrier</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <code>resolved</code>, <code>closed</code> et <code>rejected</code> sont
+        terminaux&nbsp;: l'horloge SLA s'arrête et aucun routage ne se produit
+        plus. Une réanalyse ne peut pas rouvrir une réclamation terminée.
+      </p>
+    </section>
+
+    <!-- ============================================================== 09 -->
+    <section id="sla">
+      <h2><span class="num">09</span>Délais et calendrier</h2>
+      <p class="sub">Deux horloges, et la plus courte gouverne.</p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th></th><th>Objectif interne</th><th>Plafond légal</th></tr></thead>
+          <tbody>
+            <tr><td>Unité</td><td>Heures</td><td><strong>Jours ouvrables</strong></td></tr>
+            <tr><td>Départ</td><td>Création</td><td>Accusé de réception</td></tr>
+            <tr><td>Barème</td><td>P1 4 h · P2 24 h · P3 72 h · P4 168 h</td><td>2 à 15 j.o. selon la catégorie</td></tr>
+            <tr><td>Source</td><td>Configuration</td><td><code>bct.py</code>, en dur</td></tr>
+            <tr><td>Dépassement</td><td>Indicateur de qualité</td><td><strong>Événement déclarable</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Un objectif interne qui dépasserait le plafond est ramené dessus&nbsp;:
+        une banque peut être plus rapide que la réglementation, jamais plus
+        lente. Les deux dépassements sont suivis séparément.
+      </p>
+
+      <h4>Le calendrier ouvré tunisien</h4>
+      <ul>
+        <li><strong>Week-end</strong> et jours fériés fixes</li>
+        <li><strong>Fêtes du calendrier lunaire</strong> par table (Aïd, Mouled)</li>
+        <li><strong>Séance unique d'été</strong>&nbsp;: clôture à 13h30</li>
+        <li><strong>Horaires de Ramadan</strong>, distincts</li>
+        <li>Horaire ordinaire le reste de l'année&nbsp;: clôture à 17h00</li>
+      </ul>
+
+      <div class="panel panel-key">
+        <h4>Un exemple qui vaut une démonstration</h4>
+        <p>
+          <strong>Quinze jours ouvrables depuis le 13 août tombent le
+          4 septembre</strong> — soit 22 jours calendaires — et l'heure de
+          clôture passe de 13h30 (séance unique d'été) à 17h00 en septembre. Une
+          implémentation en jours calendaires déclarerait le dépassement une
+          semaine trop tôt et alerterait pour rien.
+        </p>
+      </div>
+
+      <p>
+        Un balayage s'exécute <strong>toutes les cinq minutes</strong>&nbsp;:
+        avertissement à 80&nbsp;% du budget consommé, puis dépassement, puis
+        escalade. Les budgets se comptent en heures&nbsp;; une granularité plus
+        fine coûterait un balayage de base sans rien apporter.
+      </p>
+    </section>
+
+    <!-- ============================================================== 10 -->
+    <section id="bct">
+      <h2><span class="num">10</span>Conformité BCT</h2>
+      <p class="sub">
+        Circulaire n°2022-08 du 20 octobre 2022, article par article.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Article</th><th>Exigence</th><th>Implémentation</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">Art. 2</td><td>Six exclusions du périmètre</td><td><code>rules/perimetre.py</code> — le message reste traité, il sort des totaux</td></tr>
+            <tr><td class="mono">Art. 6</td><td>Canaux de réception minimaux</td><td>5 canaux → 4 buckets du régulateur</td></tr>
+            <tr><td class="mono">Art. 7</td><td>Informer des délais et de la médiation</td><td>La voie de médiation est dans chaque modèle de réponse</td></tr>
+            <tr><td class="mono">Art. 8</td><td>Accusé daté et référencé</td><td>Émis à la création, démarre l'horloge légale</td></tr>
+            <tr><td class="mono">Art. 8</td><td>Réponse ≤ 15 jours ouvrables</td><td>Plafond calculé au calendrier tunisien</td></tr>
+            <tr><td class="mono">Art. 8</td><td>Rejet motivé</td><td><code>POST /reject</code> refuse une motivation trop courte</td></tr>
+            <tr><td class="mono">Art. 9</td><td>Base, accusés, alerte, indicateurs</td><td>MongoDB · accusé automatique · balayage 5 min · tableau de bord</td></tr>
+            <tr><td class="mono">Art. 12</td><td>Audit interne tous les 3 ans</td><td>Constante définie&nbsp;; compte à rebours non affiché <span class="tag">partiel</span></td></tr>
+            <tr><td class="mono">Annexe 1</td><td>10 informations minimales</td><td>Bloc <code>reglementaire</code> sur chaque réclamation</td></tr>
+            <tr><td class="mono">Annexe 2</td><td>Déclaration ROGS760, annuelle, XML, DR+45j</td><td><code>GET /analytics/declaration/{year}/xml</code></td></tr>
+            <tr><td class="mono">Annexe 3</td><td>Quatre tableaux de la déclaration</td><td>Nature · genre et âge · canal · objet et délais</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Les huit objets de l'annexe 3-IV</h4>
+      <p>
+        Nos 12 catégories se projettent sur les 8 objets que compte le
+        régulateur&nbsp;: Financement · Paiement hors monétique · Monétique ·
+        Fonctionnement des comptes · Opérations bancaires internationales ·
+        Tarification · Services bancaires à distance · Autres services.
+      </p>
+
+      <div class="panel panel-warn">
+        <h4>Une limite du formulaire, pas de l'implémentation</h4>
+        <p>
+          <strong>La liste du régulateur n'a aucune entrée pour la fraude.</strong>
+          Une opération carte non autorisée est monétique, un virement non
+          autorisé est paiement hors monétique, et ni l'un ni l'autre ne dit à la
+          BCT que de l'argent est parti sans consentement. La correspondance
+          retient MONETIQUE, origine dominante, et la catégorie interne reste
+          intacte — mais la déclaration ne sait littéralement pas exprimer le
+          cas.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================== 11 -->
+    <section id="modele">
+      <h2><span class="num">11</span>Modèle de données</h2>
+      <p class="sub">Le document <code>Complaint</code> et ses blocs.</p>
+
+<pre><code>Complaint
+  ref                 REC-2026-00042      référence affichée, séquentielle
+  channel             web | email | agence | phone | courrier
+  status              new … rejected
+  triage_state        pending | done | failed | manual
+  subject, body       texte d'origine, accents conservés
+  normalized_text     texte replié, ce sur quoi on recherche
+  corrected           un humain a changé la catégorie ou le service
+
+  claimant            nom, courriel, téléphone, référence client, VIP
+                      + annexe 3 : nature, genre, tranche d'âge, RNE
+
+  analysis            category, category_confidence (part de preuve)
+                      category_alternatives, subcategory
+                      priority, priority_score, rule_hits[]
+                      sentiment, language, keywords
+                      duplicate_of, duplicate_score, related_ids
+                      needs_human_triage, triage_reason
+                      engine, engine_version, latency_ms
+
+  assignment          service, agent, date, méthode (auto|manual|queue)
+
+  sla                 due_at, hours, breached, warned, escalation_level
+                      legal_due_at, legal_days, legal_breached
+
+  reglementaire       accuse_reception_at      art. 8, départ de l'horloge
+                      investigations_menees    annexe 1
+                      demarches_entreprises    annexe 1
+                      motivation               art. 8, rejet motivé
+                      hors_perimetre           art. 2
+                      objet_bct                annexe 3-IV
+
+  attachments[]       fichier, type, taille, clé S3, déposant
+  messages[]          échanges, avec notes internes
+  timeline[]          journal d'audit horodaté
+  satisfaction        note 1-5 et commentaire</code></pre>
+
+      <div class="panel">
+        <h4>Écritures ciblées, jamais <code>save()</code></h4>
+        <p>
+          Les services écrivent avec <code>$push</code> et <code>$set</code> sur
+          les seuls champs qu'ils possèdent. Un <code>save()</code> complet
+          réécrit tout le document depuis une copie en mémoire potentiellement
+          périmée&nbsp;: c'est ainsi qu'une pièce jointe déposée pendant l'analyse
+          disparaissait silencieusement. Ce défaut est apparu trois fois dans ce
+          projet — pièces jointes, résolution, messages — et la règle est donc
+          générale.
+        </p>
+      </div>
+
+      <h4>Index</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Index</th><th>Sert à</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">ref (unique)</td><td>Suivi par référence</td></tr>
+            <tr><td class="mono">status + sla.due_at</td><td>Balayage SLA</td></tr>
+            <tr><td class="mono">assignment.agent_id + status</td><td>File d'un agent</td></tr>
+            <tr><td class="mono">assignment.department_id + status</td><td>File d'un service</td></tr>
+            <tr><td class="mono">analysis.category + created_at</td><td>Statistiques</td></tr>
+            <tr><td class="mono">created_at + _id</td><td>Pagination par curseur</td></tr>
+            <tr><td class="mono">texte (subject, body, normalized_text)</td><td>Recherche&nbsp;; <code>default_language="none"</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        L'index texte est déclaré sans langue de radicalisation&nbsp;: la
+        radicalisation française est inutile sur de l'arabe et de l'arabizi, et
+        MongoDB n'autorise qu'un seul index texte par collection.
+        <code>normalized_text</code> y figure pour que l'arabe et la derja
+        restent trouvables.
+      </p>
+    </section>
+
+    <!-- ============================================================== 12 -->
+    <section id="api">
+      <h2><span class="num">12</span>Référence API</h2>
+      <p class="sub">
+        Base <code>/api/v1</code>. Jeton d'accès en <code>Authorization: Bearer</code>,
+        rafraîchissement par cookie httpOnly.
+      </p>
+
+      <h4>Authentification</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Méthode</th><th>Route</th><th>Rôle</th><th>Accès</th></tr></thead>
+          <tbody>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/auth/register</td><td>Créer un compte réclamant</td><td>Public</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/auth/login</td><td>Ouvrir une session</td><td>Public</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/auth/refresh</td><td>Renouveler le jeton d'accès</td><td>Cookie</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/auth/logout</td><td>Fermer la session</td><td>Authentifié</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/auth/me</td><td>Profil courant</td><td>Authentifié</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Réclamations</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Méthode</th><th>Route</th><th>Rôle</th><th>Accès</th></tr></thead>
+          <tbody>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/complaints</td><td>Déposer&nbsp;; renvoie référence et lien de suivi</td><td>Public</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/complaints/track</td><td>Suivi par référence et contact</td><td>Public</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/complaints/satisfaction</td><td>Noter après clôture</td><td>Jeton de suivi</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/complaints</td><td>Liste paginée par curseur, filtres</td><td>Agent</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/complaints/{id}</td><td>Détail complet</td><td>Agent</td></tr>
+            <tr><td><span class="verb patch">PATCH</span></td><td class="mono">/complaints/{id}</td><td>Catégorie, service, statut, VIP&nbsp;; <code>agent_id</code> réservé au superviseur</td><td>Agent</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/complaints/{id}/messages</td><td>Répondre ou noter en interne</td><td>Agent</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/complaints/{id}/resolve</td><td>Résoudre avec message au client</td><td>Agent</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/complaints/{id}/reject</td><td><strong>Rejeter&nbsp;; motivation obligatoire (art. 8)</strong></td><td>Agent</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/complaints/{id}/retriage</td><td>Relancer le pipeline</td><td>Superviseur</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/complaints/{id}/analysis</td><td>Trace complète des six étapes</td><td>Agent</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/complaints/{id}/suggest</td><td>Articles de base de connaissances</td><td>Agent</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/complaints/{id}/suggest/used</td><td>Marquer une suggestion utilisée</td><td>Agent</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/complaints/{id}/attachments</td><td>Déposer une pièce</td><td>Agent ou jeton</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/complaints/{id}/attachments/{aid}</td><td>Télécharger</td><td>Agent ou jeton</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Statistiques et déclaration</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Méthode</th><th>Route</th><th>Rôle</th><th>Accès</th></tr></thead>
+          <tbody>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/overview</td><td>Volumes, SLA, satisfaction</td><td>Agent</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/by-category</td><td>Répartition et part de preuve moyenne</td><td>Agent</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/volume</td><td>Série par jour</td><td>Agent</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/supervision</td><td>Tableau de supervision</td><td>Agent</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/agents</td><td>Charge par agent</td><td>Superviseur</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/engine</td><td>État du moteur, taux de correction</td><td>Superviseur</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/rules</td><td>Déclenchements par règle</td><td>Superviseur</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/kb</td><td>Usage des articles</td><td>Superviseur</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/declaration/{year}</td><td><strong>ROGS760 en JSON</strong></td><td>Superviseur</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/analytics/declaration/{year}/xml</td><td><strong>ROGS760 en XML (annexe 2)</strong></td><td>Superviseur</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Administration</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Méthode</th><th>Route</th><th>Rôle</th><th>Accès</th></tr></thead>
+          <tbody>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/rules</td><td>Catalogue des 27 règles</td><td>Superviseur</td></tr>
+            <tr><td><span class="verb patch">PATCH</span></td><td class="mono">/rules/{id}</td><td>Poids, activation, configuration</td><td>Admin</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/rules/simulate</td><td>Essai à blanc&nbsp;; n'enregistre rien</td><td>Superviseur</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/kb</td><td>Articles</td><td>Agent</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/kb</td><td>Créer</td><td>Admin</td></tr>
+            <tr><td><span class="verb patch">PATCH</span></td><td class="mono">/kb/{id}</td><td>Modifier</td><td>Admin</td></tr>
+            <tr><td><span class="verb delete">DELETE</span></td><td class="mono">/kb/{id}</td><td>Supprimer</td><td>Admin</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/kb/reindex</td><td>Reconstruire l'index BM25</td><td>Admin</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/departments</td><td>Services</td><td>Agent</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/departments</td><td>Créer</td><td>Admin</td></tr>
+            <tr><td><span class="verb patch">PATCH</span></td><td class="mono">/departments/{id}</td><td>Modifier</td><td>Admin</td></tr>
+            <tr><td><span class="verb delete">DELETE</span></td><td class="mono">/departments/{id}</td><td>Supprimer</td><td>Admin</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/users</td><td>Personnel</td><td>Superviseur</td></tr>
+            <tr><td><span class="verb post">POST</span></td><td class="mono">/users</td><td>Créer</td><td>Admin</td></tr>
+            <tr><td><span class="verb patch">PATCH</span></td><td class="mono">/users/{id}</td><td>Modifier</td><td>Admin</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Temps réel et santé</h4>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Méthode</th><th>Route</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/events/stream</td><td>Flux SSE&nbsp;; requiert un en-tête, donc <code>fetch</code> et non <code>EventSource</code></td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/health</td><td>Vivacité</td></tr>
+            <tr><td><span class="verb get">GET</span></td><td class="mono">/health/ready</td><td>Mongo, Redis, moteur, abonnés SSE</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Événements diffusés</h4>
+      <p class="mono" style="font-size:0.82rem">
+        complaint.created · complaint.triaged · complaint.assigned ·
+        complaint.updated · complaint.replied · complaint.resolved ·
+        complaint.escalated · sla.warning · sla.breached · triage.corrected
+      </p>
+      <p>
+        Trois seulement déclenchent une notification visuelle&nbsp;:
+        <code>sla.warning</code>, <code>sla.breached</code> et
+        <code>complaint.escalated</code>. La file se rafraîchit déjà seule&nbsp;;
+        un avis par arrivée serait du bruit.
+      </p>
+    </section>
+
+    <!-- ============================================================== 13 -->
+    <section id="rbac">
+      <h2><span class="num">13</span>RBAC</h2>
+      <p class="sub">
+        Quatre rôles. Le cloisonnement est un filtre <em>injecté dans la
+        requête</em>, jamais appliqué après lecture.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Rôle</th><th>Filtre injecté</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Admin</strong></td><td class="mono">{} — aucune restriction</td></tr>
+            <tr><td><strong>Superviseur</strong></td><td class="mono">{} — aucune restriction</td></tr>
+            <tr><td><strong>Agent</strong> avec service</td><td class="mono">son service OU ses affectations</td></tr>
+            <tr><td><strong>Agent</strong> sans service</td><td class="mono">ses affectations uniquement</td></tr>
+            <tr><td><strong>Réclamant</strong></td><td class="mono">ses propres réclamations</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Action</th><th>Réclamant</th><th>Agent</th><th>Superviseur</th><th>Admin</th></tr></thead>
+          <tbody>
+            <tr><td>Déposer, suivre ses réclamations</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Voir la file et l'analyse</td><td class="no">non</td><td class="partial">périmètre</td><td class="yes">tout</td><td class="yes">tout</td></tr>
+            <tr><td>Corriger une catégorie, changer un statut</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Répondre, résoudre, rejeter</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Statistiques générales</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td><strong>Réaffecter à un agent</strong></td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Relancer l'analyse</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Charge par agent, supervision</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td>Lire les règles, simuler</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td><strong>Déclaration ROGS760</strong></td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td><td class="yes">oui</td></tr>
+            <tr><td><strong>Modifier un poids de règle</strong></td><td class="no">non</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td></tr>
+            <tr><td>Gérer base de connaissances, utilisateurs, services</td><td class="no">non</td><td class="no">non</td><td class="no">non</td><td class="yes">oui</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h4>Deux gardes, et la différence compte</h4>
+        <p>
+          <code>require_role</code> respecte la hiérarchie&nbsp;: un admin passe
+          partout où un agent passe. <code>require_exact_roles</code> ne la
+          respecte pas — <strong>un admin n'est pas implicitement un
+          agent</strong>. Un test vérifie explicitement cette distinction, et un
+          autre garantit qu'un filtre vide — qui signifierait «&nbsp;tout
+          lire&nbsp;» — ne peut jamais être produit pour un rôle inférieur.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================== 14 -->
+    <section id="front">
+      <h2><span class="num">14</span>Interface</h2>
+      <p class="sub">
+        Un seul système de jetons, deux registres&nbsp;: portail calme et clair,
+        console dense et sombre.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Route</th><th>Écran</th><th>Accès</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">/portal</td><td>Dépôt d'une réclamation</td><td>Public</td></tr>
+            <tr><td class="mono">/portal/suivi</td><td>Suivi par référence</td><td>Public</td></tr>
+            <tr><td class="mono">/portal/satisfaction</td><td>Évaluation après clôture</td><td>Public</td></tr>
+            <tr><td class="mono">/portal/mes-reclamations</td><td>Espace du réclamant</td><td>Réclamant</td></tr>
+            <tr><td class="mono">/portal/reclamation/:id</td><td>Détail côté réclamant</td><td>Réclamant</td></tr>
+            <tr><td class="mono">/login · /register</td><td>Session</td><td>Public</td></tr>
+            <tr><td class="mono">/inbox</td><td>File de traitement, filtres, curseur</td><td>Agent</td></tr>
+            <tr><td class="mono">/inbox/:id</td><td>Détail, analyse, réponse, réaffectation</td><td>Agent</td></tr>
+            <tr><td class="mono">/supervision</td><td>Tableau de supervision</td><td>Superviseur</td></tr>
+            <tr><td class="mono">/analytics</td><td>Statistiques et graphiques</td><td>Agent</td></tr>
+            <tr><td class="mono">/admin/rules</td><td>Règles et simulateur</td><td>Superviseur / Admin</td></tr>
+            <tr><td class="mono">/admin/kb</td><td>Base de connaissances</td><td>Superviseur / Admin</td></tr>
+            <tr><td class="mono">/admin/users</td><td>Personnel</td><td>Admin</td></tr>
+            <tr><td class="mono">/admin/departments</td><td>Services</td><td>Admin</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Le système de couleurs</h4>
+      <p>
+        L'identité est noire et rouge, ce qui crée le seul conflit qu'un système
+        de réclamations ne peut pas se permettre&nbsp;: <strong>le rouge est déjà
+        la couleur du danger</strong>. La résolution sépare les deux par le rôle
+        et la position, pas seulement par la teinte.
+      </p>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Jeton</th><th>Emploi</th><th>Interdit</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">--primary</td><td>Graphite&nbsp;: boutons, focus, états actifs</td><td>—</td></tr>
+            <tr><td class="mono">--brand</td><td>Rouge&nbsp;: marque, filet du bandeau, navigation active</td><td><strong>Jamais sur une donnée ni un état</strong></td></tr>
+            <tr><td class="mono">--danger</td><td>Oxblood&nbsp;: dépassement, P1, action destructive</td><td>Jamais sur du chrome</td></tr>
+            <tr><td class="mono">--amber</td><td>Réservé au SLA et au triage humain</td><td>Partout ailleurs</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        En mode sombre, <code>--primary</code> s'inverse en quasi-blanc&nbsp;: un
+        bouton rouge se battrait avec les badges de dépassement voisins dans la
+        file.
+      </p>
+
+      <h4>Internationalisation</h4>
+      <p>
+        Le portail est bilingue français et arabe avec un RTL réel — mise en page
+        miroir, pas seulement le texte — et les numéros de téléphone restent
+        isolés en LTR à l'intérieur du texte arabe. La console est en français,
+        langue de travail du personnel bancaire tunisien. Aucune police n'est
+        embarquée&nbsp;: l'exécution hors ligne exclut un CDN, et les fontes
+        système rendent correctement l'arabe sur toutes les plateformes visées.
+      </p>
+    </section>
+
+    <!-- ============================================================== 15 -->
+    <section id="comptes">
+      <h2><span class="num">15</span>Comptes</h2>
+      <p class="sub">Créés par le script de peuplement. Mot de passe commun&nbsp;: <code>Rakib2026!</code></p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Adresse</th><th>Nom</th><th>Rôle</th><th>Service</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">admin@rakib.tn</td><td>Sonia Trabelsi</td><td>Admin</td><td class="no">—</td></tr>
+            <tr><td class="mono">superviseur1@rakib.tn</td><td>Mehdi Gharbi</td><td>Superviseur</td><td class="no">tous</td></tr>
+            <tr><td class="mono">superviseur2@rakib.tn</td><td>Ines Bouzid</td><td>Superviseur</td><td class="no">tous</td></tr>
+            <tr><td class="mono">agent.mon1@rakib.tn</td><td>Karim Jelassi</td><td>Agent</td><td>Monétique et Cartes</td></tr>
+            <tr><td class="mono">agent.mon2@rakib.tn</td><td>Rania Ayari</td><td>Agent</td><td>Monétique et Cartes</td></tr>
+            <tr><td class="mono">agent.ope1@rakib.tn</td><td>Yassine Chaouch</td><td>Agent</td><td>Opérations Bancaires</td></tr>
+            <tr><td class="mono">agent.ope2@rakib.tn</td><td>Nadia Belhaj</td><td>Agent</td><td>Opérations Bancaires</td></tr>
+            <tr><td class="mono">agent.cre1@rakib.tn</td><td>Walid Mansouri</td><td>Agent</td><td>Crédits et Financement</td></tr>
+            <tr><td class="mono">agent.rc1@rakib.tn</td><td>Olfa Hamdi</td><td>Agent</td><td>Relation Clientèle</td></tr>
+            <tr><td class="mono">agent.rc2@rakib.tn</td><td>Bilel Khemiri</td><td>Agent</td><td>Relation Clientèle</td></tr>
+            <tr><td class="mono">agent.dig1@rakib.tn</td><td>Amel Zouari</td><td>Agent</td><td>Banque Digitale</td></tr>
+            <tr><td class="mono">agent.int1@rakib.tn</td><td>Hamza Ben Romdhane</td><td>Agent</td><td>Opérations Internationales</td></tr>
+            <tr><td class="mono">agent.frd1@rakib.tn</td><td>Sofiene Kacem</td><td>Agent</td><td>Conformité et Fraude</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Le rôle <strong>Réclamant</strong> n'est pas pré-créé&nbsp;: il se crée
+        depuis <code>/register</code>, ou implicitement lorsqu'un dépôt anonyme
+        est rattaché à une adresse connue.
+      </p>
+    </section>
+
+    <!-- ============================================================== 16 -->
+    <section id="tests">
+      <h2><span class="num">16</span>Tests</h2>
+      <p class="sub">Quinze fichiers. Couverture mesurée sur <code>services/</code> et <code>intelligence/</code> seulement — le cœur métier.</p>
+
+<pre><code>docker compose -f docker-compose.test.yml run --rm tests
+ruff check .
+mypy app/</code></pre>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Fichier</th><th>Couvre</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">test_normalize.py</td><td>Nettoyage, masquage, repli des accents latins et arabes, arabizi</td></tr>
+            <tr><td class="mono">test_language_and_engine.py</td><td>Identification de langue, derja, moteur de secours</td></tr>
+            <tr><td class="mono">test_rules_engine.py</td><td>Les 27 règles, pondérations, seuils de priorité</td></tr>
+            <tr><td class="mono">test_triage_pipeline.py</td><td>Enchaînement des six étapes, dédoublonnage, affectation</td></tr>
+            <tr><td class="mono">test_rules_api.py</td><td>Lecture, édition, validation, simulateur</td></tr>
+            <tr><td class="mono">test_complaints.py</td><td>Dépôt, cycle de vie, pagination par curseur</td></tr>
+            <tr><td class="mono">test_attachments.py</td><td>Dépôt authentifié et anonyme, écriture atomique</td></tr>
+            <tr><td class="mono">test_auth.py</td><td>Inscription, session, rafraîchissement, jetons de suivi</td></tr>
+            <tr><td class="mono">test_rbac.py</td><td>Hiérarchie, gardes de routes, filtre de périmètre</td></tr>
+            <tr><td class="mono">test_security.py</td><td>argon2, signature JWT, expiration</td></tr>
+            <tr><td class="mono">test_sla.py</td><td>Calendrier ouvré, plafond de l'article 8, alertes, escalade</td></tr>
+            <tr><td class="mono">test_events.py</td><td>Redis Streams, groupes de consommateurs, SSE</td></tr>
+            <tr><td class="mono">test_kb.py</td><td>BM25, suggestions, comptage d'usage</td></tr>
+            <tr><td class="mono">test_analytics.py</td><td>Agrégations et leur cloisonnement</td></tr>
+            <tr><td class="mono">conftest.py</td><td>Fixtures&nbsp;: une boucle d'événements pour toute la session</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Évaluer la catégorisation</h4>
+<pre><code>python -m scripts.evaluate</code></pre>
+      <p>
+        Mesure le lexique contre <code>scripts/gold.py</code>, écrit à la main et
+        indépendamment du vocabulaire&nbsp;: <strong>0,600 de macro-F1,
+        37&nbsp;% d'abstention, 88&nbsp;% des inclassables correctement
+        renvoyés</strong>. Il n'y a pas de jeu de contrôle&nbsp;: un lexique ne
+        peut rien mémoriser, donc l'écart contrôle/réel qui domine tant de
+        rapports n'existe pas ici.
+      </p>
+    </section>
+
+    <!-- ============================================================== 17 -->
+    <section id="deploiement">
+      <h2><span class="num">17</span>Déploiement</h2>
+      <p class="sub">k3s, espace de noms <code>reclamations</code>, TLS automatique.</p>
+
+<pre><code>sh deploy/deploy.sh              # build, import k3s, applique, vérifie
+sh deploy/deploy.sh --skip-build # manifestes seulement</code></pre>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Service</th><th>Rôle</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">api</td><td>FastAPI et flux SSE</td></tr>
+            <tr><td class="mono">worker</td><td>Analyse de fond, balayage SLA (5 min)</td></tr>
+            <tr><td class="mono">notifier</td><td>Consommateur du flux, envoi des courriels</td></tr>
+            <tr><td class="mono">web</td><td>React servi par nginx</td></tr>
+            <tr><td class="mono">mongo · redis · minio</td><td>Données, files, pièces jointes</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>L'image</h4>
+      <p>
+        Build multi-étapes&nbsp;: le toolchain d'installation n'atteint jamais
+        l'image finale. <strong>469 Mo</strong>, contre 800 visés.
+        <code>PIP_ONLY_BINARY=:all:</code> fait échouer le build au grand jour si
+        une dépendance cessait de publier une wheel, plutôt que de réintroduire
+        un compilateur en silence. Le conteneur tourne sous un utilisateur non
+        privilégié.
+      </p>
+
+      <div class="panel panel-warn">
+        <h4>Deux pièges rencontrés</h4>
+        <p>
+          Le Dockerfile référençait un fichier supprimé — invisible dans le code,
+          fatal au build. Et le ConfigMap imposait une valeur que l'énumération
+          refusait, mettant trois services en boucle de crash&nbsp;: <strong>le
+          manifeste n'est pas typé avec le code</strong>, et rien ne le vérifie
+          avant le déploiement.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================== 18 -->
+    <section id="exploitation">
+      <h2><span class="num">18</span>Exploitation</h2>
+      <p class="sub">Peupler, mesurer, observer.</p>
+
+      <h4>Peuplement</h4>
+<pre><code>python -m scripts.seed --force --count 60
+python -m scripts.seed --no-triage      # sans exécuter le pipeline</code></pre>
+
+      <h4>Charge</h4>
+<pre><code>python3 deploy/benchmark.py [requêtes] [concurrence]
+python3 deploy/benchmark.py 300 1 --keep   # conserve les lignes créées</code></pre>
+      <div class="panel panel-warn">
+        <h4>Le benchmark écrit dans la vraie base</h4>
+        <p>
+          Ses requêtes créent de <em>vraies</em> réclamations&nbsp;: catégorisées,
+          comptées, et intégrées à la déclaration destinée au régulateur. Elles
+          portent une adresse dédiée et sont supprimées par défaut en fin de
+          mesure. <code>--keep</code> existe, mais il faut le demander&nbsp;: le
+          mode d'échec est silencieux et ne se manifeste que comme un chiffre
+          faux dans un rapport réglementaire.
+        </p>
+      </div>
+
+      <h4>Vérification visuelle</h4>
+<pre><code>node deploy/visual_check.mjs      # 11 captures + erreurs console</code></pre>
+      <p>
+        Playwright parcourt portail, RTL arabe, file, détail, simulateur,
+        statistiques et mobile. Plusieurs des défauts les plus sérieux du projet
+        n'ont été trouvés que par ce script — aucun outil statique ne les
+        voyait.
+      </p>
+
+      <h4>Santé</h4>
+<pre><code>curl https://reclamations.activiity.com/health/ready</code></pre>
+<pre><code>{"status":"ready",
+ "checks":{"mongo":true,"redis":true},
+ "sse_clients":0,
+ "engine":{"active_engine":"lexicon",
+           "engine_version":"lexicon-v1",
+           "degraded":false}}</code></pre>
+    </section>
+
+    <!-- ============================================================== 19 -->
+    <section id="connu">
+      <h2><span class="num">19</span>Problèmes connus</h2>
+      <p class="sub">Recensés volontairement.</p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Sujet</th><th>Détail</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Performance sous concurrence</strong></td>
+              <td>58 ms p95 à un client (cible tenue), 196 ms à cinq, 501 ms à vingt. L'hôte partagé explique une part de l'écart&nbsp;; le débit plafonne vers 60 req/s, ce qui désigne une contention interne. La cause exacte demande un profilage.</td>
+            </tr>
+            <tr>
+              <td><strong>Généralisation nulle hors vocabulaire</strong></td>
+              <td>37&nbsp;% d'abstention sur le jeu de référence. Corrigeable par un administrateur qui élargit le lexique, pas par le système lui-même.</td>
+            </tr>
+            <tr>
+              <td><strong>La déclaration ne sait pas dire « fraude »</strong></td>
+              <td>Aucune entrée correspondante dans la nomenclature du régulateur.</td>
+            </tr>
+            <tr>
+              <td><strong>Marque officielle non fournie</strong></td>
+              <td><code>Brandmark</code> charge <code>public/brand/uib.svg</code> dès qu'il est déposé&nbsp;; l'artwork est une marque déposée et n'est délibérément pas versionné.</td>
+            </tr>
+            <tr>
+              <td><strong>Audit interne non outillé</strong></td>
+              <td>L'intervalle de trois ans de l'article 12 est défini mais aucun compte à rebours n'est affiché.</td>
+            </tr>
+            <tr>
+              <td><strong>401 au rechargement</strong></td>
+              <td>Le jeton d'accès n'existe qu'en mémoire, par choix de sécurité&nbsp;; le premier appel après rechargement échoue avant la reprise automatique. Sans effet fonctionnel, mais visible en console.</td>
+            </tr>
+            <tr>
+              <td><strong>Console peu visible depuis le portail</strong></td>
+              <td>Un visiteur arrivant sur le portail ne devine pas qu'une console existe&nbsp;: l'entrée est un simple lien « Connexion » sans identifiants de démonstration.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="colophon">
+    Rakib — plateforme de gestion des réclamations · Projet de fin d'études<br>
+    Environnement de démonstration&nbsp;: reclamations.activiity.com · Projet
+    académique, sans affiliation officielle · Les identifiants ci-dessus n'ont
+    cours que sur cet environnement.
+  </footer>
+
+</div>
