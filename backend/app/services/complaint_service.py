@@ -50,6 +50,11 @@ log = get_logger(__name__)
 #: on the SLA board with no clock at all. Triage overwrites this (spec 5.6).
 PROVISIONAL_PRIORITY = 3
 
+#: Article 8 requires a rejection to be reasoned. A one-word refusal is not
+#: a reason, so the service sets a floor low enough never to block a genuine
+#: explanation and high enough to stop \"non\" being recorded as one.
+MOTIVATION_MIN_CHARS = 40
+
 
 def event_payload(complaint: Complaint, **extra: Any) -> dict[str, Any]:
     """The shared shape every notifier reads. Kept flat so it survives JSON."""
@@ -94,6 +99,14 @@ async def create_complaint(
     )
     complaint.sla.hours = settings.sla_hours_by_priority[PROVISIONAL_PRIORITY]
     complaint.sla.due_at = complaint.created_at + timedelta(hours=complaint.sla.hours)
+
+    # Article 8: the acknowledgement carries a registration date and a reference
+    # number, and the fifteen-working-day clock runs from it. We issue it on
+    # receipt — the reference exists, the record exists, so there is nothing to
+    # wait for, and any delay here would eat into the customer's legal window.
+    complaint.reglementaire.accuse_reception_at = complaint.created_at
+    apply_legal_deadline(complaint)
+
     complaint.log(
         "complaint.created",
         actor_type="user" if actor else "system",
@@ -491,14 +504,69 @@ async def resolve(complaint: Complaint, resolution: str, actor: User) -> Complai
     complaint.status = Status.RESOLVED
     complaint.sla.resolved_at = datetime.now(UTC)
     complaint.log("complaint.resolved", actor_type="agent", actor_id=str(actor.id))
-    complaint.touch()
-    await complaint.save()
+    # Targeted write, not save(): add_message above has already written to this
+    # document, and a whole-document save from the stale in-memory copy would
+    # drop it — the same lost-update the attachment path had.
+    await persist_fields(
+        complaint,
+        {"status": str(Status.RESOLVED), "sla": complaint.sla.model_dump()},
+    )
 
     await publish(
         EventName.COMPLAINT_RESOLVED,
         event_payload(
             complaint,
             resolution=resolution,
+            satisfaction_url=satisfaction_url(complaint),
+        ),
+    )
+    return complaint
+
+
+async def reject(
+    complaint: Complaint, motivation: str, actor: User
+) -> Complaint:
+    """Reject a claim, with the reasoning the circulaire requires.
+
+    Article 8: « motiver toute reponse rejetant en partie ou en totalite les
+    revendications du client ». The obligation is enforced here rather than left
+    to the interface, because a rejection recorded without reasoning is a
+    compliance defect that an audit under Article 12 would find — and by then
+    the agent who knew the reason has long moved on.
+    """
+    if complaint.status in CLOSED_STATUSES:
+        raise Conflict("Reclamation deja cloturee")
+
+    reasoning = motivation.strip()
+    if len(reasoning) < MOTIVATION_MIN_CHARS:
+        raise Conflict(
+            "Un rejet doit etre motive (article 8 de la circulaire BCT "
+            f"n°2022-08) : au moins {MOTIVATION_MIN_CHARS} caracteres."
+        )
+
+    # The motivation is sent to the claimant, not filed internally: a reasoned
+    # rejection the customer never sees is not a reasoned rejection.
+    await add_message(complaint, reasoning, actor, internal=False)
+
+    now = datetime.now(UTC)
+    complaint.status = Status.REJECTED
+    complaint.sla.resolved_at = now
+    complaint.reglementaire.motivation = reasoning
+    complaint.log("complaint.rejected", actor_type="agent", actor_id=str(actor.id))
+    await persist_fields(
+        complaint,
+        {
+            "status": str(Status.REJECTED),
+            "sla": complaint.sla.model_dump(),
+            "reglementaire": complaint.reglementaire.model_dump(),
+        },
+    )
+
+    await publish(
+        EventName.COMPLAINT_RESOLVED,
+        event_payload(
+            complaint,
+            resolution=reasoning,
             satisfaction_url=satisfaction_url(complaint),
         ),
     )

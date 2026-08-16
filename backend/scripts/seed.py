@@ -90,7 +90,8 @@ async def main(force: bool = False, count: int = 60, triage: bool = True) -> Non
     now = datetime.now(UTC)
     for index in range(count):
         category, subject, body = COMPLAINTS[index % len(COMPLAINTS)]
-        name, email, phone, is_vip = CLAIMANTS[index % len(CLAIMANTS)]
+        (name, email, phone, is_vip, nature, genre, tranche,
+         rne) = CLAIMANTS[index % len(CLAIMANTS)]
         status = STATUS_MIX[index % len(STATUS_MIX)]
 
         # Age follows the status. Spreading every complaint evenly over 30 days
@@ -108,7 +109,9 @@ async def main(force: bool = False, count: int = 60, triage: bool = True) -> Non
             ref=await next_complaint_ref(created_at),
             channel=random.choice(CHANNEL_MIX),
             claimant=Claimant(
-                full_name=name, email=email, phone=phone, is_vip=is_vip
+                full_name=name, email=email, phone=phone, is_vip=is_vip,
+                nature=nature, genre=genre, tranche_age=tranche,
+                identifiant_rne=rne,
             ),
             subject=subject,
             body=body,

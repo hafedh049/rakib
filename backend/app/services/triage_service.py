@@ -31,6 +31,8 @@ from app.models.complaint import (
 )
 from app.models.department import Department
 from app.models.user import User
+from app.domain.bct import objet_bct
+from app.intelligence.rules.perimetre import detect_hors_perimetre
 from app.services import assignment_service, complaint_service, triage
 
 log = get_logger(__name__)
@@ -223,6 +225,28 @@ async def triage_complaint(complaint: Complaint) -> Complaint:
             )
         )
 
+    # ---- regulatory fields, derived here so every complaint carries them ----
+    # Annexe 3-IV: the declaration counts eight objets, not our twelve
+    # categories. Stamping it now means the annual report is a read, not a
+    # recomputation over historical rows whose mapping may since have moved.
+    complaint.reglementaire.objet_bct = objet_bct(complaint.analysis.category)
+
+    # Article 2: a message that is not a reclamation is still handled, but must
+    # not inflate the declaration. Only set on first analysis — a supervisor's
+    # later judgement outranks the detector and must not be overwritten by a
+    # re-analysis.
+    if complaint.reglementaire.hors_perimetre is None:
+        reason, matched = detect_hors_perimetre(complaint.normalized_text)
+        if reason:
+            complaint.reglementaire.hors_perimetre = reason
+            entries.append(
+                TimelineEntry(
+                    action="perimetre.hors_scope",
+                    actor_type="engine",
+                    meta={"reason": reason, "matched": matched},
+                )
+            )
+
     # Targeted write: a claimant may have attached a file while the pipeline was
     # running, and a whole-document save would have thrown it away.
     await complaint_service.persist_fields(
@@ -233,6 +257,7 @@ async def triage_complaint(complaint: Complaint) -> Complaint:
             "triage_state": str(complaint.triage_state),
             "status": str(complaint.status),
             "sla": complaint.sla.model_dump(),
+            "reglementaire": complaint.reglementaire.model_dump(),
             "assignment": complaint.assignment.model_dump()
             if complaint.assignment
             else None,

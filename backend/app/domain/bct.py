@@ -211,3 +211,66 @@ REPORTING_FORMAT = "XML"
 #: Article 12 — the complaint-handling device is audited internally at least
 #: every three years. Surfaced in the admin console as a compliance countdown.
 AUDIT_INTERNE_INTERVALLE_ANS = 3
+
+
+# ------------------------------------------------------------ Annexe 3-IV
+class ObjetBCT(StrEnum):
+    """The regulator's eight complaint objects, from Annexe 3 section IV.
+
+    Our twelve categories are the bank's operational vocabulary; these eight are
+    what the BCT counts. The two are deliberately separate: an internal taxonomy
+    that has to double as a regulatory one ends up serving neither.
+    """
+
+    FINANCEMENT = "FINANCEMENT"
+    PAIEMENT_HORS_MONETIQUE = "PAIEMENT_HORS_MONETIQUE"
+    MONETIQUE = "MONETIQUE"
+    FONCTIONNEMENT_COMPTES = "FONCTIONNEMENT_COMPTES"
+    OPERATIONS_INTERNATIONALES = "OPERATIONS_INTERNATIONALES"
+    TARIFICATION = "TARIFICATION"
+    SERVICES_A_DISTANCE = "SERVICES_A_DISTANCE"
+    AUTRES_SERVICES = "AUTRES_SERVICES"
+
+
+OBJET_LABELS_FR: dict[str, str] = {
+    ObjetBCT.FINANCEMENT: "Financement",
+    ObjetBCT.PAIEMENT_HORS_MONETIQUE: "Paiement hors monétique",
+    ObjetBCT.MONETIQUE: "Monétique",
+    ObjetBCT.FONCTIONNEMENT_COMPTES: "Fonctionnement des comptes",
+    ObjetBCT.OPERATIONS_INTERNATIONALES: "Opérations bancaires internationales",
+    ObjetBCT.TARIFICATION: "Tarification",
+    ObjetBCT.SERVICES_A_DISTANCE: "Services bancaires à distance",
+    ObjetBCT.AUTRES_SERVICES: "Autres services",
+}
+
+#: category -> objet. Twelve into eight, so the mapping loses detail on purpose.
+#:
+#: One line is a genuine modelling problem worth stating: the regulator's list
+#: has **no entry for fraud**. An unauthorised card transaction is monétique, an
+#: unauthorised transfer is paiement hors monétique, and neither reading tells
+#: the BCT that money left an account without consent. We map fraud to
+#: MONETIQUE because that is where most of it originates, and keep the internal
+#: FRAUDE_* category so nothing is lost on our side — but the declaration
+#: genuinely cannot express it, and that is a limitation of the form, not of
+#: this implementation.
+OBJET_BCT_FOR_CATEGORY: dict[str, str] = {
+    "CREDIT_FINANCEMENT": ObjetBCT.FINANCEMENT,
+    "VIREMENT_PRELEVEMENT": ObjetBCT.PAIEMENT_HORS_MONETIQUE,
+    "CHEQUE_EFFET": ObjetBCT.PAIEMENT_HORS_MONETIQUE,
+    "CARTE_BANCAIRE": ObjetBCT.MONETIQUE,
+    "DAB_GAB": ObjetBCT.MONETIQUE,
+    "PAIEMENT_TPE_ECOMMERCE": ObjetBCT.MONETIQUE,
+    "FRAUDE_OPERATION_NON_AUTORISEE": ObjetBCT.MONETIQUE,
+    "COMPTE_GESTION": ObjetBCT.FONCTIONNEMENT_COMPTES,
+    "OPERATIONS_INTERNATIONALES": ObjetBCT.OPERATIONS_INTERNATIONALES,
+    "FRAIS_COMMISSIONS": ObjetBCT.TARIFICATION,
+    "BANQUE_DIGITALE": ObjetBCT.SERVICES_A_DISTANCE,
+    "AGENCE_QUALITE_SERVICE": ObjetBCT.AUTRES_SERVICES,
+}
+
+
+def objet_bct(category: str | None) -> str:
+    """Map an internal category onto the declaration's object line."""
+    if category is None:
+        return ObjetBCT.AUTRES_SERVICES
+    return OBJET_BCT_FOR_CATEGORY.get(category, ObjetBCT.AUTRES_SERVICES)

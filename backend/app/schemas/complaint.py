@@ -79,6 +79,17 @@ class ResolveRequest(BaseModel):
     notify_claimant: bool = True
 
 
+class RejectRequest(BaseModel):
+    """Article 8 — a rejection carries its reasoning or it is not recorded.
+
+    The floor is enforced again in the service, because the obligation belongs
+    to the domain, not to whichever caller happens to be validating today.
+    """
+
+    motivation: str = Field(min_length=40, max_length=10_000)
+    notify_claimant: bool = True
+
+
 class SuggestionUsage(BaseModel):
     article_id: str
     outcome: Literal["verbatim", "edited", "discarded"]

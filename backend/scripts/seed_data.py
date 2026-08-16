@@ -35,16 +35,28 @@ STAFF = [
      ["fraude", "opposition"]),
 ]
 
-#: (full name, email, phone, is_vip)
+#: (full name, email, phone, is_vip, nature, genre, tranche_age, rne)
+#:
+#: The last four are Annexe 3 fields. Genre and age are only meaningful for
+#: individuals, so legal persons carry None — which is also what the declaration
+#: expects: section II counts *particuliers* only.
 CLAIMANTS = [
-    ("Fatma Ben Ali", "fatma.benali@example.tn", "+21620145879", False),
-    ("Societe Medina Import", "contact@medina-import.tn", "+21671845200", True),
-    ("Sami Ouertani", "sami.ouertani@example.tn", "+21698774512", False),
-    ("Leila Nasri", None, "+21622336698", False),
-    ("Anis Dridi", "anis.dridi@example.tn", "+21655412003", False),
-    ("Cabinet Ben Youssef", "cabinet@benyoussef.tn", "+21673228400", True),
-    ("Emna Sassi", "emna.sassi@example.tn", None, False),
-    ("Mohamed Zribi", None, "+21627889044", False),
+    ("Fatma Ben Ali", "fatma.benali@example.tn", "+21620145879", False,
+     "PARTICULIER", "FEMININ", "A_26_60", None),
+    ("Societe Medina Import", "contact@medina-import.tn", "+21671845200", True,
+     "ENTREPRISE", None, None, "1234567ABC"),
+    ("Sami Ouertani", "sami.ouertani@example.tn", "+21698774512", False,
+     "PARTICULIER", "MASCULIN", "A_26_60", None),
+    ("Leila Nasri", None, "+21622336698", False,
+     "PARTICULIER", "FEMININ", "PLUS_60", None),
+    ("Anis Dridi", "anis.dridi@example.tn", "+21655412003", False,
+     "PARTICULIER", "MASCULIN", "A_18_25", None),
+    ("Cabinet Ben Youssef", "cabinet@benyoussef.tn", "+21673228400", True,
+     "PROFESSIONNEL", None, None, "7654321XYZ"),
+    ("Emna Sassi", "emna.sassi@example.tn", None, False,
+     "PARTICULIER", "FEMININ", "A_18_25", None),
+    ("Mohamed Zribi", None, "+21627889044", False,
+     "PARTICULIER", "MASCULIN", "PLUS_60", None),
 ]
 
 #: (category, subject, body)

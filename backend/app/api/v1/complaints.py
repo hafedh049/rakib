@@ -28,6 +28,7 @@ from app.schemas.complaint import (
     ComplaintPublicOut,
     MessageCreate,
     PublicMessage,
+    RejectRequest,
     ResolveRequest,
     SatisfactionIn,
     SuggestionUsage,
@@ -157,6 +158,15 @@ async def resolve_complaint(
 ) -> Complaint:
     complaint = await complaint_service.get_for_user(complaint_id, user)
     return await complaint_service.resolve(complaint, payload.resolution, user)
+
+
+@router.post("/{complaint_id}/reject", response_model=ComplaintOut)
+async def reject_complaint(
+    complaint_id: PydanticObjectId, payload: RejectRequest, user: AgentUser
+) -> Complaint:
+    """Reject a claim. Article 8 makes the reasoning mandatory, not optional."""
+    complaint = await complaint_service.get_for_user(complaint_id, user)
+    return await complaint_service.reject(complaint, payload.motivation, user)
 
 
 @router.post(
