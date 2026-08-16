@@ -1,0 +1,908 @@
+<title>Dossier de soutenance Rakib</title>
+
+<style>
+  /* =====================================================================
+     Dossier de soutenance — jetons repris de frontend/src/styles/app.css.
+     Le document porte l'identité du produit : graphite pour la structure,
+     rouge réservé au chrome, ambre au SLA.
+     ===================================================================== */
+
+  :root {
+    --ground:      oklch(0.995 0.002 25);
+    --surface:     oklch(0.978 0.004 25);
+    --surface-2:   oklch(0.958 0.006 25);
+    --ink:         oklch(0.19 0.008 25);
+    --ink-muted:   oklch(0.45 0.010 25);
+    --ink-faint:   oklch(0.60 0.010 25);
+    --line:        oklch(0.89 0.005 25);
+    --line-strong: oklch(0.80 0.007 25);
+
+    --brand:       oklch(0.55 0.215 27);
+    --brand-soft:  oklch(0.962 0.030 27);
+    --graphite:    oklch(0.22 0.010 25);
+
+    --amber:       oklch(0.60 0.13 75);
+    --amber-soft:  oklch(0.962 0.045 80);
+    --danger:      oklch(0.44 0.16 25);
+    --danger-soft: oklch(0.962 0.035 25);
+    --success:     oklch(0.48 0.12 155);
+    --success-soft:oklch(0.960 0.038 155);
+
+    --shadow: 0 1px 2px oklch(0 0 0 / 0.05), 0 6px 20px oklch(0 0 0 / 0.04);
+
+    --serif: ui-serif, "Iowan Old Style", "Source Serif 4", Cambria, Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+    --arabic: "Segoe UI", "Noto Naskh Arabic", "Geeza Pro", var(--sans);
+
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      oklch(0.160 0.006 25);
+      --surface:     oklch(0.205 0.008 25);
+      --surface-2:   oklch(0.248 0.010 25);
+      --ink:         oklch(0.96 0.003 25);
+      --ink-muted:   oklch(0.73 0.008 25);
+      --ink-faint:   oklch(0.58 0.010 25);
+      --line:        oklch(0.30 0.010 25);
+      --line-strong: oklch(0.41 0.012 25);
+
+      --brand:       oklch(0.64 0.21 27);
+      --brand-soft:  oklch(0.28 0.055 27);
+      --graphite:    oklch(0.92 0.004 25);
+
+      --amber:       oklch(0.80 0.13 75);
+      --amber-soft:  oklch(0.29 0.055 70);
+      --danger:      oklch(0.66 0.17 25);
+      --danger-soft: oklch(0.28 0.065 25);
+      --success:     oklch(0.73 0.12 155);
+      --success-soft:oklch(0.27 0.050 155);
+
+      --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 6px 20px oklch(0 0 0 / 0.25);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      oklch(0.160 0.006 25);
+    --surface:     oklch(0.205 0.008 25);
+    --surface-2:   oklch(0.248 0.010 25);
+    --ink:         oklch(0.96 0.003 25);
+    --ink-muted:   oklch(0.73 0.008 25);
+    --ink-faint:   oklch(0.58 0.010 25);
+    --line:        oklch(0.30 0.010 25);
+    --line-strong: oklch(0.41 0.012 25);
+
+    --brand:       oklch(0.64 0.21 27);
+    --brand-soft:  oklch(0.28 0.055 27);
+    --graphite:    oklch(0.92 0.004 25);
+
+    --amber:       oklch(0.80 0.13 75);
+    --amber-soft:  oklch(0.29 0.055 70);
+    --danger:      oklch(0.66 0.17 25);
+    --danger-soft: oklch(0.28 0.065 25);
+    --success:     oklch(0.73 0.12 155);
+    --success-soft:oklch(0.27 0.050 155);
+
+    --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 6px 20px oklch(0 0 0 / 0.25);
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem) 6rem;
+  }
+
+  @media (min-width: 1080px) {
+    .page { grid-template-columns: 14rem minmax(0, 1fr); gap: 3.5rem; align-items: start; }
+  }
+
+  main { min-width: 0; }
+
+  /* ------------------------------------------------------------- masthead */
+  .masthead {
+    grid-column: 1 / -1;
+    padding: clamp(2.5rem, 6vw, 4rem) 0 2rem;
+    margin-bottom: 2.75rem;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+
+  /* The one place brand red runs edge to edge, exactly as in the product. */
+  .masthead::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 3px;
+    background: var(--brand);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin: 0 0 0.9rem;
+  }
+
+  .masthead h1 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 5.5vw, 3.1rem);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    line-height: 1.08;
+    margin: 0;
+    text-wrap: balance;
+    max-width: 20ch;
+  }
+
+  .masthead .lede {
+    font-family: var(--serif);
+    font-size: clamp(1.02rem, 2.1vw, 1.22rem);
+    line-height: 1.55;
+    color: var(--ink-muted);
+    max-width: 54ch;
+    margin: 1.1rem 0 0;
+    text-wrap: pretty;
+  }
+
+  /* -------------------------------------------------------------- summary */
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 2rem 0 0;
+  }
+
+  .figure { background: var(--surface); padding: 0.95rem 1.05rem; }
+
+  .figure .v {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+
+  .figure .k {
+    font-size: 0.74rem;
+    color: var(--ink-muted);
+    display: block;
+    margin-top: 0.25rem;
+    line-height: 1.35;
+  }
+
+  .figure.good .v { color: var(--success); }
+  .figure.warn .v { color: var(--amber); }
+
+  /* ------------------------------------------------------------- sommaire */
+  nav.toc { display: none; }
+
+  @media (min-width: 1080px) {
+    nav.toc {
+      display: block;
+      position: sticky;
+      top: 2rem;
+      font-size: 0.83rem;
+      line-height: 1.4;
+      border-inline-start: 2px solid var(--line);
+      padding-inline-start: 1rem;
+    }
+    nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+    nav.toc a { color: var(--ink-muted); text-decoration: none; display: block; transition: color 140ms ease; }
+    nav.toc a:hover, nav.toc a:focus-visible { color: var(--brand); }
+    nav.toc .num { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-faint); margin-inline-end: 0.4rem; }
+  }
+
+  /* -------------------------------------------------------------- content */
+  section { margin-bottom: 3.75rem; scroll-margin-top: 1.5rem; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.45rem, 3.2vw, 1.95rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin: 0 0 0.4rem;
+    text-wrap: balance;
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+  }
+
+  h2 .num { font-family: var(--mono); font-size: 0.68em; font-weight: 400; color: var(--brand); }
+
+  h2 + .sub {
+    color: var(--ink-muted);
+    max-width: 66ch;
+    margin: 0 0 1.8rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--line);
+    text-wrap: pretty;
+  }
+
+  h3 {
+    font-size: 1.02rem;
+    font-weight: 650;
+    letter-spacing: -0.005em;
+    margin: 2.2rem 0 0.75rem;
+  }
+
+  h4 {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 1.7rem 0 0.65rem;
+  }
+
+  p, li { max-width: 70ch; text-wrap: pretty; }
+  p { margin: 0 0 1rem; }
+  ul, ol { margin: 0 0 1rem; padding-inline-start: 1.3rem; }
+  li { margin-bottom: 0.45rem; }
+  strong { font-weight: 650; }
+  a { color: var(--brand); text-underline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 3px; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.08em 0.36em;
+  }
+
+  .ar { font-family: var(--arabic); }
+
+  /* --------------------------------------------------------------- tables */
+  .scroll {
+    overflow-x: auto;
+    margin: 0 0 1.4rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+
+  thead th {
+    text-align: start;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--line-strong);
+    white-space: nowrap;
+  }
+
+  tbody td { padding: 0.68rem 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--surface-2); }
+  td.mono { font-family: var(--mono); font-size: 0.8rem; }
+  td.num { text-align: end; font-family: var(--mono); font-size: 0.82rem; white-space: nowrap; }
+  td.tight { white-space: nowrap; }
+
+  /* -------------------------------------------------------------- devices */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 1.05rem 1.2rem;
+    margin: 0 0 1.4rem;
+  }
+  .panel > :last-child { margin-bottom: 0; }
+  .panel h4 { margin-top: 0; }
+
+  .panel-key { background: var(--brand-soft); border-color: var(--brand); }
+  .panel-key h4 { color: var(--brand); }
+  .panel-warn { background: var(--amber-soft); border-color: var(--amber); }
+  .panel-warn h4 { color: var(--amber); }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.67rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.14rem 0.44rem;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .tag-ok { background: var(--success-soft); color: var(--success); border-color: var(--success); }
+  .tag-warn { background: var(--amber-soft); color: var(--amber); border-color: var(--amber); }
+  .tag-no { background: var(--surface-2); color: var(--ink-muted); border-color: var(--line-strong); }
+
+  /* Q&A — the anticipated-questions section */
+  .qa { border-inline-start: 2px solid var(--brand); padding-inline-start: 1.1rem; margin: 0 0 1.9rem; }
+  .qa .q { font-weight: 650; margin: 0 0 0.55rem; font-size: 1rem; }
+  .qa p:last-child { margin-bottom: 0; }
+
+  footer.colophon {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--line);
+    padding-top: 1.4rem;
+    margin-top: 1rem;
+    font-family: var(--mono);
+    font-size: 0.73rem;
+    color: var(--ink-faint);
+    line-height: 1.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Projet de fin d'études · Dossier de soutenance</p>
+    <h1>Rakib <span class="ar" style="color:var(--brand)">رقيب</span></h1>
+    <p class="lede">
+      Plateforme de gestion des réclamations pour une banque tunisienne, conçue
+      autour de la circulaire BCT n°2022-08 plutôt qu'à côté d'elle.
+    </p>
+
+    <div class="figures">
+      <div class="figure good"><span class="v">58 ms</span><span class="k">p95 de bout en bout <br>(cible 100)</span></div>
+      <div class="figure good"><span class="v">4 ms</span><span class="k">analyse complète<br>six étapes</span></div>
+      <div class="figure good"><span class="v">469 Mo</span><span class="k">image conteneur<br>(cible 800)</span></div>
+      <div class="figure warn"><span class="v">0,600</span><span class="k">macro-F1 sur le jeu<br>de référence</span></div>
+      <div class="figure good"><span class="v">397</span><span class="k">termes de lexique,<br>12 catégories</span></div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Sommaire">
+    <ol>
+      <li><a href="#probleme"><span class="num">01</span>Le problème</a></li>
+      <li><a href="#reglementaire"><span class="num">02</span>L'ancrage réglementaire</a></li>
+      <li><a href="#architecture"><span class="num">03</span>Architecture</a></li>
+      <li><a href="#pivot"><span class="num">04</span>La décision structurante</a></li>
+      <li><a href="#mesure"><span class="num">05</span>Ce qu'on sait, ce qu'on ignore</a></li>
+      <li><a href="#defauts"><span class="num">06</span>Les défauts trouvés</a></li>
+      <li><a href="#chiffres"><span class="num">07</span>Les chiffres</a></li>
+      <li><a href="#limites"><span class="num">08</span>Limites assumées</a></li>
+      <li><a href="#questions"><span class="num">09</span>Questions probables</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ============================================================ 01 -->
+    <section id="probleme">
+      <h2><span class="num">01</span>Le problème</h2>
+      <p class="sub">
+        Ce que fait une banque aujourd'hui, et la décision que le système prend
+        à sa place — ainsi que celle qu'il ne prend jamais.
+      </p>
+
+      <p>
+        Une banque tunisienne reçoit des réclamations par formulaire, courriel,
+        téléphone, courrier et au guichet. Un agent lit chacune et tranche quatre
+        questions&nbsp;: <strong>de quoi s'agit-il, quelle urgence, quel service
+        est compétent, et l'avons-nous déjà reçue&nbsp;?</strong> C'est lent,
+        incohérent d'un agent à l'autre, et des réclamations dépassent leur délai
+        <em>légal</em> pendant qu'elles attendent d'être lues.
+      </p>
+
+      <p>
+        Rakib prend ces quatre décisions en quelques millisecondes, sur la machine
+        locale, sans aucun appel réseau. Puis l'humain reprend la main.
+      </p>
+
+      <div class="panel panel-key">
+        <h4>Le principe non négociable</h4>
+        <p>
+          Le système ne répond <strong>jamais</strong> au réclamant de lui-même.
+          Il prépare, il propose, il alerte&nbsp;; c'est un agent qui envoie.
+          Dans un domaine où une réponse engage la banque, l'automatisation
+          s'arrête à la porte de la décision.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 02 -->
+    <section id="reglementaire">
+      <h2><span class="num">02</span>L'ancrage réglementaire</h2>
+      <p class="sub">
+        La circulaire n'est pas une contrainte ajoutée après coup&nbsp;: c'est le
+        cahier des charges. L'article 9 décrit littéralement le logiciel à écrire.
+      </p>
+
+      <p>
+        <strong>Circulaire BCT n°2022-08 du 20 octobre 2022</strong>, « Politiques
+        et mesures de traitement des réclamations de la clientèle ». Chaque
+        exigence ci-dessous est implémentée et vérifiable dans l'application en
+        ligne.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>Article</th><th>Exigence</th><th>Implémentation</th><th>État</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">Art. 2</td>
+              <td>Six catégories de messages ne sont pas des réclamations</td>
+              <td>Détection par marqueurs explicites&nbsp;; le message reste traité mais sort des totaux</td>
+              <td class="tight"><span class="tag tag-ok">fait</span></td>
+            </tr>
+            <tr>
+              <td class="mono">Art. 6</td>
+              <td>Messagerie, formulaire en ligne, dépôt en agence au minimum</td>
+              <td>Cinq canaux, mappés sur les quatre buckets du régulateur</td>
+              <td class="tight"><span class="tag tag-ok">fait</span></td>
+            </tr>
+            <tr>
+              <td class="mono">Art. 7</td>
+              <td>Informer des délais <em>et</em> du recours à la médiation</td>
+              <td>La voie de médiation figure dans chaque modèle de réponse</td>
+              <td class="tight"><span class="tag tag-ok">fait</span></td>
+            </tr>
+            <tr>
+              <td class="mono">Art. 8</td>
+              <td>Accusé de réception avec date et référence</td>
+              <td>Émis à la création&nbsp;; démarre l'horloge légale</td>
+              <td class="tight"><span class="tag tag-ok">fait</span></td>
+            </tr>
+            <tr>
+              <td class="mono">Art. 8</td>
+              <td>Réponse sous <strong>15 jours ouvrables</strong> au plus</td>
+              <td>Plafond calculé au calendrier tunisien&nbsp;; l'objectif interne ne peut le dépasser</td>
+              <td class="tight"><span class="tag tag-ok">fait</span></td>
+            </tr>
+            <tr>
+              <td class="mono">Art. 8</td>
+              <td>Tout rejet doit être motivé</td>
+              <td>Le service refuse un rejet non motivé&nbsp;; la motivation part au client</td>
+              <td class="tight"><span class="tag tag-ok">fait</span></td>
+            </tr>
+            <tr>
+              <td class="mono">Art. 9</td>
+              <td>Base centralisée, accusés automatisés, alerte sur dépassement, indicateurs</td>
+              <td>Les quatre&nbsp;: MongoDB, accusé à la création, balayage SLA toutes les 5 min, tableau de bord</td>
+              <td class="tight"><span class="tag tag-ok">fait</span></td>
+            </tr>
+            <tr>
+              <td class="mono">Annexe 1</td>
+              <td>Dix informations minimales à conserver</td>
+              <td>Bloc <code>reglementaire</code> dédié sur chaque réclamation</td>
+              <td class="tight"><span class="tag tag-ok">fait</span></td>
+            </tr>
+            <tr>
+              <td class="mono">Annexe 2-3</td>
+              <td>Déclaration annuelle <strong>ROGS760</strong> en XML</td>
+              <td>Générée à la demande, quatre tableaux renseignés</td>
+              <td class="tight"><span class="tag tag-ok">fait</span></td>
+            </tr>
+            <tr>
+              <td class="mono">Art. 12</td>
+              <td>Audit interne du dispositif tous les trois ans</td>
+              <td>Intervalle constant&nbsp;; le compte à rebours n'est pas affiché</td>
+              <td class="tight"><span class="tag tag-warn">partiel</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel panel-key">
+        <h4>Pourquoi « jours ouvrables » change tout</h4>
+        <p>
+          L'article 8 compte en jours <em>ouvrables</em>. Le calendrier tunisien
+          — week-ends, jours fériés, séance unique d'été, horaires de Ramadan,
+          fêtes du calendrier lunaire — devient donc juridiquement porteur, et
+          l'effet est mesurable&nbsp;: <strong>quinze jours ouvrables depuis le
+          13 août tombent le 4 septembre, soit 22 jours calendaires</strong>, avec
+          une clôture à 13h30 en août et 17h00 en septembre. Une implémentation
+          en jours calendaires déclarerait le dépassement une semaine trop tôt.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 03 -->
+    <section id="architecture">
+      <h2><span class="num">03</span>Architecture</h2>
+      <p class="sub">
+        Une couche d'intelligence qui ignore tout du web et de la base, derrière
+        une interface unique — et c'est ce qui a permis d'en changer le contenu
+        deux fois sans toucher au reste.
+      </p>
+
+      <h3>Le pipeline, six étapes</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Étape</th><th>Rôle</th><th class="num">Durée</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">normalize</td><td>Masquage des données personnelles, repli des accents latins et des variantes arabes, translittération de l'arabizi</td><td class="num">0,42 ms</td></tr>
+            <tr><td class="mono">language</td><td>fr · ar · <strong>ar-tn</strong> · en, par script et marqueurs</td><td class="num">0,14 ms</td></tr>
+            <tr><td class="mono">classify</td><td>Lexique pondéré, 397 termes, avec abstention explicite</td><td class="num">0,67 ms</td></tr>
+            <tr><td class="mono">rules</td><td>27 règles déterministes pondérées → P1/P2/P3</td><td class="num">0,93 ms</td></tr>
+            <tr><td class="mono">dedup</td><td>BM25 et correspondance approximative sur les réclamations récentes</td><td class="num">2,0 ms</td></tr>
+            <tr><td class="mono">decide</td><td>Routage, échéance interne, plafond légal</td><td class="num">&lt; 0,1 ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>La couture qui a tout permis</h3>
+      <p>
+        <code>intelligence/</code> n'importe ni <code>api/</code> ni
+        <code>models/</code>&nbsp;; seules des structures de données simples
+        franchissent la frontière. Derrière l'interface <code>TriageEngine</code>
+        se tiennent deux implémentations, toutes deux déterministes&nbsp;:
+        <strong>lexicon</strong> (par défaut) et <strong>rules</strong> (routage
+        seul, sans catégorisation).
+      </p>
+
+      <div class="panel panel-key">
+        <h4>Ce n'est plus une affirmation, c'est un résultat</h4>
+        <p>
+          La séparation a été mise à l'épreuve deux fois pendant le projet&nbsp;:
+          un changement de <strong>secteur</strong> (télécom → banque) et un
+          changement de <strong>moteur</strong>. Le second a été demandé à trois
+          semaines de l'échéance et a coûté un adaptateur. La plupart des projets
+          affirment que leur architecture est modulaire&nbsp;; celui-ci l'a
+          démontré sous contrainte.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 04 -->
+    <section id="pivot">
+      <h2><span class="num">04</span>La décision structurante</h2>
+      <p class="sub">
+        Pourquoi la catégorisation ne repose sur aucun modèle entraîné — et
+        pourquoi, dans une banque, c'est défendable.
+      </p>
+
+      <p>
+        La catégorie sort d'un <strong>lexique pondéré</strong>&nbsp;: 397 termes
+        sur 12 catégories, deux poids (décisif 3,0 / appui 1,0) et une pondération
+        inverse à la fréquence — un terme réclamé par plusieurs catégories pèse
+        moins qu'un terme discriminant. Le gagnant doit détenir 40&nbsp;% de la
+        preuve et devancer son suivant d'un facteur 1,3. Sinon le système
+        s'abstient et le dit.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th></th><th>Modèle entraîné</th><th>Lexique pondéré</th></tr></thead>
+          <tbody>
+            <tr><td>Traçabilité</td><td>Poids appris, non lisibles</td><td><strong>Les termes exacts qui ont décidé</strong></td></tr>
+            <tr><td>Déterminisme</td><td>Dérive, versions à réconcilier</td><td>Même entrée, même sortie, toujours</td></tr>
+            <tr><td>Correction</td><td>Réentraîner, revalider, promouvoir</td><td>Un administrateur édite un terme</td></tr>
+            <tr><td>Généralisation</td><td><strong>Bonne</strong></td><td>Nulle hors vocabulaire</td></tr>
+            <tr><td>Audit (art. 12)</td><td>Difficile à justifier</td><td>Chaque décision remonte à un mot</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Le coût est réel et se paie en <strong>abstention</strong>&nbsp;: un texte
+        formulé hors vocabulaire marque zéro et part vers un agent. Ce n'est pas
+        un échec du système — la réclamation est routée par mots-clés de service,
+        accusée et datée — et <strong>l'article 9 n'exige nulle part une
+        classification automatique</strong>. Il demande une base, des accusés, une
+        alerte et des indicateurs. Les quatre existent.
+      </p>
+    </section>
+
+    <!-- ============================================================ 05 -->
+    <section id="mesure">
+      <h2><span class="num">05</span>Ce qu'on sait, ce qu'on ignore</h2>
+      <p class="sub">
+        Un seul chiffre est valable, et il est modeste. Le dire est plus utile
+        que de l'habiller.
+      </p>
+
+      <div class="figures" style="margin-top:0">
+        <div class="figure warn"><span class="v">0,600</span><span class="k">macro-F1, jeu de référence</span></div>
+        <div class="figure warn"><span class="v">37 %</span><span class="k">taux d'abstention</span></div>
+        <div class="figure good"><span class="v">88 %</span><span class="k">inclassables correctement renvoyés</span></div>
+      </div>
+
+      <p>
+        Le jeu de référence est écrit à la main, indépendamment du lexique, en
+        français, arabe et derja, avec un bloc volontairement inclassable. C'est
+        la seule mesure honnête disponible&nbsp;: <strong>il n'y a pas de jeu de
+        contrôle, parce qu'un lexique ne peut rien mémoriser</strong>. L'écart
+        entre score de contrôle et score réel qui domine tant de rapports n'existe
+        pas ici.
+      </p>
+
+      <div class="panel panel-warn">
+        <h4>Un chiffre écarté, et pourquoi</h4>
+        <p>
+          Une évaluation sur avis réels donnait 0,99. Elle est <strong>circulaire
+          et sans valeur</strong>&nbsp;: ces avis avaient été étiquetés par un
+          script de supervision faible qui partage son vocabulaire avec le
+          lexique. On mesurait le lexique contre lui-même. Le chiffre reste
+          imprimé par le script d'évaluation, encadré d'un avertissement, pour
+          que la circularité soit visible plutôt que discrètement supprimée.
+        </p>
+      </div>
+
+      <h3>La netteté du vocabulaire se lit dans les chiffres</h3>
+      <p>
+        Part de preuve moyenne par catégorie&nbsp;: <strong>distributeur
+        0,933</strong> · frais 0,878 · crédit 0,777 · carte 0,678 ·
+        <strong>banque digitale 0,673</strong>. Le gradient est parlant&nbsp;:
+        un distributeur se nomme d'une seule façon, une application de mille.
+        C'est exactement l'information dont un superviseur a besoin pour savoir
+        quel lexique élargir en premier — information qu'une probabilité de
+        modèle ne donnait pas.
+      </p>
+    </section>
+
+    <!-- ============================================================ 06 -->
+    <section id="defauts">
+      <h2><span class="num">06</span>Les défauts trouvés</h2>
+      <p class="sub">
+        La partie la plus instructive du projet. Chaque niveau de vérification a
+        attrapé une classe de défaut différente — aucun n'aurait suffi seul.
+      </p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Trouvé par</th><th>Défaut</th><th>Pourquoi invisible autrement</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="tight"><strong>Les tests</strong></td>
+              <td>Un paramètre retiré était encore fourni trois niveaux plus haut&nbsp;: toute analyse levait une exception</td>
+              <td>Les types passaient, les imports résolvaient. Il fallait exécuter.</td>
+            </tr>
+            <tr>
+              <td class="tight"><strong>Les tests</strong></td>
+              <td>Course au démarrage&nbsp;: deux appelants constataient « absent » et inséraient tous les deux</td>
+              <td>1 échec sur un run, 10 sur le suivant, sans changement de code</td>
+            </tr>
+            <tr>
+              <td class="tight"><strong>Le build</strong></td>
+              <td>Le Dockerfile copiait un fichier supprimé</td>
+              <td>Rien ne le référence dans le code</td>
+            </tr>
+            <tr>
+              <td class="tight"><strong>Le déploiement</strong></td>
+              <td>Le ConfigMap imposait une valeur que l'énumération refusait&nbsp;: trois services en boucle de crash</td>
+              <td>Le manifeste n'est pas typé avec le code</td>
+            </tr>
+            <tr>
+              <td class="tight"><strong>Le navigateur</strong></td>
+              <td><strong>Les accents français cassaient la catégorisation</strong></td>
+              <td>Les données de démonstration étaient sans accent&nbsp;: tout marchait par accident</td>
+            </tr>
+            <tr>
+              <td class="tight"><strong>Le navigateur</strong></td>
+              <td>Douze libellés de catégorie manquants&nbsp;: la file affichait les clés brutes</td>
+              <td>Aucune erreur, juste du texte faux</td>
+            </tr>
+            <tr>
+              <td class="tight"><strong>La vérification post-déploiement</strong></td>
+              <td><strong>Le benchmark écrivait 1 100 vraies réclamations dans la base de production</strong></td>
+              <td>Les lignes ont l'air normales&nbsp;; le symptôme est un chiffre faux dans un rapport réglementaire, des mois plus tard</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel panel-key">
+        <h4>Le défaut à raconter en priorité</h4>
+        <p>
+          <code>normalize()</code> mettait en minuscules mais ne repliait pas les
+          accents latins, alors que tous les lexiques sont écrits sans accent.
+          « chèque » ne pouvait donc jamais correspondre à « cheque ».
+          <strong>Une réclamation rédigée en français correct échouait à se
+          catégoriser, tandis que la même phrase tapée négligemment
+          fonctionnait.</strong> Un client qui écrit bien recevait un moins bon
+          service. Ni les tests, ni le typage, ni le déploiement ne l'auraient
+          révélé — seul un écran.
+        </p>
+      </div>
+
+      <p>
+        Deux défauts appartiennent à la même famille&nbsp;: un <code>except</code>
+        muet qui avale l'erreur et laisse la mesure continuer. C'est ainsi qu'un
+        benchmark a pu annoncer <strong>PASS sur 200 requêtes toutes
+        échouées</strong>. Un outil de mesure incapable d'échouer bruyamment est
+        pire que pas d'outil du tout&nbsp;: il fabrique un chiffre que personne ne
+        recontrôle.
+      </p>
+    </section>
+
+    <!-- ============================================================ 07 -->
+    <section id="chiffres">
+      <h2><span class="num">07</span>Les chiffres</h2>
+      <p class="sub">Mesurés sur le déploiement réel, pas estimés.</p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Mesure</th><th class="num">Valeur</th><th>Cible</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td>Analyse complète, six étapes</td><td class="num">4 ms</td><td>—</td><td class="tight"><span class="tag tag-ok">—</span></td></tr>
+            <tr><td>p95 de bout en bout, 1 client</td><td class="num">58 ms</td><td>&lt; 100 ms</td><td class="tight"><span class="tag tag-ok">conforme</span></td></tr>
+            <tr><td>p95 de bout en bout, 5 clients</td><td class="num">196 ms</td><td>&lt; 100 ms</td><td class="tight"><span class="tag tag-warn">au-delà</span></td></tr>
+            <tr><td>p95 de bout en bout, 20 clients</td><td class="num">501 ms</td><td>&lt; 100 ms</td><td class="tight"><span class="tag tag-warn">au-delà</span></td></tr>
+            <tr><td>Image conteneur</td><td class="num">469 Mo</td><td>&lt; 800 Mo</td><td class="tight"><span class="tag tag-ok">conforme</span></td></tr>
+            <tr><td>Couverture du cœur métier</td><td class="num">88 %</td><td>≥ 80 %</td><td class="tight"><span class="tag tag-ok">conforme</span></td></tr>
+            <tr><td>Fichiers typés sans erreur</td><td class="num">91</td><td>—</td><td class="tight"><span class="tag tag-ok">—</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel panel-warn">
+        <h4>La lecture honnête de la concurrence</h4>
+        <p>
+          La cible est tenue sans concurrence et ne l'est plus dès cinq clients.
+          L'hôte est partagé et sa charge oscillait entre 6 et 9 pendant la
+          mesure, ce qui explique <em>une part</em> de l'écart — <strong>mais pas
+          tout</strong>&nbsp;: le débit plafonne vers 60 requêtes par seconde, et
+          un plateau aussi net signale une contention dans le chemin de requête
+          plutôt qu'une machine occupée. Attribuer l'intégralité de l'écart à
+          l'hôte serait plus confortable et inexact.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ 08 -->
+    <section id="limites">
+      <h2><span class="num">08</span>Limites assumées</h2>
+      <p class="sub">Mieux vaut les annoncer que les découvrir pendant la démonstration.</p>
+
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Limite</th><th>Détail</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>La déclaration ne sait pas dire « fraude »</strong></td>
+              <td>
+                La liste des objets du régulateur n'a aucune entrée pour la
+                fraude. Une opération carte non autorisée est monétique, un
+                virement non autorisé est paiement hors monétique, et ni l'un ni
+                l'autre ne dit à la BCT que de l'argent est parti sans
+                consentement. C'est une limite du formulaire, pas de
+                l'implémentation — la catégorie interne, elle, existe.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Performance sous concurrence</strong></td>
+              <td>Au-delà de la cible dès cinq clients simultanés&nbsp;; la cause exacte demande un profilage.</td>
+            </tr>
+            <tr>
+              <td><strong>Généralisation nulle hors vocabulaire</strong></td>
+              <td>37 % d'abstention sur le jeu de référence. Corrigeable par un administrateur, pas par le système.</td>
+            </tr>
+            <tr>
+              <td><strong>Marque officielle non fournie</strong></td>
+              <td>Le composant charge <code>public/brand/uib.svg</code> dès qu'il est déposé&nbsp;; l'artwork est une marque déposée et n'est délibérément pas versionné.</td>
+            </tr>
+            <tr>
+              <td><strong>Audit interne non outillé</strong></td>
+              <td>L'intervalle de trois ans de l'article 12 est constant mais aucun compte à rebours n'est affiché.</td>
+            </tr>
+            <tr>
+              <td><strong>401 au rechargement</strong></td>
+              <td>Conséquence d'un choix de sécurité — jeton en mémoire uniquement. Sans effet fonctionnel.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================ 09 -->
+    <section id="questions">
+      <h2><span class="num">09</span>Questions probables</h2>
+      <p class="sub">
+        Les six questions les plus prévisibles, et une réponse qui tient sans
+        esquive.
+      </p>
+
+      <div class="qa">
+        <p class="q">« 0,600 de macro-F1, c'est faible, non&nbsp;? »</p>
+        <p>
+          Oui, et c'est le prix assumé du déterminisme. Un modèle entraîné faisait
+          mieux sur ce jeu&nbsp;; il apportait aussi une dérive à surveiller, des
+          versions à réconcilier et des décisions impossibles à justifier devant
+          un auditeur. Dans une banque, la traçabilité vaut plus que quelques
+          points. Et l'abstention n'est pas une erreur&nbsp;: la réclamation est
+          quand même routée, accusée et datée.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">« Où est l'intelligence artificielle, alors&nbsp;? »</p>
+        <p>
+          Il n'y en a pas, volontairement. Le système ne charge aucun modèle et
+          n'appelle aucun service&nbsp;: il applique un lexique pondéré, des règles
+          numérotées et un calendrier légal. La circulaire n'exige nulle part une
+          classification automatique&nbsp;; elle exige une base centralisée, des
+          accusés, une alerte sur dépassement et des indicateurs. Les quatre sont
+          là, et chaque décision remonte à un mot qu'un administrateur peut lire.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">« Comment savez-vous que ça marche&nbsp;? »</p>
+        <p>
+          Par quatre niveaux qui n'attrapent pas les mêmes choses&nbsp;: la suite
+          de tests, le build, le déploiement et l'observation en navigateur. La
+          section 06 liste sept défauts réels et par quel niveau chacun a été
+          trouvé. Le plus grave — les accents français qui cassaient la
+          catégorisation — n'a été révélé par aucun outil, seulement en regardant
+          l'écran.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">« Pourquoi ne pas tenir la cible de 100 ms sous charge&nbsp;? »</p>
+        <p>
+          Elle est tenue à un client&nbsp;: 58 ms. Au-delà de cinq clients
+          simultanés, non. L'hôte est partagé, ce qui explique une part de
+          l'écart, mais le débit plafonne vers 60 req/s et ce plateau désigne une
+          contention interne. Je ne peux pas en nommer la cause sans profiler,
+          donc je ne la nomme pas.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">« Et si le vocabulaire ne couvre pas une nouvelle réclamation&nbsp;? »</p>
+        <p>
+          Elle part vers un agent avec la mention explicite du motif — preuve
+          insuffisante, trop dispersée, ou marge trop étroite. Le taux
+          d'abstention est l'indicateur à surveiller&nbsp;: s'il monte, le
+          vocabulaire s'éloigne de la façon dont les clients écrivent, et un
+          administrateur le corrige en une minute depuis la console. Sans
+          réentraînement, sans redéploiement.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">« Le calendrier tunisien, est-ce vraiment utile&nbsp;? »</p>
+        <p>
+          C'est ce qui rend le délai juste. L'article 8 compte en jours
+          <em>ouvrables</em>&nbsp;: quinze jours ouvrables depuis le 13 août
+          tombent le 4 septembre — 22 jours calendaires — et l'heure de clôture
+          passe de 13h30 en août à 17h00 en septembre. Une implémentation en
+          jours calendaires déclarerait le dépassement une semaine trop tôt et
+          alerterait pour rien.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="colophon">
+    Rakib — plateforme de gestion des réclamations · Projet de fin d'études<br>
+    Environnement de démonstration&nbsp;: reclamations.activiity.com · Projet
+    académique, sans affiliation officielle.
+  </footer>
+
+</div>
