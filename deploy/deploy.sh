@@ -34,11 +34,11 @@ fi
 
 # SMTP: copied blind from the authorised source secret. Values are never printed.
 log "smtp credentials"
-SMTP_HOST=$(kubectl -n elitetek-academy get secret eta-mail-secret \
+SMTP_HOST=$(kubectl -n "${SMTP_SECRET_NS:?definir SMTP_SECRET_NS}" get secret "${SMTP_SECRET_NAME:?definir SMTP_SECRET_NAME}" \
   -o jsonpath='{.data.RELAYHOST}' | base64 -d | sed 's/^\[//; s/\].*$//')
-SMTP_USER=$(kubectl -n elitetek-academy get secret eta-mail-secret \
+SMTP_USER=$(kubectl -n "${SMTP_SECRET_NS:?definir SMTP_SECRET_NS}" get secret "${SMTP_SECRET_NAME:?definir SMTP_SECRET_NAME}" \
   -o jsonpath='{.data.RELAYHOST_USERNAME}' | base64 -d)
-SMTP_PASS=$(kubectl -n elitetek-academy get secret eta-mail-secret \
+SMTP_PASS=$(kubectl -n "${SMTP_SECRET_NS:?definir SMTP_SECRET_NS}" get secret "${SMTP_SECRET_NAME:?definir SMTP_SECRET_NAME}" \
   -o jsonpath='{.data.RELAYHOST_PASSWORD}' | base64 -d)
 
 kubectl -n "$NS" patch secret rakib-secret --type merge -p "$(cat <<JSON

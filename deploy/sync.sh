@@ -3,8 +3,10 @@
 #   usage: bash deploy/sync.sh
 set -euo pipefail
 
-VPS_HOST="${VPS_HOST:-root@169.58.38.11}"
-VPS_KEY="${VPS_KEY:-${USERPROFILE:-$HOME}/.ssh/elitetek-academy}"
+# Renseigner VPS_HOST et VPS_KEY dans l'environnement : l'adresse du
+# serveur et le nom du fichier de cle n'ont pas a etre versionnes.
+VPS_HOST="${VPS_HOST:?definir VPS_HOST, ex. root@203.0.113.10}"
+VPS_KEY="${VPS_KEY:?definir VPS_KEY, chemin de la cle SSH}"
 REMOTE_DIR="${REMOTE_DIR:-/root/rakib/src}"
 LOCAL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
