@@ -1,5 +1,9 @@
-# Reference deliverable: `docker compose up` boots a working, seeded Rakib with no
-# internet access. k3s is the deployed environment; this file is the reproducible one.
+# `docker compose up --build` boots the whole system locally, with no internet
+# access beyond pulling the base images. k3s is the deployed environment; this
+# file is the reproducible one.
+#
+# Copy .env.example to .env first — the services read it, and compose refuses to
+# start without it (with a clear message naming the missing path).
 name: rakib
 
 services:
@@ -72,6 +76,22 @@ services:
     depends_on:
       api: {condition: service_started}
     command: ["arq", "app.workers.settings.WorkerSettings"]
+    # Inherited from the API image, which curls itself on :8000. This process
+    # serves no HTTP, so the check can only ever fail — and a container marked
+    # unhealthy for a reason that is not real teaches people to ignore the
+    # column. Crashes are covered by `restart: unless-stopped`.
+    healthcheck:
+      disable: true
+
+  # The interface. nginx serves the built SPA and proxies /api/ to `api`, so the
+  # browser talks to a single origin and no CORS configuration is needed.
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      api: {condition: service_started}
+    ports:
+      - "5173:80"
 
   # Stream consumer, not a job queue — hence its own process rather than arq.
   notifier:
@@ -84,6 +104,9 @@ services:
     depends_on:
       api: {condition: service_started}
     command: ["python", "-m", "app.workers.notify_worker"]
+    # Same reason as the worker above: a stream consumer, not an HTTP server.
+    healthcheck:
+      disable: true
 
 volumes:
   mongo_data:

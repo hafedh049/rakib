@@ -82,7 +82,7 @@ git clone https://github.com/hafedh049/rakib.git && cd rakib
 cp .env.example .env
 
 docker compose up --build
-# api · worker · notifier · web · mongo · redis · minio
+# web · api · worker · notifier · mongo · redis · minio
 ```
 
 ### Peupler
@@ -102,7 +102,8 @@ soixante lignes rouges.
 |---|---|---|
 | Portail public | `localhost:5173/portal` | Anonyme |
 | Console agents | `localhost:5173/login` | `admin@rakib.tn` / `Rakib2026!` |
-| API | `localhost:8000/api/v1` | JWT |
+| API (via nginx) | `localhost:5173/api/v1` | JWT |
+| API (directe) | `localhost:8000/api/v1` | JWT |
 | OpenAPI | `localhost:8000/docs` | Ouvert hors production |
 | Santé | `localhost:8000/health/ready` | Ouvert |
 
