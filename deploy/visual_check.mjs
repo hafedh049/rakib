@@ -7,7 +7,7 @@
  */
 import { chromium } from 'playwright'
 
-const BASE = process.env.BASE ?? 'https://reclamations.activiity.com'
+const BASE = process.env.BASE ?? 'http://localhost:5173'
 const OUT = process.env.OUT ?? '/out'
 const EMAIL = process.env.RAKIB_EMAIL ?? 'admin@rakib.tn'
 const PASSWORD = process.env.RAKIB_PASSWORD ?? 'Rakib2026!'
