@@ -251,7 +251,7 @@
       <span><b>Moteur</b> lexicon-v1</span>
       <span><b>API</b> /api/v1</span>
       <span><b>Circulaire</b> BCT n°2022-08</span>
-      <span><b>Démo</b> reclamations.activiity.com</span>
+      <span><b>Démo</b> retirée — relançable en local</span>
     </div>
   </header>
 
@@ -1305,7 +1305,7 @@ python3 deploy/benchmark.py 300 1 --keep   # conserve les lignes créées</code>
       </p>
 
       <h4>Santé</h4>
-<pre><code>curl https://reclamations.activiity.com/health/ready</code></pre>
+<pre><code>curl http://localhost:8000/health/ready</code></pre>
 <pre><code>{"status":"ready",
  "checks":{"mongo":true,"redis":true},
  "sse_clients":0,
@@ -1360,7 +1360,7 @@ python3 deploy/benchmark.py 300 1 --keep   # conserve les lignes créées</code>
 
   <footer class="colophon">
     Rakib — plateforme de gestion des réclamations · Projet de fin d'études<br>
-    Environnement de démonstration&nbsp;: reclamations.activiity.com · Projet
+    Projet
     académique, sans affiliation officielle · Les identifiants ci-dessus n'ont
     cours que sur cet environnement.
   </footer>

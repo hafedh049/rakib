@@ -566,7 +566,7 @@
       circulaire BCT n°2022-08. Dossier technique et protocole de test manuel.
     </p>
     <div class="masthead-meta">
-      <span><b>URL</b> reclamations.activiity.com</span>
+      <span><b>URL</b> locale — localhost:5173</span>
       <span><b>Version</b> 0.1.0</span>
       <span><b>Circulaire</b> BCT 2022-08</span>
       <span><b>Moteur</b> lexicon</span>
@@ -1209,7 +1209,7 @@
       <div class="panel">
         <h4>Avant de commencer</h4>
         <p style="margin-bottom:0.5rem">
-          Ouvrez <strong>reclamations.activiity.com</strong>. Gardez deux fenêtres
+          Lancez la pile (<code>docker compose up --build</code>) puis ouvrez <strong>localhost:5173</strong>. Gardez deux fenêtres
           disponibles&nbsp;: une normale, une en navigation privée — plusieurs épreuves
           demandent d'être connecté et anonyme en même temps.
           <strong>Notez les références</strong> que le portail vous rend&nbsp;; elles
@@ -1763,7 +1763,7 @@
         <p style="font-size:0.925rem;margin-bottom:0">
           Ouvrir directement dans le navigateur, ou en ligne de commande&nbsp;:
         </p>
-        <div class="copyblock code" data-copy>curl -s https://reclamations.activiity.com/health/ready</div>
+        <div class="copyblock code" data-copy>curl -s http://localhost:8000/health/ready</div>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
@@ -1784,7 +1784,7 @@
         <p style="font-size:0.925rem;margin-bottom:0">
           Prouve que le canal web n'est pas le seul point d'entrée&nbsp;:
         </p>
-        <div class="copyblock code" data-copy>curl -s -X POST https://reclamations.activiity.com/api/v1/complaints \
+        <div class="copyblock code" data-copy>curl -s -X POST http://localhost:8000/api/v1/complaints \
   -H "Content-Type: application/json" \
   -d '{"subject":"Test API","body":"Le distributeur a debite mon compte sans delivrer les billets, cest inacceptable.","claimant":{"full_name":"Test","phone":"+21620145879"},"channel":"WEB"}'</div>
         <div class="expect">
@@ -1851,7 +1851,7 @@
           <strong>ROGS760</strong>, annuelle, transmise en XML dans les 45 jours.
           En superviseur&nbsp;:
         </p>
-        <div class="copyblock code" data-copy>curl -H "Authorization: Bearer $TOKEN"   https://reclamations.activiity.com/api/v1/analytics/declaration/2026/xml</div>
+        <div class="copyblock code" data-copy>curl -H "Authorization: Bearer $TOKEN"   http://localhost:8000/api/v1/analytics/declaration/2026/xml</div>
         <div class="expect">
           <span class="label">Résultat attendu</span>
           <p>
@@ -2127,7 +2127,7 @@ mypy app/                                      # types</div>
   <footer class="colophon">
     Rakib — plateforme intelligente de gestion des réclamations · Projet de fin
     d'études · Document de référence et protocole de test<br>
-    Environnement de test&nbsp;: reclamations.activiity.com · Les identifiants
+    Environnement local · Les identifiants
     ci-dessus n'ont cours que sur cet environnement de démonstration.
   </footer>
 
