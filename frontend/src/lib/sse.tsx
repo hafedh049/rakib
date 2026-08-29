@@ -26,16 +26,13 @@ interface SSEValue {
 const SSEContext = createContext<SSEValue>({ connected: false, lastEvent: null })
 
 const INVALIDATES: Record<string, string[]> = {
-  'complaint.created': ['complaints', 'supervision', 'overview'],
-  'complaint.triaged': ['complaints', 'complaint', 'supervision'],
-  'complaint.assigned': ['complaints', 'complaint', 'supervision'],
+  'complaint.created': ['complaints'],
+  'complaint.triaged': ['complaints', 'complaint'],
+  'complaint.assigned': ['complaints', 'complaint'],
   'complaint.updated': ['complaints', 'complaint'],
   'complaint.replied': ['complaint'],
-  'complaint.resolved': ['complaints', 'complaint', 'supervision', 'overview'],
-  'sla.warning': ['complaints', 'supervision'],
-  'sla.breached': ['complaints', 'supervision', 'overview'],
-  'complaint.escalated': ['complaints', 'supervision'],
-  'triage.corrected': ['complaints', 'complaint', 'engine'],
+  'complaint.resolved': ['complaints', 'complaint'],
+  'triage.corrected': ['complaints', 'complaint'],
 }
 
 /**
@@ -46,9 +43,7 @@ const INVALIDATES: Record<string, string[]> = {
  * next — a deadline about to expire, and one already missed — plus escalation.
  */
 const ANNOUNCE: Record<string, { message: string; kind: ToastKind }> = {
-  'sla.warning': { message: 'Une réclamation approche de son échéance', kind: 'warning' },
-  'sla.breached': { message: 'Échéance dépassée sur une réclamation', kind: 'danger' },
-  'complaint.escalated': { message: 'Une réclamation a été escaladée', kind: 'warning' },
+  'complaint.created': { message: 'Nouvelle réclamation reçue', kind: 'info' },
 }
 
 const RECONNECT_MIN_MS = 1_000

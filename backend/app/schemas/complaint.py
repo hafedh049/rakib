@@ -67,7 +67,6 @@ class MessageCreate(BaseModel):
 
 class ComplaintPatch(BaseModel):
     status: Status | None = None
-    priority: int | None = Field(default=None, ge=1, le=4)
     category: str | None = None
     department_code: str | None = None
     agent_id: PydanticObjectId | None = None
@@ -76,17 +75,6 @@ class ComplaintPatch(BaseModel):
 
 class ResolveRequest(BaseModel):
     resolution: str = Field(min_length=1, max_length=10_000)
-    notify_claimant: bool = True
-
-
-class RejectRequest(BaseModel):
-    """Article 8 — a rejection carries its reasoning or it is not recorded.
-
-    The floor is enforced again in the service, because the obligation belongs
-    to the domain, not to whichever caller happens to be validating today.
-    """
-
-    motivation: str = Field(min_length=40, max_length=10_000)
     notify_claimant: bool = True
 
 
@@ -131,15 +119,12 @@ class ComplaintOut(BaseModel):
     subject: str
     body: str
     normalized_text: str
-    attachments: list[Attachment]
     analysis: Analysis
     assignment: Assignment | None
-    sla: object
     status: Status
     triage_state: TriageState
     messages: list[Message]
     timeline: list[TimelineEntry]
-    satisfaction: Satisfaction | None
     corrected: bool
     created_at: datetime
     updated_at: datetime

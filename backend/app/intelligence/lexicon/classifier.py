@@ -20,7 +20,7 @@ import math
 from dataclasses import dataclass, field
 
 from app.intelligence.lexicon.terms import CATEGORY_LEXICON
-from app.intelligence.rules.engine import find_terms
+from app.intelligence.text.matching import find_terms
 
 #: A winner must hold at least this share of the total evidence, otherwise the
 #: complaint is ambiguous. 0.40 lets a clear winner through against two weak

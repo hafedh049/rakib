@@ -5,8 +5,6 @@ import { Link, useSearchParams } from 'react-router-dom'
 import {
   CategoryLabel,
   ChannelBadge,
-  PriorityBadge,
-  SLABadge,
   StatusBadge,
 } from '@/components/badges'
 import {
@@ -258,18 +256,12 @@ function Row({
       )}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <PriorityBadge priority={item.analysis.priority} compact />
         <span className="ltr-isolate text-xs tabular text-ink-muted">
           {item.ref}
         </span>
         <span className="min-w-0 flex-1 truncate text-sm font-medium">
           {item.subject}
         </span>
-        <SLABadge
-          dueAt={item.sla_due_at}
-          breached={item.sla_breached}
-          warned={item.sla_warned}
-        />
       </div>
 
       <div className="flex flex-wrap items-center gap-2 text-2xs text-ink-muted">
@@ -282,9 +274,6 @@ function Row({
         <span className="truncate">{item.claimant.full_name}</span>
         {item.claimant.is_vip && <Badge tone="primary">VIP</Badge>}
         {attention && <Badge tone="amber">{t('inbox.onlyTriage')}</Badge>}
-        {item.analysis.duplicate_of && (
-          <Badge tone="neutral">{t('analysis.duplicate')}</Badge>
-        )}
         <span className="ms-auto">{formatRelative(item.created_at, locale)}</span>
       </div>
     </Link>

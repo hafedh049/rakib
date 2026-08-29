@@ -16,8 +16,6 @@ from app.core.logging import get_logger
 from app.core.pagination import Page, clamp_limit, cursor_filter, encode_cursor
 from app.core.security import create_tracking_token
 from app.deps import department_scope
-from app.domain.bct import delai_jours_ouvrables
-from app.domain.calendar_tn import add_business_days
 from app.domain.taxonomy import (
     ALL_CATEGORIES,
     GENERAL_DEPARTMENT_CODE,
@@ -29,7 +27,6 @@ from app.models.complaint import (
     CLOSED_STATUSES,
     Assignment,
     AssignmentMethod,
-    Attachment,
     Claimant,
     Complaint,
     Message,
@@ -71,7 +68,6 @@ def event_payload(complaint: Complaint, **extra: Any) -> dict[str, Any]:
         "department": (
             complaint.assignment.department_code if complaint.assignment else None
         ),
-        "due_at": complaint.sla.due_at.isoformat() if complaint.sla.due_at else None,
     }
     payload.update(extra)
     return payload
@@ -97,15 +93,11 @@ async def create_complaint(
         subject=payload.subject.strip(),
         body=payload.body.strip(),
     )
-    complaint.sla.hours = settings.sla_hours_by_priority[PROVISIONAL_PRIORITY]
-    complaint.sla.due_at = complaint.created_at + timedelta(hours=complaint.sla.hours)
 
     # Article 8: the acknowledgement carries a registration date and a reference
     # number, and the fifteen-working-day clock runs from it. We issue it on
     # receipt — the reference exists, the record exists, so there is nothing to
     # wait for, and any delay here would eat into the customer's legal window.
-    complaint.reglementaire.accuse_reception_at = complaint.created_at
-    apply_legal_deadline(complaint)
 
     complaint.log(
         "complaint.created",
@@ -139,11 +131,6 @@ def tracking_url(complaint: Complaint) -> str:
     return f"{settings.public_url}/portal/suivi?token={token}"
 
 
-def satisfaction_url(complaint: Complaint) -> str:
-    token = create_tracking_token(str(complaint.id), scope="satisfaction")
-    return f"{settings.public_url}/portal/satisfaction?token={token}"
-
-
 # -------------------------------------------------------------------------- reading
 async def list_complaints(
     user: User,
@@ -156,7 +143,6 @@ async def list_complaints(
     q: str | None = None,
     date_from: datetime | None = None,
     date_to: datetime | None = None,
-    sla_breached: bool | None = None,
     needs_human_triage: bool | None = None,
     unassigned: bool | None = None,
     cursor: str | None = None,
@@ -180,8 +166,6 @@ async def list_complaints(
         conditions.append({"assignment.department_code": department_code})
     if agent_id is not None:
         conditions.append({"assignment.agent_id": agent_id})
-    if sla_breached is not None:
-        conditions.append({"sla.breached": sla_breached})
     if needs_human_triage is not None:
         conditions.append({"analysis.needs_human_triage": needs_human_triage})
     if unassigned:
@@ -251,15 +235,6 @@ async def patch_complaint(
         _guard_status_transition(complaint, payload.status, actor)
         changed["status"] = (str(complaint.status), str(payload.status))
         complaint.status = payload.status
-        if payload.status in CLOSED_STATUSES:
-            complaint.sla.resolved_at = datetime.now(UTC)
-
-    if payload.priority is not None and payload.priority != complaint.analysis.priority:
-        if not role_at_least(actor.role, Role.SUPERVISOR):
-            raise PermissionDenied("Seul un superviseur peut changer la priorite")
-        changed["priority"] = (complaint.analysis.priority, payload.priority)
-        complaint.analysis.priority = payload.priority
-        _apply_sla_for_priority(complaint, payload.priority)
 
     if payload.category is not None and payload.category != complaint.analysis.category:
         if payload.category not in ALL_CATEGORIES:
@@ -343,34 +318,6 @@ def _guard_status_transition(
             )
 
 
-def _apply_sla_for_priority(complaint: Complaint, priority: int) -> None:
-    hours = settings.sla_hours_by_priority.get(priority, settings.sla_hours_p3)
-    complaint.sla.hours = hours
-    complaint.sla.due_at = complaint.created_at + timedelta(hours=hours)
-    complaint.sla.breached = False
-    complaint.sla.warned = False
-    apply_legal_deadline(complaint)
-
-
-def apply_legal_deadline(complaint: Complaint) -> None:
-    """Article 8: at most fifteen jours ouvrables from the acknowledgement.
-
-    Two clocks, and the earlier one governs. The internal target above is a
-    service commitment; this one is the law, so it is computed independently and
-    the effective `due_at` is never allowed past it. An unclassified complaint
-    gets the full ceiling — we may not invent a shorter deadline for something we
-    have not understood.
-    """
-    start = complaint.reglementaire.accuse_reception_at or complaint.created_at
-    days = delai_jours_ouvrables(complaint.analysis.category)
-    complaint.sla.legal_days = days
-    complaint.sla.legal_due_at = add_business_days(start, days)
-
-    if complaint.sla.due_at and complaint.sla.due_at > complaint.sla.legal_due_at:
-        # The internal target overshoots the law — the law wins.
-        complaint.sla.due_at = complaint.sla.legal_due_at
-
-
 async def _assign_department(
     complaint: Complaint, department: Department, method: AssignmentMethod
 ) -> None:
@@ -381,12 +328,6 @@ async def _assign_department(
     complaint.assignment.department_id = department.id
     complaint.assignment.department_code = department.code
     complaint.assignment.method = method
-    if department.default_sla_hours:
-        complaint.sla.hours = department.default_sla_hours
-        complaint.sla.due_at = complaint.created_at + timedelta(
-            hours=department.default_sla_hours
-        )
-        apply_legal_deadline(complaint)
 
 
 async def route_to_category_department(complaint: Complaint, category: str | None) -> None:
@@ -481,35 +422,18 @@ async def add_message(
     return message
 
 
-async def add_attachment(complaint: Complaint, attachment: Attachment) -> Attachment:
-    entry = TimelineEntry(
-        action="attachment.added",
-        actor_type="user",
-        actor_id=str(attachment.uploaded_by) if attachment.uploaded_by else None,
-        meta={"filename": attachment.filename, "size": attachment.size},
-    )
-    complaint.attachments.append(attachment)
-    complaint.timeline.append(entry)
-    await _append(
-        complaint,
-        {"attachments": attachment.model_dump(), "timeline": entry.model_dump()},
-    )
-    return attachment
-
-
 async def resolve(complaint: Complaint, resolution: str, actor: User) -> Complaint:
     if complaint.status in CLOSED_STATUSES:
         raise Conflict("Reclamation deja cloturee")
     await add_message(complaint, resolution, actor, internal=False)
     complaint.status = Status.RESOLVED
-    complaint.sla.resolved_at = datetime.now(UTC)
     complaint.log("complaint.resolved", actor_type="agent", actor_id=str(actor.id))
     # Targeted write, not save(): add_message above has already written to this
     # document, and a whole-document save from the stale in-memory copy would
     # drop it — the same lost-update the attachment path had.
     await persist_fields(
         complaint,
-        {"status": str(Status.RESOLVED), "sla": complaint.sla.model_dump()},
+        {"status": str(Status.RESOLVED)},
     )
 
     await publish(
@@ -517,73 +441,8 @@ async def resolve(complaint: Complaint, resolution: str, actor: User) -> Complai
         event_payload(
             complaint,
             resolution=resolution,
-            satisfaction_url=satisfaction_url(complaint),
         ),
     )
-    return complaint
-
-
-async def reject(
-    complaint: Complaint, motivation: str, actor: User
-) -> Complaint:
-    """Reject a claim, with the reasoning the circulaire requires.
-
-    Article 8: « motiver toute reponse rejetant en partie ou en totalite les
-    revendications du client ». The obligation is enforced here rather than left
-    to the interface, because a rejection recorded without reasoning is a
-    compliance defect that an audit under Article 12 would find — and by then
-    the agent who knew the reason has long moved on.
-    """
-    if complaint.status in CLOSED_STATUSES:
-        raise Conflict("Reclamation deja cloturee")
-
-    reasoning = motivation.strip()
-    if len(reasoning) < MOTIVATION_MIN_CHARS:
-        raise Conflict(
-            "Un rejet doit etre motive (article 8 de la circulaire BCT "
-            f"n°2022-08) : au moins {MOTIVATION_MIN_CHARS} caracteres."
-        )
-
-    # The motivation is sent to the claimant, not filed internally: a reasoned
-    # rejection the customer never sees is not a reasoned rejection.
-    await add_message(complaint, reasoning, actor, internal=False)
-
-    now = datetime.now(UTC)
-    complaint.status = Status.REJECTED
-    complaint.sla.resolved_at = now
-    complaint.reglementaire.motivation = reasoning
-    complaint.log("complaint.rejected", actor_type="agent", actor_id=str(actor.id))
-    await persist_fields(
-        complaint,
-        {
-            "status": str(Status.REJECTED),
-            "sla": complaint.sla.model_dump(),
-            "reglementaire": complaint.reglementaire.model_dump(),
-        },
-    )
-
-    await publish(
-        EventName.COMPLAINT_RESOLVED,
-        event_payload(
-            complaint,
-            resolution=reasoning,
-            satisfaction_url=satisfaction_url(complaint),
-        ),
-    )
-    return complaint
-
-
-async def submit_satisfaction(
-    complaint: Complaint, score: int, comment: str | None
-) -> Complaint:
-    if complaint.satisfaction is not None:
-        raise Conflict("Une evaluation a deja ete enregistree")
-    if complaint.status not in CLOSED_STATUSES:
-        raise Conflict("La reclamation n'est pas encore resolue")
-    complaint.satisfaction = Satisfaction(score=score, comment=comment)
-    complaint.log("satisfaction.submitted", actor_type="user", score=score)
-    complaint.touch()
-    await complaint.save()
     return complaint
 
 

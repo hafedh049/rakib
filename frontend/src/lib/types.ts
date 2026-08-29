@@ -29,29 +29,15 @@ export interface User {
   created_at: string
 }
 
-export interface RuleHit {
-  code: string
-  label: string
-  weight: number
-  matched: string[]
-}
-
 export interface Analysis {
   category: string | null
+  /** Evidence ratio, not a calibrated probability. */
   category_confidence: number | null
   category_alternatives: [string, number][]
-  subcategory: string | null
-  priority: number | null
-  priority_score: number | null
-  rule_hits: RuleHit[]
-  sentiment: Sentiment | null
-  sentiment_score: number | null
-  urgency_score: number | null
   language: string | null
   keywords: string[]
-  duplicate_of: string | null
-  duplicate_score: number | null
-  related_ids: string[]
+  /** Terms that fired, per category — the explainability payload. */
+  evidence: Record<string, string[]>
   needs_human_triage: boolean
   triage_reason: string | null
   engine: string | null
@@ -77,15 +63,6 @@ export interface Assignment {
   method: string
 }
 
-export interface SLA {
-  due_at: string | null
-  hours: number | null
-  breached: boolean
-  warned: boolean
-  escalation_level: number
-  resolved_at: string | null
-}
-
 export interface Message {
   id: string
   at: string
@@ -102,13 +79,6 @@ export interface TimelineEntry {
   actor_id: string | null
   action: string
   meta: Record<string, unknown>
-}
-
-export interface Attachment {
-  id: string
-  filename: string
-  content_type: string
-  size: number
 }
 
 export interface ComplaintListItem {
@@ -136,15 +106,12 @@ export interface Complaint {
   subject: string
   body: string
   normalized_text: string
-  attachments: Attachment[]
   analysis: Analysis
   assignment: Assignment | null
-  sla: SLA
   status: Status
   triage_state: TriageState
   messages: Message[]
   timeline: TimelineEntry[]
-  satisfaction: { score: number; comment: string | null } | null
   corrected: boolean
   created_at: string
   updated_at: string
@@ -181,14 +148,8 @@ export interface Rule {
 }
 
 export interface SimulationResult {
-  priority: number
-  priority_score: number
-  urgency_score: number
-  sentiment: Sentiment
-  sentiment_score: number
   language: string
   language_source: string
-  subcategory: string | null
   normalized_text: string
   transliterated: string
   hits: RuleHit[]
@@ -240,7 +201,6 @@ export interface PublicComplaint {
     author_name: string | null
     body: string
   }[]
-  satisfaction_submitted: boolean
 }
 
 export interface Overview {
@@ -249,11 +209,8 @@ export interface Overview {
   open: number
   closed: number
   by_status: Record<string, number>
-  by_priority: Record<string, number>
-  sla: { breached: number; compliance_rate: number }
-  avg_resolution_hours: number | null
+  by_  avg_resolution_hours: number | null
   resolved_count: number
   needs_human_triage: number
   duplicates_detected: number
-  satisfaction: { average: number | null; responses: number }
 }

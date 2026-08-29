@@ -1,31 +1,26 @@
-"""The category lexicon: terms, and how much each is worth.
+"""The category lexicon.
 
-Two tiers, because not all evidence is equal:
+Each term names a product or an incident outright — "chequier", "allocation
+touristique", "operation non autorisee" — so one match is meaningful on its own.
+Vaguer corroborating vocabulary is deliberately absent: a word like "deux fois"
+fires for cards, ATMs, payments and credit alike, and adding it would blur the
+categories it was meant to separate.
 
-*   **Decisive** terms name the product or the incident outright — "chequier",
-    "allocation touristique", "operation non autorisee". One of them is usually
-    enough on its own.
-*   **Supporting** terms are the subcategory vocabulary. They are shared far
-    more widely ("deux fois" fires for cards, ATMs, payments and credit alike),
-    so they only corroborate.
+Terms are matched against normalised text, so they are written normalised: lower
+case, no French accents, Arabic diacritics and alef/teh-marbuta folded. A term
+written with an accent here would simply never match.
 
-Terms are matched against normalised text, so they must be written normalised:
-lower case, no French accents, Arabic diacritics and alef/teh-marbuta folded.
-
-The weights below are the seed. They are deliberately coarse — a 3/1 split
-rather than tuned decimals — because a number an administrator cannot reason
-about is worse than a blunt one they can.
+Weights are uniform. The classifier separates categories by *how many* terms
+match and how exclusive each one is (see the inverse-category-frequency
+discount), not by hand-tuned per-term scores nobody could justify.
 """
 
 from app.domain.taxonomy import Category
-from app.intelligence.rules.subcategory import SUBCATEGORY_TERMS
 
 DECISIVE_WEIGHT = 3.0
-SUPPORTING_WEIGHT = 1.0
 
-#: Terms that name the product or the incident. Moved here from the dev-time
-#: weak-supervision script, which is now the *consumer* of this file rather
-#: than the owner of its own copy — one vocabulary, one place to edit it.
+#: category -> the terms that name it. Editable by an administrator; adding a
+#: term is the whole procedure for teaching the system a new phrasing.
 DECISIVE_TERMS: dict[str, list[str]] = {
     Category.CARTE_BANCAIRE: [
         "carte avalee", "carte bloquee", "opposition carte", "renouvellement de carte",
@@ -94,21 +89,11 @@ DECISIVE_TERMS: dict[str, list[str]] = {
 
 
 def build_lexicon() -> dict[str, dict[str, float]]:
-    """category -> {term: weight}, decisive terms overriding supporting ones."""
-    lexicon: dict[str, dict[str, float]] = {}
-    for category, subcategories in SUBCATEGORY_TERMS.items():
-        terms: dict[str, float] = {}
-        for subcategory_terms in subcategories.values():
-            for term in subcategory_terms:
-                terms[term.lower()] = SUPPORTING_WEIGHT
-        lexicon[category] = terms
-
-    for category, decisive in DECISIVE_TERMS.items():
-        terms = lexicon.setdefault(category, {})
-        for term in decisive:
-            terms[term.lower()] = DECISIVE_WEIGHT
-
-    return lexicon
+    """category -> {term: weight}, lower-cased for matching."""
+    return {
+        category: {term.lower(): DECISIVE_WEIGHT for term in terms}
+        for category, terms in DECISIVE_TERMS.items()
+    }
 
 
 #: Built once at import. Rebuilding is cheap, but the engine holds a reference

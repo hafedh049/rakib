@@ -17,7 +17,6 @@ interface Created {
 
 // Mirrors storage.ALLOWED_CONTENT_TYPES and MAX_ATTACHMENT_MB on the server;
 // checking here too turns a 422 round trip into instant feedback.
-const ACCEPTED_TYPES = [
   'image/jpeg',
   'image/png',
   'image/webp',
@@ -25,7 +24,6 @@ const ACCEPTED_TYPES = [
   'application/pdf',
   'text/plain',
 ]
-const MAX_FILE_BYTES = 10 * 1024 * 1024
 const MAX_FILES = 5
 
 export function PortalSubmit() {
@@ -48,9 +46,6 @@ export function PortalSubmit() {
     external_id: '',
   })
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-  const [files, setFiles] = useState<File[]>([])
-  const [fileError, setFileError] = useState<string | null>(null)
-  const [uploadFailed, setUploadFailed] = useState(false)
 
   const submit = useMutation({
     mutationFn: async () => {
@@ -66,25 +61,6 @@ export function PortalSubmit() {
         },
       })
 
-      // Attachments go up after creation, authorised by the tracking token the
-      // API just minted — an anonymous claimant has no session to use instead.
-      if (files.length) {
-        const token = created.tracking_url.split('token=')[1] ?? ''
-        for (const file of files) {
-          const body = new FormData()
-          body.append('file', file)
-          try {
-            await api.upload(
-              `/complaints/${created.id}/attachments?token=${encodeURIComponent(token)}`,
-              body,
-            )
-          } catch {
-            // The complaint itself is already saved; a failed attachment must
-            // not throw that away, so it is reported rather than raised.
-            setUploadFailed(true)
-          }
-        }
-      }
       return created
     },
     onError: (error) => {
@@ -92,33 +68,12 @@ export function PortalSubmit() {
     },
   })
 
-  function addFiles(selected: FileList | null) {
-    if (!selected) return
-    setFileError(null)
-    const accepted: File[] = []
-    for (const file of Array.from(selected)) {
-      if (file.size > MAX_FILE_BYTES) {
-        setFileError(t('portal.attachmentTooBig'))
-        continue
-      }
-      if (!ACCEPTED_TYPES.includes(file.type)) {
-        setFileError(t('portal.attachmentBadType'))
-        continue
-      }
-      accepted.push(file)
-    }
-    setFiles((current) => [...current, ...accepted].slice(0, MAX_FILES))
-  }
-
   if (submit.isSuccess) {
     return (
       <Confirmation
         created={submit.data}
-        uploadFailed={uploadFailed}
         onReset={() => {
           submit.reset()
-          setFiles([])
-          setUploadFailed(false)
         }}
       />
     )
@@ -263,66 +218,6 @@ export function PortalSubmit() {
               />
             </Field>
 
-            <Field
-              label={t('portal.attachments')}
-              hint={t('portal.attachmentsHint')}
-              optional={t('portal.optional')}
-              error={fileError ?? undefined}
-            >
-              <div className="flex flex-col gap-2">
-                <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-[var(--radius-control)] border border-line bg-surface px-3 py-2 text-sm transition-colors duration-150 hover:bg-surface-2">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="size-4"
-                    fill="none"
-                    strokeWidth="2"
-                    aria-hidden
-                  >
-                    <path
-                      d="M12 5v14M5 12h14"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  {t('portal.addFiles')}
-                  <input
-                    type="file"
-                    multiple
-                    className="sr-only"
-                    accept={ACCEPTED_TYPES.join(',')}
-                    onChange={(event) => {
-                      addFiles(event.target.files)
-                      event.target.value = ''
-                    }}
-                  />
-                </label>
-
-                {files.length > 0 && (
-                  <ul className="flex flex-col gap-1">
-                    {files.map((file, index) => (
-                      <li
-                        key={`${file.name}-${index}`}
-                        className="flex items-center gap-2 rounded-[var(--radius-control)] border border-line px-3 py-2 text-xs"
-                      >
-                        <span className="min-w-0 flex-1 truncate">{file.name}</span>
-                        <span className="tabular text-ink-muted">
-                          {(file.size / 1024).toFixed(0)} Ko
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFiles(files.filter((_, i) => i !== index))
-                          }
-                          className="text-ink-muted underline-offset-2 hover:text-danger hover:underline"
-                        >
-                          {t('portal.removeFile')}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </Field>
           </div>
 
           {submit.isError && !Object.keys(fieldErrors).length && (
@@ -338,11 +233,7 @@ export function PortalSubmit() {
               size="md"
               loading={submit.isPending}
             >
-              {submit.isPending
-                ? files.length
-                  ? t('portal.uploading')
-                  : t('portal.submitting')
-                : t('portal.submit')}
+              {submit.isPending ? t('portal.submitting') : t('portal.submit')}
             </Button>
             <Link
               to="/portal/suivi"
@@ -359,11 +250,9 @@ export function PortalSubmit() {
 
 function Confirmation({
   created,
-  uploadFailed,
   onReset,
 }: {
   created: Created
-  uploadFailed: boolean
   onReset: () => void
 }) {
   const { t } = useT()
@@ -389,12 +278,6 @@ function Confirmation({
           <h1 className="text-2xl">{t('portal.received')}</h1>
           <p className="text-sm text-ink-muted">{t('portal.receivedLead')}</p>
         </div>
-
-        {uploadFailed && (
-          <Panel className="border-amber/40 bg-amber-soft">
-            <p className="text-xs text-ink">{t('portal.attachmentsFailed')}</p>
-          </Panel>
-        )}
 
         <Panel>
           <p className="text-2xs tracking-wide text-ink-muted uppercase">

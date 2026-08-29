@@ -14,22 +14,10 @@ import { PortalTrack } from './routes/PortalTrack'
 import { Register } from './routes/Register'
 
 // Console screens are lazy: a claimant filing a complaint on a poor mobile
-// connection should never download the agent console or the charting library.
+// connection should never download the agent console.
 const Inbox = lazy(() => import('./routes/Inbox').then((m) => ({ default: m.Inbox })))
 const ComplaintDetail = lazy(() =>
   import('./routes/ComplaintDetail').then((m) => ({ default: m.ComplaintDetail })),
-)
-const Supervision = lazy(() =>
-  import('./routes/Supervision').then((m) => ({ default: m.Supervision })),
-)
-const Analytics = lazy(() =>
-  import('./routes/Analytics').then((m) => ({ default: m.Analytics })),
-)
-const AdminRules = lazy(() =>
-  import('./routes/AdminRules').then((m) => ({ default: m.AdminRules })),
-)
-const AdminKb = lazy(() =>
-  import('./routes/AdminKb').then((m) => ({ default: m.AdminKb })),
 )
 const AdminUsers = lazy(() =>
   import('./routes/AdminUsers').then((m) => ({ default: m.AdminUsers })),
@@ -70,7 +58,6 @@ export function App() {
         <Route path="/portal/mes-reclamations" element={<PortalMine />} />
         <Route path="/portal/reclamation/:id" element={<PortalComplaint />} />
         <Route path="/portal/suivi" element={<PortalTrack />} />
-        <Route path="/portal/satisfaction" element={<PortalTrack satisfaction />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -96,42 +83,6 @@ export function App() {
               <Suspense fallback={<RouteFallback />}>
                 <ComplaintDetail />
               </Suspense>
-            }
-          />
-          <Route
-            path="/supervision"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <Supervision />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/analytics"
-            element={
-              <Suspense fallback={<RouteFallback />}>
-                <Analytics />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/admin/rules"
-            element={
-              <Protected minimum="supervisor">
-                <Suspense fallback={<RouteFallback />}>
-                  <AdminRules />
-                </Suspense>
-              </Protected>
-            }
-          />
-          <Route
-            path="/admin/kb"
-            element={
-              <Protected minimum="supervisor">
-                <Suspense fallback={<RouteFallback />}>
-                  <AdminKb />
-                </Suspense>
-              </Protected>
             }
           />
           <Route

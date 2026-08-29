@@ -44,13 +44,9 @@ interface NavItem {
 
 const PRIMARY: NavItem[] = [
   { to: '/inbox', labelKey: 'nav.inbox', minimum: 'agent' },
-  { to: '/supervision', labelKey: 'nav.supervision', minimum: 'supervisor' },
-  { to: '/analytics', labelKey: 'nav.analytics', minimum: 'agent' },
 ]
 
 const ADMIN: NavItem[] = [
-  { to: '/admin/rules', labelKey: 'nav.rules', minimum: 'supervisor' },
-  { to: '/admin/kb', labelKey: 'nav.kb', minimum: 'supervisor' },
   { to: '/admin/users', labelKey: 'nav.users', minimum: 'admin' },
   { to: '/admin/departments', labelKey: 'nav.departments', minimum: 'admin' },
 ]

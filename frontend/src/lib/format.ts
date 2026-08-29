@@ -44,32 +44,6 @@ export function formatRelative(value: string | null, locale: Locale = 'fr') {
   return formatter.format(Math.round(deltaSeconds), 'second')
 }
 
-/** Compact countdown for the SLA badge: "3 h 12" / "-1 j 4 h". */
-export function countdown(value: string | null): string {
-  if (!value) return '—'
-  const delta = new Date(value).getTime() - Date.now()
-  const overdue = delta < 0
-  const total = Math.abs(delta)
-
-  const days = Math.floor(total / 86_400_000)
-  const hours = Math.floor((total % 86_400_000) / 3_600_000)
-  const minutes = Math.floor((total % 3_600_000) / 60_000)
-
-  const body =
-    days > 0 ? `${days} j ${hours} h` : hours > 0 ? `${hours} h ${minutes}` : `${minutes} min`
-  return overdue ? `-${body}` : body
-}
-
-export function slaState(
-  dueAt: string | null,
-  breached: boolean,
-  warned: boolean,
-): 'ok' | 'warning' | 'breached' | 'none' {
-  if (breached) return 'breached'
-  if (!dueAt) return 'none'
-  if (new Date(dueAt).getTime() < Date.now()) return 'breached'
-  return warned ? 'warning' : 'ok'
-}
 
 export function percent(value: number | null | undefined, digits = 0) {
   if (value === null || value === undefined) return '—'

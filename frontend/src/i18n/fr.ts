@@ -91,10 +91,6 @@ export const fr = {
 
   // ---- shell --------------------------------------------------------------
   'nav.inbox': 'Ma file',
-  'nav.supervision': 'Supervision',
-  'nav.analytics': 'Analyses',
-  'nav.rules': 'Règles',
-  'nav.kb': 'Base de connaissance',
   'nav.users': 'Utilisateurs',
   'nav.departments': 'Départements',
   'nav.admin': 'Administration',
@@ -192,6 +188,12 @@ export const fr = {
   'analysis.relatedHelp':
     'Meme problème signalé par d’autres clients — probablement un incident collectif.',
   'analysis.needsTriage': 'Vérification humaine requise',
+  'analysis.terms': 'Termes déclenchés',
+  'analysis.clickToCorrect': 'cliquez pour corriger',
+  'triage.no_signal': 'aucun terme reconnu',
+  'triage.insufficient_evidence': 'preuve insuffisante',
+  'triage.evidence_too_spread': 'preuve trop dispersée',
+  'triage.margin_too_narrow': 'marge trop étroite',
   'analysis.engineVersion': 'Version',
   'analysis.engine': 'Moteur',
   'analysis.latency': 'Durée',
@@ -309,20 +311,12 @@ export const fr = {
   'status.closed': 'Clôturée',
   'status.rejected': 'Rejetée',
 
-  'priority.1': 'Critique',
-  'priority.2': 'Haute',
-  'priority.3': 'Normale',
-  'priority.4': 'Basse',
 
   'sentiment.angry': 'Colère',
   'sentiment.frustrated': 'Frustration',
   'sentiment.neutral': 'Neutre',
   'sentiment.positive': 'Positif',
 
-  'sla.ok': 'Dans les délais',
-  'sla.warning': 'Échéance proche',
-  'sla.breached': 'Délai dépassé',
-  'sla.none': 'Sans échéance',
 
   'channel.web': 'Web',
   'channel.phone': 'Téléphone',
