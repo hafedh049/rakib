@@ -14,11 +14,7 @@ class EventName(StrEnum):
     COMPLAINT_UPDATED = "complaint.updated"
     COMPLAINT_REPLIED = "complaint.replied"
     COMPLAINT_RESOLVED = "complaint.resolved"
-    SLA_WARNING = "sla.warning"
-    SLA_BREACHED = "sla.breached"
-    ESCALATED = "complaint.escalated"
     TRIAGE_CORRECTED = "triage.corrected"
-    MODEL_PROMOTED = "model.promoted"
 
 
 @dataclass(frozen=True)
@@ -60,9 +56,5 @@ EVENT_MIN_ROLE: dict[EventName, str] = {
     EventName.COMPLAINT_UPDATED: "agent",
     EventName.COMPLAINT_REPLIED: "agent",
     EventName.COMPLAINT_RESOLVED: "agent",
-    EventName.SLA_WARNING: "agent",
-    EventName.SLA_BREACHED: "supervisor",
-    EventName.ESCALATED: "supervisor",
     EventName.TRIAGE_CORRECTED: "supervisor",
-    EventName.MODEL_PROMOTED: "admin",
 }

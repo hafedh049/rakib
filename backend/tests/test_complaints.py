@@ -293,6 +293,77 @@ async def test_out_of_scope_complaint_is_404_not_403(client, make_user, login):
     assert response.status_code == 404
 
 
-# ---------------------------------------------------------- resolution/satisfaction
+# --------------------------------------------------------------------- resolution
 
 
+async def test_assigning_an_agent_moves_the_complaint_to_assigned(
+    client, make_user, login, departments
+):
+    """The status must follow the hand-off.
+
+    Triage has already set TRIAGED by the time an admin picks an agent, so a
+    guard that only advanced from NEW left the board showing "triage termine"
+    on complaints that were in fact assigned to someone.
+    """
+    await make_user(email="sup@rakib.tn", password="Password123!", role=Role.SUPERVISOR)
+    headers = await login(client, "sup@rakib.tn", "Password123!")
+    agent = await make_user(
+        email="a1@rakib.tn", role=Role.AGENT,
+        department_id=departments["RELATION_CLIENT"].id,
+    )
+
+    created = (await client.post(COMPLAINTS, json=payload())).json()
+    complaint = await Complaint.get(created["id"])
+    complaint.status = Status.TRIAGED
+    await complaint.save()
+
+    response = await client.patch(
+        f"{COMPLAINTS}/{created['id']}",
+        json={"agent_id": str(agent.id)},
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["status"] == Status.ASSIGNED
+    assert body["assignment"]["agent_id"] == str(agent.id)
+
+
+async def test_an_explicit_status_wins_over_the_assignment_default(
+    client, make_user, login, departments
+):
+    await make_user(email="sup@rakib.tn", password="Password123!", role=Role.SUPERVISOR)
+    headers = await login(client, "sup@rakib.tn", "Password123!")
+    agent = await make_user(
+        email="a1@rakib.tn", role=Role.AGENT,
+        department_id=departments["RELATION_CLIENT"].id,
+    )
+    created = (await client.post(COMPLAINTS, json=payload())).json()
+
+    response = await client.patch(
+        f"{COMPLAINTS}/{created['id']}",
+        json={"agent_id": str(agent.id), "status": "in_progress"},
+        headers=headers,
+    )
+    assert response.json()["status"] == Status.IN_PROGRESS
+
+
+async def test_an_agent_cannot_assign_a_complaint_to_someone(
+    client, agent_headers, make_user, departments, routed_complaint
+):
+    """Assignment is the admin's decision — that is the whole point of the queue.
+
+    The complaint is routed to the agent's own department first, so the refusal
+    is the permission check and not the scope filter answering 404.
+    """
+    other = await make_user(
+        email="a2@rakib.tn", role=Role.AGENT,
+        department_id=departments["RELATION_CLIENT"].id,
+    )
+    created = await routed_complaint()
+
+    response = await client.patch(
+        f"{COMPLAINTS}/{created['id']}",
+        json={"agent_id": str(other.id)},
+        headers=agent_headers,
+    )
+    assert response.status_code == 403

@@ -1,74 +1,62 @@
 # Rakib · رقيب
 
 **Plateforme de gestion des réclamations pour une banque tunisienne.**
-Tri déterministe, délais conformes à la circulaire BCT n°2022-08, exécution
-intégralement hors ligne.
+Dépôt en ligne, catégorisation déterministe, routage vers le service compétent,
+affectation par un administrateur, traitement par un agent — le tout exécuté
+hors ligne, sans aucun modèle entraîné.
 
-`Python 3.12` · `FastAPI` · `MongoDB` · `Redis` · `React 19` · `k3s`
+`Python 3.12` · `FastAPI` · `MongoDB` · `Redis` · `React 19` · `Docker`
 
 | | |
 |---|---|
-| **p95 de bout en bout** | 58 ms (cible 100) |
-| **Analyse complète** | 4 ms, six étapes |
-| **Image conteneur** | 469 Mo (cible 800) |
-| **Couverture du cœur métier** | 88 % |
-| **Moteur** | `lexicon-v1` — 397 termes, aucun modèle entraîné |
+| **Dépôt d'une réclamation** | 9 ms médian, 10 ms p95 — mesuré de bout en bout via nginx |
+| **Catégorisation** | 0,084 ms médian, 0,111 ms p95 — 2 600 mesures |
+| **Moteur** | `lexicon-v1` — 133 termes, **aucun modèle, aucun artefact** |
+| **Tests** | 197, tous verts · `ruff` propre · `mypy` sur 65 fichiers |
+| **Images** | serveur 469 Mo · interface 74 Mo |
 
 ---
 
 ## Sommaire
 
-1. [Aperçu](#1-aperçu) · 2. [Démarrage](#2-démarrage) · 3. [Configuration](#3-configuration)
-· 4. [Structure](#4-structure-du-dépôt) · 5. [Pipeline](#5-le-pipeline)
-· 6. [Lexique](#6-le-lexique) · 7. [Règles](#7-les-27-règles)
-· 8. [Taxonomie](#8-taxonomie) · 9. [Délais](#9-délais-et-calendrier)
-· 10. [Conformité BCT](#10-conformité-bct) · 11. [Données](#11-modèle-de-données)
-· 12. [API](#12-référence-api) · 13. [RBAC](#13-rbac) · 14. [Interface](#14-interface)
-· 15. [Comptes](#15-comptes-de-démonstration) · 16. [Tests](#16-tests)
-· 17. [Déploiement](#17-déploiement) · 18. [Exploitation](#18-exploitation)
-· 19. [Problèmes connus](#19-problèmes-connus)
+1. [Ce que fait le système](#1-ce-que-fait-le-système) · 2. [Démarrage](#2-démarrage)
+· 3. [Comptes de démonstration](#3-comptes-de-démonstration)
+· 4. [La catégorisation](#4-la-catégorisation) · 5. [Le routage](#5-le-routage)
+· 6. [Taxonomie](#6-taxonomie) · 7. [Architecture](#7-architecture)
+· 8. [API](#8-api) · 9. [RBAC](#9-rbac) · 10. [Modèle de données](#10-modèle-de-données)
+· 11. [Interface](#11-interface) · 12. [Configuration](#12-configuration)
+· 13. [Tests](#13-tests) · 14. [Déploiement](#14-déploiement)
+· 15. [Limites connues](#15-limites-connues)
 
 ---
 
-## 1. Aperçu
+## 1. Ce que fait le système
 
-Une banque reçoit des réclamations par formulaire, courriel, téléphone, courrier
-et guichet. Un agent lit chacune et tranche quatre questions : **de quoi
-s'agit-il, quelle urgence, quel service est compétent, et l'avons-nous déjà
-reçue ?** C'est lent, incohérent d'un agent à l'autre, et des réclamations
-dépassent leur délai *légal* pendant qu'elles attendent d'être lues.
+Une banque reçoit des réclamations. Quelqu'un doit les lire, décider de quoi
+elles parlent, les envoyer au bon service, les confier à un agent, et répondre
+au client. Rakib prend en charge cette chaîne, et **s'arrête net avant la
+décision** : il propose une catégorie, il ne répond jamais à personne.
 
-Rakib prend ces quatre décisions en quelques millisecondes, sur la machine
-locale, sans aucun appel réseau. Puis l'humain reprend la main.
+Le périmètre est volontairement fermé. Sept fonctionnalités, pas une de plus :
 
-> **Principe non négociable** — le système ne répond **jamais** au réclamant de
-> lui-même. Il prépare, propose et alerte ; c'est un agent qui envoie. Dans un
-> domaine où une réponse engage la banque, l'automatisation s'arrête à la porte
-> de la décision.
+| # | Fonctionnalité | Où |
+|---|---|---|
+| 1 | Inscription et connexion | `/register` · `/login` |
+| 2 | Recherche et filtrage des réclamations | `/inbox` |
+| 3 | Prédiction de la catégorie de réclamation | à la création, puis affichée dans le détail |
+| 4 | Dépôt **sans compte** et suivi par lien personnel | `/portal` · `/portal/suivi` |
+| 5 | L'administrateur affecte la réclamation à un agent | `/inbox/:id` |
+| 6 | L'agent change l'état du ticket (résolu, clôturé…) | `/inbox/:id` |
+| 7 | L'administrateur et l'agent écrivent au réclamant | `/inbox/:id` |
 
-### Contraintes structurantes
+> **Aucune intelligence artificielle.** La prédiction de catégorie est un
+> lexique pondéré : une liste de termes, un score, un seuil. Aucun modèle n'est
+> entraîné, chargé ni appelé — ni localement, ni à distance. La décision est
+> reproductible et se justifie mot par mot (§4).
 
-| Contrainte | Conséquence |
-|---|---|
-| Hors ligne intégral | Aucun appel réseau à l'inférence, aucune police servie par CDN, aucune dépendance tierce |
-| Aucun modèle entraîné | Catégorisation par lexique pondéré ; déterminisme et traçabilité complets |
-| Matériel modeste | Bi-cœur, 4 Go, sans carte graphique |
-| Conformité BCT 2022-08 | Délais en jours ouvrables, registre annexe 1, déclaration ROGS760 |
-| Bilingue FR/AR + derja | RTL réel côté portail, détection de la derja latine |
-| Jamais de réponse automatique | L'automatisation s'arrête à la décision |
-
-### Pile technique
-
-| Couche | Technologies |
-|---|---|
-| Serveur | Python 3.12 · FastAPI 0.115 · Uvicorn 0.32 · Pydantic 2.9 |
-| Données | MongoDB 7 · Beanie 1.27 · Motor 3.6 |
-| Tâches | Redis 7 · arq 0.26 (files, cron, Streams) |
-| Recherche | rank-bm25 0.2 · RapidFuzz 3.10 |
-| Sécurité | PyJWT 2.9 · argon2-cffi 23.1 |
-| Stockage | MinIO (S3) via aioboto3 13.2 |
-| Interface | React 19 · TypeScript 5.7 · Vite 6 · Tailwind 4 · TanStack Query 5 |
-| Déploiement | Docker multi-étapes · k3s · Traefik · cert-manager |
+> **Le système ne répond jamais au réclamant de lui-même.** Il enregistre,
+> classe, route et notifie. C'est un agent qui écrit. Dans un domaine où une
+> réponse engage la banque, l'automatisation s'arrête à la porte de la décision.
 
 ---
 
@@ -82,133 +70,224 @@ git clone https://github.com/hafedh049/rakib.git && cd rakib
 cp .env.example .env
 
 docker compose up --build
-# web · api · worker · notifier · mongo · redis · minio
+# mongo · redis · api · worker · notifier · web
 ```
 
-### Peupler
+### Peupler la base
 
 ```bash
-docker compose exec api python -m scripts.seed --force --count 60
+docker compose exec api python -m scripts.seed --force --count 40
 ```
 
-Crée 8 services, 13 comptes et 60 réclamations bancaires en français, arabe et
-derja, puis exécute le pipeline sur chacune. L'âge d'une réclamation suit son
-statut, de sorte que le tableau de bord ouvre sur un mélange réaliste et non sur
-soixante lignes rouges.
+Crée 8 services, 13 comptes et 40 réclamations bancaires rédigées en français,
+en arabe et en derja, puis exécute la catégorisation sur chacune. L'âge d'une
+réclamation suit son statut : le tableau ouvre sur un mélange réaliste et non
+sur quarante lignes identiques.
 
 ### Accéder
 
 | Surface | URL locale | Accès |
 |---|---|---|
 | Portail public | `localhost:5173/portal` | Anonyme |
-| Console agents | `localhost:5173/login` | `admin@rakib.tn` / `Rakib2026!` |
+| Console | `localhost:5173/login` | `admin@rakib.tn` / `Rakib2026!` |
 | API (via nginx) | `localhost:5173/api/v1` | JWT |
 | API (directe) | `localhost:8000/api/v1` | JWT |
 | OpenAPI | `localhost:8000/docs` | Ouvert hors production |
 | Santé | `localhost:8000/health/ready` | Ouvert |
 
----
-
-## 3. Configuration
-
-### Application
-
-| Variable | Défaut | Rôle |
-|---|---|---|
-| `APP_NAME` | `Rakib` | Nom affiché |
-| `ENVIRONMENT` | `development` | `development` · `staging` · `production` · `test` |
-| `LOG_LEVEL` | `INFO` | Journalisation structurée (structlog) |
-| `API_PREFIX` | `/api/v1` | Préfixe des routes |
-| `FRONTEND_URL` | `localhost:5173` | Liens dans les courriels |
-| `PUBLIC_URL` | `localhost:5173` | Base des liens de suivi |
-
-### Infrastructure
-
-| Variable | Défaut |
-|---|---|
-| `MONGO_URI` | `mongodb://localhost:27017/reclamations` |
-| `REDIS_URL` | `redis://localhost:6379/0` |
-| `S3_ENDPOINT` | `http://localhost:9000` |
-| `S3_BUCKET` | `reclamations` |
-| `S3_ACCESS_KEY` / `S3_SECRET_KEY` | `rakib` / `rakib-dev-secret` |
-| `MAX_ATTACHMENT_MB` | `10` |
-
-### À changer impérativement en production
-
-| Variable | Défaut | Pourquoi |
-|---|---|---|
-| `JWT_SECRET` | `change-me-in-production` | Signature des jetons de session |
-| `TRACKING_TOKEN_SECRET` | `change-me-too` | Signature des liens de suivi remis aux réclamants |
-| `S3_SECRET_KEY` | `rakib-dev-secret` | Accès aux pièces jointes |
-
-> Ces deux secrets ne doivent **pas** être tournés à chaque déploiement :
-> changer `JWT_SECRET` déconnecte tout le monde, et changer
-> `TRACKING_TOKEN_SECRET` invalide tous les liens de suivi déjà remis à des
-> clients. Le script de déploiement les génère une fois puis les laisse
-> tranquilles.
-
-### Authentification
-
-| Variable | Défaut | Rôle |
-|---|---|---|
-| `JWT_ALGORITHM` | `HS256` | Algorithme de signature |
-| `JWT_ACCESS_TTL_MIN` | `15` | Durée du jeton d'accès (minutes) |
-| `JWT_REFRESH_TTL_DAYS` | `7` | Durée du jeton de rafraîchissement (jours) |
-| `TRACKING_TOKEN_TTL_DAYS` | `365` | Validité d'un lien de suivi anonyme |
-
-### Moteur et seuils
-
-| Variable | Défaut | Rôle |
-|---|---|---|
-| `TRIAGE_BACKEND` | `lexicon` | `lexicon` ou `rules` (routage seul) |
-| `CATEGORY_CONFIDENCE_THRESHOLD` | `0.55` | Seuil de renvoi en triage humain |
-| `AMBIGUITY_MARGIN` | `0.15` | Écart minimal avec la deuxième catégorie |
-| `DEDUP_AUTO_THRESHOLD` | `0.82` | Liaison automatique d'un doublon |
-| `DEDUP_SUGGEST_THRESHOLD` | `0.65` | Simple suggestion à l'agent |
-| `DEDUP_CROSS_CLAIMANT_THRESHOLD` | `0.90` | Seuil relevé entre réclamants différents |
-
-### Délais et courriel
-
-| Variable | Défaut | Rôle |
-|---|---|---|
-| `SLA_HOURS_P1` … `P4` | `4` / `24` / `72` / `168` | Objectifs internes par priorité (heures) |
-| `SLA_BUSINESS_HOURS` | `false` | Horloge ouvrée pour l'objectif interne |
-| `SLA_TIMEZONE` | `Africa/Tunis` | Fuseau du calendrier ouvré |
-| `SMTP_HOST` / `SMTP_PORT` | — / `587` | Relais sortant ; vide = pas d'envoi |
-| `SMTP_USERNAME` / `SMTP_PASSWORD` | — | Identifiants du relais |
-| `SMTP_FROM` | — | Expéditeur |
-| `SMTP_STARTTLS` | `true` | Chiffrement de la session |
-
-Le plafond légal de l'article 8 **ne dépend d'aucune variable**. Il est en dur
-dans `app/domain/bct.py`, avec l'article qui le justifie : une obligation
-réglementaire n'est pas un réglage.
+L'interface et l'API partagent une seule origine : nginx sert le bundle et
+relaie `/api/`. Aucune configuration CORS n'est donc nécessaire.
 
 ---
 
-## 4. Structure du dépôt
+## 3. Comptes de démonstration
+
+Mot de passe unique pour tous : **`Rakib2026!`**
+
+| Compte | Rôle | Service |
+|---|---|---|
+| `admin@rakib.tn` | admin | — |
+| `superviseur1@rakib.tn` · `superviseur2@rakib.tn` | superviseur | — |
+| `agent.mon1@rakib.tn` · `agent.mon2@rakib.tn` | agent | MONETIQUE |
+| `agent.ope1@rakib.tn` · `agent.ope2@rakib.tn` | agent | OPERATIONS |
+| `agent.cre1@rakib.tn` | agent | CREDITS |
+| `agent.rc1@rakib.tn` · `agent.rc2@rakib.tn` | agent | RELATION_CLIENT |
+| `agent.dig1@rakib.tn` | agent | DIGITAL |
+| `agent.int1@rakib.tn` | agent | INTERNATIONAL |
+| `agent.frd1@rakib.tn` | agent | CONFORMITE_FRAUDE |
+
+**La démonstration qui compte :** connectez-vous en `agent.mon1@rakib.tn`, puis
+en `agent.ope1@rakib.tn`. Les deux ouvrent le même écran `/inbox`, aucun des
+deux ne voit les réclamations de l'autre. Le cloisonnement n'est pas un filtre
+d'affichage : il est injecté dans la requête Mongo (§9).
+
+---
+
+## 4. La catégorisation
+
+### Le principe
+
+Chaque catégorie possède une liste de termes qui la nomment sans ambiguïté —
+« chéquier », « allocation touristique », « opération non autorisée ». Le texte
+de la réclamation est normalisé, les termes sont cherchés dedans, chaque
+correspondance rapporte un poids, et la catégorie qui totalise le plus l'emporte
+— **à condition de franchir trois seuils**. Sinon le système s'abstient et la
+réclamation part en tri humain.
+
+```
+texte brut
+  │
+  ├─ 1. normalisation   minuscules, signatures retirées, téléphones et courriels
+  │                     masqués, arabizi translittéré, accents latins repliés
+  ├─ 2. langue          fr · ar · ar-tn (derja) · en
+  ├─ 3. classification  lexique pondéré, remise IDF, abstention explicite
+  └─ 4. routage         catégorie → service, ou mots-clés → service
+```
+
+### Les seuils, et pourquoi ils existent
+
+| Seuil | Valeur | Motif d'abstention si non atteint |
+|---|---|---|
+| Score brut minimal | 2.0 | `insufficient_evidence` |
+| Part de preuve du gagnant | 40 % | `evidence_too_spread` |
+| Avance sur la deuxième | ×1.3 | `margin_too_narrow` |
+| Aucun terme reconnu | — | `no_signal` |
+
+Un terme réclamé par plusieurs catégories pèse moins qu'un terme discriminant
+(fréquence inverse de catégorie). Sans cette remise, un mot banal partagé par
+quatre catégories noie le mot utile qui n'en désigne qu'une.
+
+> **« Confiance » n'est pas une probabilité.** Le pourcentage affiché est une
+> *part de preuve* : la fraction du poids total détenue par la catégorie
+> gagnante. Il n'est pas calibré et ne prétend pas l'être. De toute façon,
+> l'écran montre à côté **les termes exacts qui ont décidé** — une information
+> plus utile qu'un pourcentage, et sur laquelle un agent peut argumenter.
+
+### Ce que ça vaut réellement
+
+Mesuré contre un jeu de référence de 130 cas écrits à la main, indépendamment du
+lexique, et incluant volontairement 16 textes qui n'ont pas de bonne réponse :
+
+```
+$ docker compose -f docker-compose.test.yml run --rm tests python -m scripts.evaluate
+
+lexicon: 133 terms across 12 categories
+
+=== GOLD (authored, independent)  (n=114) ===
+macro-F1 0.495   accuracy 0.368
+abstained on 63/114 (55%)
+when it committed: 42/51 correct (82%)
+
+=== unclassifiable  (n=16) ===
+correctly routed to human triage: 94%
+```
+
+Ces chiffres sont donnés tels quels, sans mise en scène :
+
+- **Il s'abstient plus d'une fois sur deux.** C'est le comportement voulu, pas
+  une panne. Un texte formulé hors du vocabulaire marque zéro et part chez un
+  agent — qui l'aurait lu de toute façon.
+- **Quand il tranche, il a raison 4 fois sur 5.** C'est le seul chiffre qui
+  compte en exploitation : une mauvaise catégorie affichée avec assurance coûte
+  plus de temps à un agent que pas de catégorie du tout.
+- **94 % des textes inclassables sont correctement envoyés en tri humain.**
+- L'exactitude globale de 0,368 est basse *parce que* l'abstention y est comptée
+  comme une erreur. Un modèle entraîné ferait mieux sur cette métrique. Il ne
+  serait pas explicable terme par terme, et le cahier des charges l'interdit.
+
+### Le repli des accents
+
+`text` conserve ses accents — il est lu par des humains. `indexable` les replie,
+parce que tous les termes du lexique sont écrits sans accent.
+
+Sans ce repli, « chèque » ne correspondait jamais à « cheque » : **une
+réclamation rédigée en français correct échouait à se catégoriser, alors que la
+même phrase tapée négligemment fonctionnait.** Le repli est restreint aux
+marques combinantes latines — les points-voyelles arabes sont traités séparément
+et ne doivent pas être touchés ici.
+
+### Enrichir le vocabulaire
+
+Ajouter une tournure au lexique, c'est ajouter une chaîne de caractères dans
+[`terms.py`](backend/app/intelligence/lexicon/terms.py) et redémarrer. Pas de
+réentraînement, pas de jeu de données, pas d'artefact à versionner. C'est le
+principal avantage pratique de cette approche, et la raison pour laquelle la
+liste entière se lit en une minute.
+
+---
+
+## 5. Le routage
+
+Une réclamation catégorisée va au service qui possède cette catégorie. Une
+réclamation **non** catégorisée n'est pas abandonnée : les mots-clés de chaque
+service sont cherchés dans le texte, avec la même remise IDF, et le meilleur
+score l'emporte. Si rien ne ressort, elle atterrit dans `GENERAL`.
+
+La réclamation arrive donc toujours dans une file de service, **jamais
+directement chez un agent**. Le passage de la file à une personne est une
+décision humaine : c'est la fonctionnalité 5, et c'est délibérément le seul
+chemin.
+
+---
+
+## 6. Taxonomie
+
+12 catégories, 8 services. La correspondance est dérivée, jamais saisie deux
+fois : [`taxonomy.py`](backend/app/domain/taxonomy.py) lève une erreur à
+l'import si une catégorie n'appartient à aucun service.
+
+| Catégorie | Libellé | Service |
+|---|---|---|
+| `CARTE_BANCAIRE` | Carte bancaire | MONETIQUE |
+| `DAB_GAB` | Distributeur (DAB/GAB) | MONETIQUE |
+| `PAIEMENT_TPE_ECOMMERCE` | Paiement TPE et e-commerce | MONETIQUE |
+| `VIREMENT_PRELEVEMENT` | Virement et prélèvement | OPERATIONS |
+| `CHEQUE_EFFET` | Chèque et effet | OPERATIONS |
+| `CREDIT_FINANCEMENT` | Crédit et financement | CREDITS |
+| `COMPTE_GESTION` | Gestion du compte | RELATION_CLIENT |
+| `FRAIS_COMMISSIONS` | Frais et commissions | RELATION_CLIENT |
+| `AGENCE_QUALITE_SERVICE` | Agence et qualité de service | RELATION_CLIENT |
+| `BANQUE_DIGITALE` | Banque digitale | DIGITAL |
+| `OPERATIONS_INTERNATIONALES` | Opérations internationales | INTERNATIONAL |
+| `FRAUDE_OPERATION_NON_AUTORISEE` | Fraude / opération non autorisée | CONFORMITE_FRAUDE |
+
+Le huitième service, `GENERAL`, ne possède aucune catégorie : c'est la file de
+secours.
+
+**Il n'y a pas de catégorie « Autre ».** Une classe fourre-tout absorbe tous les
+cas difficiles et détruit sa propre précision ; une réclamation inclassable
+passe par l'abstention, où une personne décide.
+
+### Statuts et canaux
+
+`new` → `triaged` → `assigned` → `in_progress` → `pending_claimant` →
+`resolved` · `closed` · `rejected`
+
+Canaux : `web` · `email` · `agence` · `phone` · `courrier`. Seul `web` est
+public ; les autres décrivent une réclamation saisie par un agent.
+
+---
+
+## 7. Architecture
 
 ```
 backend/
   app/
     domain/            connaissance métier pure, sans dépendance technique
       taxonomy.py        12 catégories, 8 services, la correspondance
-      bct.py             circulaire 2022-08 : délais, annexes, objets
-      calendar_tn.py     jours ouvrables tunisiens, Ramadan, fêtes lunaires
-      kb_seed.py         18 articles de base de connaissances FR/AR
     intelligence/      analyse — n'importe ni api/ ni models/
-      text/              normalisation, repli des accents, langue
+      text/              normalisation, repli des accents, langue, recherche de termes
       lexicon/           termes pondérés + classifieur déterministe
-      rules/             moteur de règles, sous-catégories, périmètre art. 2
-      dedup/             BM25 + correspondance approximative
-      engines/           lexicon.py (défaut) · rules_only.py
+      engines/           lexicon.py
       ports.py           l'interface TriageEngine
-      pipeline.py        l'enchaînement des six étapes
     models/            documents Beanie
     services/          orchestration métier
     api/v1/            routes HTTP
-    workers/           arq : tâches de fond et cron
+    events/            bus Redis Streams + abonnements des notificateurs
+    notifiers/         courriel · SSE
+    workers/           arq : la tâche de catégorisation
   scripts/             seed · seed_data · gold · evaluate
-  tests/               15 fichiers
+  tests/               8 fichiers de test, 197 cas
 frontend/
   src/routes/          écrans
   src/components/      AppShell · PortalLayout · Brandmark · Toasts · ui
@@ -216,647 +295,288 @@ frontend/
   src/lib/             api · auth · sse · types
 deploy/
   k8s/rakib.yaml       manifestes
-  deploy.sh            build, import k3s, applique, vérifie
-  benchmark.py         charge, avec nettoyage
+  deploy.sh            build, import, applique, vérifie
   visual_check.mjs     captures + erreurs console (Playwright)
 ```
 
 > **La règle de dépendance** — `intelligence/` n'importe ni `api/` ni `models/` :
 > seules des structures de données simples franchissent la frontière, définies
-> dans `ports.py`. C'est cette séparation qui a permis de changer de secteur puis
-> de moteur sans toucher au reste, et elle mérite d'être préservée.
+> dans [`ports.py`](backend/app/intelligence/ports.py). C'est cette séparation
+> qui a permis de changer de secteur, puis de moteur, sans toucher au reste.
+
+### Pourquoi un worker
+
+`POST /complaints` répond en 9 ms parce qu'il n'attend pas la catégorisation :
+il pousse un travail dans une file arq et rend la main. Le worker analyse et
+écrit le résultat. Le client, lui, a déjà sa référence et son lien de suivi.
+
+Les écritures du worker sont ciblées (`$set` / `$push`), jamais un `save()` de
+document entier : le worker et un agent peuvent écrire sur la même réclamation à
+la même seconde, et un enregistrement complet depuis une copie périmée effaçait
+les messages ajoutés entre-temps.
 
 ---
 
-## 5. Le pipeline
+## 8. API
 
-Six étapes, dans cet ordre, chacune consommant la précédente.
-
-| # | Étape | Ce qu'elle fait | Durée |
-|---|---|---|---|
-| 1 | `normalize` | Retire signatures et historiques cités ; masque téléphones, courriels et références en jetons ; replie les accents latins et les variantes arabes ; translittère l'arabizi en conservant les deux graphies | 0,42 ms |
-| 2 | `language` | `fr` · `ar` · `ar-tn` · `en`. L'arabe par ratio de script, la derja par motifs arabizi et marqueurs, le reste par mots outils | 0,14 ms |
-| 3 | `classify` | Lexique pondéré, 397 termes ; abstention explicite en dessous des seuils | 0,67 ms |
-| 4 | `rules` | 27 règles pondérées → score → P1/P2/P3 ; chaque déclenchement conserve les mots exacts | 0,93 ms |
-| 5 | `dedup` | BM25 et correspondance approximative sur les réclamations récentes ; seuil relevé entre réclamants différents | 2,0 ms |
-| 6 | `decide` | Routage vers le service, objectif interne, plafond légal, affectation | < 0,1 ms |
-
-### Le repli des accents, et pourquoi il compte
-
-`text` conserve ses accents — il est lu par des humains. `indexable` les replie,
-parce que tous les lexiques et termes de règles sont écrits sans accent.
-
-Sans ce repli, « chèque » ne correspondait jamais à « cheque » : **une
-réclamation rédigée en français correct échouait à se catégoriser, alors que la
-même phrase tapée négligemment fonctionnait.** Le repli est restreint aux
-marques combinantes latines — les points-voyelles arabes sont traités séparément
-et ne doivent pas être retouchés ici.
-
----
-
-## 6. Le lexique
-
-397 termes répartis sur 12 catégories, en deux niveaux :
-
-- **Décisif** (poids 3,0) — nomme le produit ou l'incident : « chéquier »,
-  « allocation touristique ».
-- **Appui** (poids 1,0) — vocabulaire de sous-catégorie, bien plus partagé :
-  « deux fois » sert aux cartes, aux distributeurs, aux paiements et au crédit.
-
-Chaque terme est ensuite pondéré par une **fréquence inverse de catégorie** : un
-terme réclamé par plusieurs catégories pèse moins qu'un terme discriminant —
-même principe que le routage par service, et même raison, sinon le terme banal
-noie le terme utile.
-
-### Conditions pour qu'une catégorie soit retenue
-
-| Seuil | Valeur | Motif d'abstention si non atteint |
-|---|---|---|
-| Score brut minimal | 2.0 | `insufficient_evidence` |
-| Part de preuve du gagnant | 40 % | `evidence_too_spread` |
-| Avance sur le suivant | ×1.3 | `margin_too_narrow` |
-| Aucun terme reconnu | — | `no_signal` |
-
-> **La « confiance » n'est pas une probabilité.** Le chiffre affiché est une
-> *part de preuve* : la fraction du poids total détenue par la catégorie
-> gagnante. Il n'est pas calibré et ne prétend pas l'être. La sortie du moteur
-> porte de toute façon les termes exacts qui ont décidé — information plus utile
-> qu'un pourcentage.
-
----
-
-## 7. Les 27 règles
-
-Toutes modifiables depuis `/admin/rules`, sans redéploiement. Un poids négatif
-abaisse la priorité.
-
-| Code | Type | Poids | Déclencheur |
-|---|---|---:|---|
-| `FRAUDE_SUSPECTEE_FR` | lexique | +55 | Opération non autorisée, compte piraté |
-| `FRAUDE_SUSPECTEE_AR` | lexique | +55 | Idem, écriture arabe |
-| `FRAUDE_SUSPECTEE_TN` | lexique | +55 | Idem, derja |
-| `MEDIATEUR_BANCAIRE_FR` | lexique | +35 | Le client évoque le médiateur |
-| `MEDIATEUR_BANCAIRE_AR` | lexique | +35 | Idem, écriture arabe |
-| `LEGAL_LEXICON_FR` | lexique | +30 | Avocat, plainte, tribunal |
-| `LEGAL_LEXICON_AR` | lexique | +30 | Idem, écriture arabe |
-| `VIP_CLAIMANT` | champ | +25 | Compte entreprise ou client signalé |
-| `CHURN_LEXICON_FR` | lexique | +20 | Menace de clôture ou de départ |
-| `CHURN_LEXICON_AR` | lexique | +20 | Idem, arabe et derja |
-| `INCIDENT_COLLECTIF` | lexique | +20 | Plusieurs clients touchés, agence entière |
-| `REPEAT_CLAIMANT_30D` | historique | +20 | Réclamations répétées sur 30 jours |
-| `URGENCY_LEXICON_FR` | lexique | +15 | Vocabulaire d'urgence |
-| `URGENCY_LEXICON_AR` | lexique | +15 | Idem, écriture arabe |
-| `URGENCY_LEXICON_TN` | lexique | +15 | Idem, derja |
-| `MONTANT_ELEVE` | regex | +12 | Montant à quatre chiffres ou plus |
-| `DURATION_WEEKS` | regex | +12 | Problème persistant en semaines ou mois |
-| `PROFANITY` | lexique | +10 | Propos agressifs |
-| `MULTIPLE_OPEN` | historique | +10 | Plusieurs dossiers ouverts |
-| `AMOUNT_IN_DINARS` | regex | +8 | Montant contesté explicite |
-| `SHOUTING` | champ | +8 | Message en majuscules |
-| `OPERATION_REFERENCE` | regex | +5 | Référence d'opération citée |
-| `HAS_ATTACHMENT` | champ | +5 | Pièce justificative fournie |
-| `DETAILED_REPORT` | longueur | +5 | Description circonstanciée |
-| `EXCLAMATION_STORM` | champ | +5 | Ponctuation excessive |
-| `CATEGORY_WEIGHTS` | catégorie | ×1 | Socle propre à chaque catégorie |
-| `VERY_SHORT` | longueur | −8 | Message trop court pour être actionnable |
-
-La fraude domine volontairement le barème : c'est la seule catégorie où le
-préjudice *continue de croître* tant que personne n'agit. Le médiateur vient
-juste après, parce qu'un client qui l'évoque est déjà au bord d'une procédure
-formelle.
-
----
-
-## 8. Taxonomie
-
-12 catégories, 8 services. Changer de secteur d'activité, c'est remplacer
-`taxonomy.py` — rien au-dessus ne code en dur la banque.
-
-| Catégorie | Libellé | العربية | Service | Délai |
-|---|---|---|---|---:|
-| `FRAUDE_OPERATION_NON_AUTORISEE` | Fraude / opération non autorisée | عملية غير مصرح بها | Conformité et Fraude | 2 j.o. |
-| `CARTE_BANCAIRE` | Carte bancaire | البطاقة البنكية | Monétique et Cartes | 5 j.o. |
-| `DAB_GAB` | Distributeur (DAB/GAB) | الموزع الآلي | Monétique et Cartes | 5 j.o. |
-| `VIREMENT_PRELEVEMENT` | Virement et prélèvement | التحويل والاقتطاع | Opérations Bancaires | 5 j.o. |
-| `BANQUE_DIGITALE` | Banque digitale | البنك الرقمي | Banque Digitale | 5 j.o. |
-| `PAIEMENT_TPE_ECOMMERCE` | Paiement TPE et e-commerce | الدفع الإلكتروني | Monétique et Cartes | 7 j.o. |
-| `CHEQUE_EFFET` | Chèque et effet | الشيك والكمبيالة | Opérations Bancaires | 7 j.o. |
-| `COMPTE_GESTION` | Gestion du compte | التصرف في الحساب | Relation Clientèle | 7 j.o. |
-| `FRAIS_COMMISSIONS` | Frais et commissions | المصاريف والعمولات | Relation Clientèle | 7 j.o. |
-| `CREDIT_FINANCEMENT` | Crédit et financement | القرض والتمويل | Crédits et Financement | 10 j.o. |
-| `OPERATIONS_INTERNATIONALES` | Opérations internationales | العمليات الدولية | Opérations Internationales | 10 j.o. |
-| `AGENCE_QUALITE_SERVICE` | Agence et qualité de service | الوكالة وجودة الخدمة | Relation Clientèle | 10 j.o. |
-
-Un huitième service, `GENERAL` (Service Général), ne porte aucune catégorie :
-c'est la file de secours pour tout ce qui n'est pas routable automatiquement.
-
-> **Il n'existe volontairement aucune catégorie « AUTRE ».** Une classe
-> fourre-tout absorbe tous les cas difficiles et détruit sa propre précision.
-> Une réclamation inclassable passe sous le seuil et devient
-> `needs_human_triage`.
-
-### Statuts et canaux
-
-```
-statuts   new · triaged · assigned · in_progress · pending_claimant
-          resolved · closed · rejected
-canaux    web · email · agence · phone · courrier
-```
-
-`resolved`, `closed` et `rejected` sont terminaux : l'horloge SLA s'arrête et
-aucun routage ne se produit plus. Une réanalyse ne peut pas rouvrir une
-réclamation terminée.
-
----
-
-## 9. Délais et calendrier
-
-Deux horloges, et **la plus courte gouverne**.
-
-| | Objectif interne | Plafond légal |
-|---|---|---|
-| Unité | Heures | **Jours ouvrables** |
-| Départ | Création | Accusé de réception |
-| Barème | P1 4 h · P2 24 h · P3 72 h · P4 168 h | 2 à 15 j.o. selon la catégorie |
-| Source | Configuration | `bct.py`, en dur |
-| Dépassement | Indicateur de qualité | **Événement déclarable** |
-
-Un objectif interne qui dépasserait le plafond est ramené dessus : une banque
-peut être plus rapide que la réglementation, jamais plus lente. Les deux
-dépassements sont suivis séparément.
-
-### Le calendrier ouvré tunisien
-
-- **Week-end** et jours fériés fixes
-- **Fêtes du calendrier lunaire** par table (Aïd, Mouled)
-- **Séance unique d'été** : clôture à 13h30
-- **Horaires de Ramadan**, distincts
-- Horaire ordinaire le reste de l'année : clôture à 17h00
-
-> **Un exemple qui vaut une démonstration** — quinze jours ouvrables depuis le
-> 13 août tombent le **4 septembre**, soit 22 jours calendaires, et l'heure de
-> clôture passe de 13h30 (séance unique d'été) à 17h00 en septembre. Une
-> implémentation en jours calendaires déclarerait le dépassement une semaine
-> trop tôt et alerterait pour rien.
-
-Un balayage s'exécute **toutes les cinq minutes** : avertissement à 80 % du
-budget consommé, puis dépassement, puis escalade.
-
----
-
-## 10. Conformité BCT
-
-Circulaire **n°2022-08 du 20 octobre 2022**, « Politiques et mesures de
-traitement des réclamations de la clientèle ».
-
-| Article | Exigence | Implémentation |
-|---|---|---|
-| Art. 2 | Six exclusions du périmètre | `rules/perimetre.py` — le message reste traité, il sort des totaux |
-| Art. 6 | Canaux de réception minimaux | 5 canaux → 4 buckets du régulateur |
-| Art. 7 | Informer des délais et de la médiation | La voie de médiation est dans chaque modèle de réponse |
-| Art. 8 | Accusé daté et référencé | Émis à la création, démarre l'horloge légale |
-| Art. 8 | Réponse ≤ 15 jours ouvrables | Plafond calculé au calendrier tunisien |
-| Art. 8 | Rejet motivé | `POST /reject` refuse une motivation trop courte |
-| Art. 9 | Base, accusés, alerte, indicateurs | MongoDB · accusé automatique · balayage 5 min · tableau de bord |
-| Art. 12 | Audit interne tous les 3 ans | Constante définie ; compte à rebours non affiché *(partiel)* |
-| Annexe 1 | 10 informations minimales | Bloc `reglementaire` sur chaque réclamation |
-| Annexe 2 | Déclaration ROGS760, annuelle, XML, DR+45j | `GET /analytics/declaration/{year}/xml` |
-| Annexe 3 | Quatre tableaux de la déclaration | Nature · genre et âge · canal · objet et délais |
-
-### Les huit objets de l'annexe 3-IV
-
-Nos 12 catégories se projettent sur les 8 objets que compte le régulateur :
-Financement · Paiement hors monétique · Monétique · Fonctionnement des comptes ·
-Opérations bancaires internationales · Tarification · Services bancaires à
-distance · Autres services.
-
-> **Une limite du formulaire, pas de l'implémentation** — la liste du régulateur
-> n'a **aucune entrée pour la fraude**. Une opération carte non autorisée est
-> monétique, un virement non autorisé est paiement hors monétique, et ni l'un ni
-> l'autre ne dit à la BCT que de l'argent est parti sans consentement. La
-> correspondance retient `MONETIQUE`, origine dominante, et la catégorie interne
-> reste intacte — mais la déclaration ne sait littéralement pas exprimer le cas.
-
----
-
-## 11. Modèle de données
-
-```
-Complaint
-  ref                 REC-2026-00042      référence affichée, séquentielle
-  channel             web | email | agence | phone | courrier
-  status              new … rejected
-  triage_state        pending | done | failed | manual
-  subject, body       texte d'origine, accents conservés
-  normalized_text     texte replié, ce sur quoi on recherche
-  corrected           un humain a changé la catégorie ou le service
-
-  claimant            nom, courriel, téléphone, référence client, VIP
-                      + annexe 3 : nature, genre, tranche d'âge, RNE
-
-  analysis            category, category_confidence (part de preuve)
-                      category_alternatives, subcategory
-                      priority, priority_score, rule_hits[]
-                      sentiment, language, keywords
-                      duplicate_of, duplicate_score, related_ids
-                      needs_human_triage, triage_reason
-                      engine, engine_version, latency_ms
-
-  assignment          service, agent, date, méthode (auto|manual|queue)
-
-  sla                 due_at, hours, breached, warned, escalation_level
-                      legal_due_at, legal_days, legal_breached
-
-  reglementaire       accuse_reception_at      art. 8, départ de l'horloge
-                      investigations_menees    annexe 1
-                      demarches_entreprises    annexe 1
-                      motivation               art. 8, rejet motivé
-                      hors_perimetre           art. 2
-                      objet_bct                annexe 3-IV
-
-  attachments[]       fichier, type, taille, clé S3, déposant
-  messages[]          échanges, avec notes internes
-  timeline[]          journal d'audit horodaté
-  satisfaction        note 1-5 et commentaire
-```
-
-> **Écritures ciblées, jamais `save()`** — les services écrivent avec `$push` et
-> `$set` sur les seuls champs qu'ils possèdent. Un `save()` complet réécrit tout
-> le document depuis une copie en mémoire potentiellement périmée : c'est ainsi
-> qu'une pièce jointe déposée pendant l'analyse disparaissait silencieusement.
-> Ce défaut est apparu **trois fois** dans ce projet — pièces jointes,
-> résolution, messages — et la règle est donc générale.
-
-### Index
-
-| Index | Sert à |
-|---|---|
-| `ref` (unique) | Suivi par référence |
-| `status` + `sla.due_at` | Balayage SLA |
-| `assignment.agent_id` + `status` | File d'un agent |
-| `assignment.department_id` + `status` | File d'un service |
-| `analysis.category` + `created_at` | Statistiques |
-| `created_at` + `_id` | Pagination par curseur |
-| texte (`subject`, `body`, `normalized_text`) | Recherche ; `default_language="none"` |
-
-L'index texte est déclaré sans langue de radicalisation : la radicalisation
-française est inutile sur de l'arabe et de l'arabizi, et MongoDB n'autorise
-qu'un seul index texte par collection. `normalized_text` y figure pour que
-l'arabe et la derja restent trouvables.
-
----
-
-## 12. Référence API
-
-Base `/api/v1`. Jeton d'accès en `Authorization: Bearer`, rafraîchissement par
-cookie httpOnly.
+Toutes les routes sont préfixées par `/api/v1`.
 
 ### Authentification
 
-| Méthode | Route | Rôle | Accès |
-|---|---|---|---|
-| `POST` | `/auth/register` | Créer un compte réclamant | Public |
-| `POST` | `/auth/login` | Ouvrir une session | Public |
-| `POST` | `/auth/refresh` | Renouveler le jeton d'accès | Cookie |
-| `POST` | `/auth/logout` | Fermer la session | Authentifié |
-| `GET` | `/auth/me` | Profil courant | Authentifié |
+| Méthode | Route | Accès |
+|---|---|---|
+| `POST` | `/auth/register` | public — crée un compte réclamant |
+| `POST` | `/auth/login` | public — rend un couple de jetons |
+| `POST` | `/auth/refresh` | public — renouvelle l'accès, fait tourner le jeton |
+| `POST` | `/auth/logout` | authentifié — révoque le rafraîchissement |
+| `GET` | `/auth/me` | authentifié |
 
 ### Réclamations
 
-| Méthode | Route | Rôle | Accès |
-|---|---|---|---|
-| `POST` | `/complaints` | Déposer ; renvoie référence et lien de suivi | Public |
-| `GET` | `/complaints/track` | Suivi par référence et contact | Public |
-| `POST` | `/complaints/satisfaction` | Noter après clôture | Jeton de suivi |
-| `GET` | `/complaints` | Liste paginée par curseur, filtres | Agent |
-| `GET` | `/complaints/{id}` | Détail complet | Agent |
-| `PATCH` | `/complaints/{id}` | Catégorie, service, statut, VIP ; `agent_id` réservé au superviseur | Agent |
-| `POST` | `/complaints/{id}/messages` | Répondre ou noter en interne | Agent |
-| `POST` | `/complaints/{id}/resolve` | Résoudre avec message au client | Agent |
-| `POST` | `/complaints/{id}/reject` | **Rejeter ; motivation obligatoire (art. 8)** | Agent |
-| `POST` | `/complaints/{id}/retriage` | Relancer le pipeline | Superviseur |
-| `GET` | `/complaints/{id}/analysis` | Trace complète des six étapes | Agent |
-| `GET` | `/complaints/{id}/suggest` | Articles de base de connaissances | Agent |
-| `POST` | `/complaints/{id}/suggest/used` | Marquer une suggestion utilisée | Agent |
-| `POST` | `/complaints/{id}/attachments` | Déposer une pièce | Agent ou jeton |
-| `GET` | `/complaints/{id}/attachments/{aid}` | Télécharger | Agent ou jeton |
+| Méthode | Route | Rôle minimal |
+|---|---|---|
+| `POST` | `/complaints` | **public** — dépôt, avec ou sans compte |
+| `GET` | `/complaints/track?token=` | **public** — suivi par lien signé |
+| `GET` | `/complaints` | authentifié — liste filtrée, paginée par curseur |
+| `GET` | `/complaints/{id}` | authentifié — détail, cloisonné par rôle |
+| `PATCH` | `/complaints/{id}` | agent — statut, catégorie, service, agent, VIP |
+| `POST` | `/complaints/{id}/messages` | authentifié — message ou note interne |
+| `POST` | `/complaints/{id}/resolve` | agent — clôt avec une résolution |
+| `POST` | `/complaints/{id}/retriage` | superviseur — relance l'analyse |
+| `GET` | `/complaints/{id}/analysis` | agent — catégorie, termes, alternatives |
 
-### Statistiques et déclaration
+Filtres de `GET /complaints` : `status` (répétable), `category`, `department`,
+`agent_id`, `q` (recherche plein texte), `date_from`, `date_to`,
+`needs_human_triage`, `unassigned`, `cursor`, `limit`.
 
-| Méthode | Route | Rôle | Accès |
-|---|---|---|---|
-| `GET` | `/analytics/overview` | Volumes, SLA, satisfaction | Agent |
-| `GET` | `/analytics/by-category` | Répartition et part de preuve moyenne | Agent |
-| `GET` | `/analytics/volume` | Série par jour | Agent |
-| `GET` | `/analytics/supervision` | Tableau de supervision | Agent |
-| `GET` | `/analytics/agents` | Charge par agent | Superviseur |
-| `GET` | `/analytics/engine` | État du moteur, taux de correction | Superviseur |
-| `GET` | `/analytics/rules` | Déclenchements par règle | Superviseur |
-| `GET` | `/analytics/kb` | Usage des articles | Superviseur |
-| `GET` | `/analytics/declaration/{year}` | **ROGS760 en JSON** | Superviseur |
-| `GET` | `/analytics/declaration/{year}/xml` | **ROGS760 en XML (annexe 2)** | Superviseur |
+> `GET /complaints/track` prend un jeton signé, **pas** une référence. La
+> référence est séquentielle : un suivi par référence laisserait n'importe qui
+> énumérer toutes les réclamations de la banque.
 
 ### Administration
 
-| Méthode | Route | Rôle | Accès |
-|---|---|---|---|
-| `GET` | `/rules` | Catalogue des 27 règles | Superviseur |
-| `PATCH` | `/rules/{id}` | Poids, activation, configuration | Admin |
-| `POST` | `/rules/simulate` | Essai à blanc ; n'enregistre rien | Superviseur |
-| `GET` | `/kb` | Articles | Agent |
-| `POST` | `/kb` | Créer | Admin |
-| `PATCH` | `/kb/{id}` | Modifier | Admin |
-| `DELETE` | `/kb/{id}` | Supprimer | Admin |
-| `POST` | `/kb/reindex` | Reconstruire l'index BM25 | Admin |
-| `GET` | `/departments` | Services | Agent |
-| `POST` | `/departments` | Créer | Admin |
-| `PATCH` | `/departments/{id}` | Modifier | Admin |
-| `DELETE` | `/departments/{id}` | Supprimer | Admin |
-| `GET` | `/users` | Personnel | Superviseur |
-| `POST` | `/users` | Créer | Admin |
-| `PATCH` | `/users/{id}` | Modifier | Admin |
+| Méthode | Route | Rôle minimal |
+|---|---|---|
+| `GET` | `/users/me` | authentifié |
+| `GET` | `/users` | superviseur |
+| `POST` | `/users` | admin — crée un membre du personnel |
+| `PATCH` | `/users/{id}` | admin — rôle, service, activation |
+| `GET` | `/departments` | agent |
+| `POST` · `PATCH` · `DELETE` | `/departments`… | admin |
 
 ### Temps réel et santé
 
-| Méthode | Route | Rôle |
+| Méthode | Route | Rôle minimal |
 |---|---|---|
-| `GET` | `/events/stream` | Flux SSE ; requiert un en-tête, donc `fetch` et non `EventSource` |
-| `GET` | `/health` | Vivacité |
-| `GET` | `/health/ready` | Mongo, Redis, moteur, abonnés SSE |
+| `GET` | `/events/stream` | agent — SSE, filtré par rôle |
+| `GET` | `/health` · `/health/ready` | public |
 
-### Événements diffusés
+Le flux est consommé en `fetch` + lecteur de flux, et non en `EventSource` :
+celui-ci ne permet pas d'envoyer un en-tête `Authorization`.
 
-```
-complaint.created · complaint.triaged · complaint.assigned · complaint.updated
-complaint.replied · complaint.resolved · complaint.escalated
-sla.warning · sla.breached · triage.corrected
-```
-
-Trois seulement déclenchent une notification visuelle : `sla.warning`,
-`sla.breached` et `complaint.escalated`. La file se rafraîchit déjà seule ; un
-avis par arrivée serait du bruit.
+Événements diffusés : `complaint.created`, `complaint.triaged`,
+`complaint.assigned`, `complaint.updated`, `complaint.replied`,
+`complaint.resolved`, et `triage.corrected` — ce dernier réservé aux
+superviseurs.
 
 ---
 
-## 13. RBAC
+## 9. RBAC
 
-Quatre rôles. Le cloisonnement est un filtre **injecté dans la requête**, jamais
-appliqué après lecture.
+Quatre rôles, ordonnés : `claimant` < `agent` < `supervisor` < `admin`.
+`require_role(agent)` admet donc aussi les superviseurs et les administrateurs.
 
-| Rôle | Filtre injecté |
-|---|---|
-| **Admin** | `{}` — aucune restriction |
-| **Superviseur** | `{}` — aucune restriction |
-| **Agent** avec service | son service OU ses affectations |
-| **Agent** sans service | ses affectations uniquement |
-| **Réclamant** | ses propres réclamations |
-
-| Action | Réclamant | Agent | Superviseur | Admin |
-|---|:---:|:---:|:---:|:---:|
-| Déposer, suivre ses réclamations | ✅ | ✅ | ✅ | ✅ |
-| Voir la file et l'analyse | ❌ | périmètre | ✅ | ✅ |
-| Corriger une catégorie, changer un statut | ❌ | ✅ | ✅ | ✅ |
-| Répondre, résoudre, rejeter | ❌ | ✅ | ✅ | ✅ |
-| Statistiques générales | ❌ | ✅ | ✅ | ✅ |
-| **Réaffecter à un agent** | ❌ | ❌ | ✅ | ✅ |
-| Relancer l'analyse | ❌ | ❌ | ✅ | ✅ |
-| Charge par agent, supervision | ❌ | ❌ | ✅ | ✅ |
-| Lire les règles, simuler | ❌ | ❌ | ✅ | ✅ |
-| **Déclaration ROGS760** | ❌ | ❌ | ✅ | ✅ |
-| **Modifier un poids de règle** | ❌ | ❌ | ❌ | ✅ |
-| Gérer base de connaissances, utilisateurs, services | ❌ | ❌ | ❌ | ✅ |
-
-> **Deux gardes, et la différence compte** — `require_role` respecte la
-> hiérarchie : un admin passe partout où un agent passe. `require_exact_roles`
-> ne la respecte pas : **un admin n'est pas implicitement un agent**. Un test
-> vérifie explicitement cette distinction, et un autre garantit qu'un filtre
-> vide — qui signifierait « tout lire » — ne peut jamais être produit pour un
-> rôle inférieur.
-
----
-
-## 14. Interface
-
-| Route | Écran | Accès |
+| Rôle | Lecture des réclamations | Écriture |
 |---|---|---|
-| `/portal` | Dépôt d'une réclamation | Public |
-| `/portal/suivi` | Suivi par référence | Public |
-| `/portal/satisfaction` | Évaluation après clôture | Public |
-| `/portal/mes-reclamations` | Espace du réclamant | Réclamant |
-| `/portal/reclamation/:id` | Détail côté réclamant | Réclamant |
-| `/login` · `/register` | Session | Public |
-| `/inbox` | File de traitement, filtres, curseur | Agent |
-| `/inbox/:id` | Détail, analyse, réponse, réaffectation | Agent |
-| `/supervision` | Tableau de supervision | Superviseur |
-| `/analytics` | Statistiques et graphiques | Agent |
-| `/admin/rules` | Règles et simulateur | Superviseur / Admin |
-| `/admin/kb` | Base de connaissances | Superviseur / Admin |
-| `/admin/users` | Personnel | Admin |
-| `/admin/departments` | Services | Admin |
+| `claimant` | les siennes | déposer, répondre sur les siennes |
+| `agent` | celles de **son** service, plus celles qui lui sont affectées | statut, catégorie, messages, résolution |
+| `supervisor` | toutes | + affecter un agent, relancer l'analyse |
+| `admin` | toutes | + comptes et services |
 
-### Le système de couleurs
+**Le cloisonnement est un filtre Mongo, jamais un tri après lecture.**
+`department_scope(user)` rend un filtre fusionné dans la requête elle-même :
 
-L'identité est noire et rouge, ce qui crée le seul conflit qu'un système de
-réclamations ne peut pas se permettre : **le rouge est déjà la couleur du
-danger**. La résolution sépare les deux par le rôle et la position, pas
-seulement par la teinte.
+```python
+# agent rattaché à un service
+{"$or": [{"assignment.department_id": user.department_id},
+         {"assignment.agent_id": user.id}]}
+```
 
-| Jeton | Emploi | Interdit |
+Un agent ne peut donc pas paginer jusqu'aux réclamations d'un autre service :
+elles ne sont jamais lues. Et une réclamation hors périmètre rend **404, pas
+403** — un 403 confirmerait qu'elle existe.
+
+---
+
+## 10. Modèle de données
+
+Trois collections principales — `complaints`, `users`, `departments` — plus
+`counters` pour les références et `refresh_tokens` pour les sessions.
+
+```
+Complaint
+  ref                REC-2026-00042, séquentiel et unique
+  channel            web · email · agence · phone · courrier
+  claimant           nom, courriel, téléphone, référence client, VIP
+  subject, body      le texte tel qu'écrit
+  normalized_text    la forme canonique, ce sur quoi porte la recherche
+  analysis           catégorie, part de preuve, alternatives, langue,
+                     mots-clés, termes déclenchés, motif d'abstention,
+                     moteur, version, latence
+  assignment         service, agent, date, méthode
+  status             new → … → resolved · closed · rejected
+  triage_state       pending · done · failed · manual
+  messages[]         auteur, corps, interne ou non
+  timeline[]         qui a fait quoi, quand — humain ou moteur
+  corrected          un humain a changé la catégorie ou le service
+```
+
+Index notables : `ref` unique ; `(agent, statut)` et `(service, statut)` pour les
+files ; `(created_at, _id)` pour la pagination par curseur — il doit correspondre
+exactement au tri ; et un index texte sur `subject`, `body` et `normalized_text`
+avec `default_language="none"`, parce qu'un radicaliseur français est inutile sur
+de l'arabe et que Mongo n'autorise **qu'un seul** index texte par collection.
+
+---
+
+## 11. Interface
+
+Deux registres sur un seul système de tokens.
+
+**Le portail** (`/portal`) est public, clair, bilingue français / arabe avec un
+vrai RTL — pas un `dir="rtl"` posé sur une mise en page pensée pour la gauche.
+Il vise un téléphone sur une connexion médiocre : la console est chargée à la
+demande, un réclamant ne télécharge jamais l'écran des agents.
+
+**La console** (`/inbox`) est dense et en français : c'est un outil de travail.
+
+| Écran | Route | Accès |
 |---|---|---|
-| `--primary` | Graphite : boutons, focus, états actifs | — |
-| `--brand` | Rouge : marque, filet du bandeau, navigation active | **Jamais sur une donnée ni un état** |
-| `--danger` | Oxblood : dépassement, P1, action destructive | Jamais sur du chrome |
-| `--amber` | Réservé au SLA et au triage humain | Partout ailleurs |
+| Dépôt | `/portal` | anonyme |
+| Suivi par lien | `/portal/suivi?token=` | anonyme |
+| Mes réclamations | `/portal/mes-reclamations` | réclamant connecté |
+| Connexion · inscription | `/login` · `/register` | public |
+| File de travail | `/inbox` | agent |
+| Détail | `/inbox/:id` | agent |
+| Comptes | `/admin/users` | admin |
+| Services | `/admin/departments` | admin |
 
-En mode sombre, `--primary` s'inverse en quasi-blanc : un bouton rouge se
-battrait avec les badges de dépassement voisins dans la file.
-
-### Internationalisation
-
-Le portail est bilingue français et arabe avec un RTL réel — mise en page
-miroir, pas seulement le texte — et les numéros de téléphone restent isolés en
-LTR à l'intérieur du texte arabe. La console est en français, langue de travail
-du personnel bancaire tunisien.
-
-Aucune police n'est embarquée : l'exécution hors ligne exclut un CDN, et les
-fontes système rendent correctement l'arabe sur toutes les plateformes visées.
-
-### La marque
-
-L'artwork officiel est **une marque déposée et n'est délibérément pas
-versionné**. `Brandmark` charge `frontend/public/brand/uib.svg` dès qu'il est
-déposé, et retombe sinon sur une composition typographique.
+Le thème suit trois états : `:root` pour le clair, `prefers-color-scheme` pour
+le réglage système, `[data-theme]` pour un choix explicite. Les couleurs sont
+définies en OKLCH.
 
 ---
 
-## 15. Comptes de démonstration
+## 12. Configuration
 
-Créés par le script de peuplement. Mot de passe commun : `Rakib2026!`
+Tout est dans `.env`, copié depuis `.env.example`.
 
-| Adresse | Nom | Rôle | Service |
-|---|---|---|---|
-| `admin@rakib.tn` | Sonia Trabelsi | Admin | — |
-| `superviseur1@rakib.tn` | Mehdi Gharbi | Superviseur | tous |
-| `superviseur2@rakib.tn` | Ines Bouzid | Superviseur | tous |
-| `agent.mon1@rakib.tn` | Karim Jelassi | Agent | Monétique et Cartes |
-| `agent.mon2@rakib.tn` | Rania Ayari | Agent | Monétique et Cartes |
-| `agent.ope1@rakib.tn` | Yassine Chaouch | Agent | Opérations Bancaires |
-| `agent.ope2@rakib.tn` | Nadia Belhaj | Agent | Opérations Bancaires |
-| `agent.cre1@rakib.tn` | Walid Mansouri | Agent | Crédits et Financement |
-| `agent.rc1@rakib.tn` | Olfa Hamdi | Agent | Relation Clientèle |
-| `agent.rc2@rakib.tn` | Bilel Khemiri | Agent | Relation Clientèle |
-| `agent.dig1@rakib.tn` | Amel Zouari | Agent | Banque Digitale |
-| `agent.int1@rakib.tn` | Hamza Ben Romdhane | Agent | Opérations Internationales |
-| `agent.frd1@rakib.tn` | Sofiene Kacem | Agent | Conformité et Fraude |
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `APP_NAME` | `Rakib` | Nom affiché |
+| `ENVIRONMENT` | `development` | `development` · `staging` · `production` · `test` |
+| `LOG_LEVEL` | `INFO` | Journalisation structurée (structlog) |
+| `MONGO_URI` | `mongodb://mongo:27017/reclamations` | Base |
+| `REDIS_URL` | `redis://redis:6379/0` | File de travaux et flux d'événements |
+| `JWT_SECRET` | `change-me-in-production` | **À changer.** Signature des sessions |
+| `JWT_ACCESS_TTL_MIN` | `15` | Durée du jeton d'accès |
+| `JWT_REFRESH_TTL_DAYS` | `7` | Durée du jeton de rafraîchissement |
+| `TRACKING_TOKEN_SECRET` | `change-me-too` | **À changer.** Signature des liens de suivi |
+| `TRACKING_TOKEN_TTL_DAYS` | `365` | Validité d'un lien de suivi |
+| `SMTP_HOST` … `SMTP_FROM` | vide | Relais sortant ; vide = aucun envoi |
+| `FRONTEND_URL` · `PUBLIC_URL` | `localhost:5173` | Base des liens envoyés par courriel |
 
-> Identifiants de **démonstration** uniquement. Le rôle *Réclamant* n'est pas
-> pré-créé : il se crée depuis `/register`, ou implicitement lorsqu'un dépôt
-> anonyme est rattaché à une adresse connue.
+> Ces deux secrets ne doivent **pas** être régénérés à chaque déploiement :
+> changer `JWT_SECRET` déconnecte tout le monde, et changer
+> `TRACKING_TOKEN_SECRET` invalide tous les liens déjà remis à des clients. Le
+> script de déploiement les génère une fois, puis les laisse tranquilles.
+
+Le jeton de suivi est signé avec un secret **différent** de celui des sessions :
+un lien de suivi qui fuite ne doit jamais pouvoir devenir une session.
 
 ---
 
-## 16. Tests
+## 13. Tests
 
 ```bash
-docker compose -f docker-compose.test.yml run --rm tests
-ruff check .
-mypy app/
+docker compose -f docker-compose.test.yml run --rm tests            # 197 tests
+docker compose -f docker-compose.test.yml run --rm tests \
+  sh -c "ruff check app tests scripts && mypy app"                  # lint + types
 ```
 
-Quinze fichiers. Couverture mesurée sur `services/` et `intelligence/`
-seulement — le cœur métier.
-
-| Fichier | Couvre |
+| Fichier | Ce qu'il verrouille |
 |---|---|
-| `test_normalize.py` | Nettoyage, masquage, repli des accents latins et arabes, arabizi |
-| `test_language_and_engine.py` | Identification de langue, derja, moteur de secours |
-| `test_rules_engine.py` | Les 27 règles, pondérations, seuils de priorité |
-| `test_triage_pipeline.py` | Enchaînement des six étapes, dédoublonnage, affectation |
-| `test_rules_api.py` | Lecture, édition, validation, simulateur |
-| `test_complaints.py` | Dépôt, cycle de vie, pagination par curseur |
-| `test_attachments.py` | Dépôt authentifié et anonyme, écriture atomique |
-| `test_auth.py` | Inscription, session, rafraîchissement, jetons de suivi |
-| `test_rbac.py` | Hiérarchie, gardes de routes, filtre de périmètre |
-| `test_security.py` | argon2, signature JWT, expiration |
-| `test_sla.py` | Calendrier ouvré, plafond de l'article 8, alertes, escalade |
-| `test_events.py` | Redis Streams, groupes de consommateurs, SSE |
-| `test_kb.py` | BM25, suggestions, comptage d'usage |
-| `test_analytics.py` | Agrégations et leur cloisonnement |
-| `conftest.py` | Fixtures : une boucle d'événements pour toute la session |
+| `test_auth.py` | Inscription, connexion, rotation du rafraîchissement, révocation |
+| `test_complaints.py` | Cycle de vie, dépôt anonyme, affectation, messages, résolution |
+| `test_rbac.py` | Le filtre de cloisonnement, rôle par rôle |
+| `test_security.py` | Jetons de suivi : falsification, portée, expiration |
+| `test_normalize.py` | Normalisation, arabizi, repli des accents |
+| `test_language_and_engine.py` | Détection de langue, sortie du moteur |
+| `test_triage_pipeline.py` | Chaîne complète, abstention, explicabilité |
+| `test_events.py` | Bus, abonnements, filtrage SSE par rôle, courriels |
 
-### Évaluer la catégorisation
+Les tests tournent contre un vrai MongoDB et un vrai Redis, pas des doublures :
+les bogues qui ont réellement coûté du temps sur ce projet — une course à
+l'insertion, une écriture perdue, un index texte en double — sont tous
+invisibles sans base réelle.
+
+Vérifier la catégorisation contre le jeu de référence :
 
 ```bash
-python -m scripts.evaluate
-```
-
-Mesure le lexique contre `scripts/gold.py`, écrit à la main et indépendamment du
-vocabulaire : **0,600 de macro-F1, 37 % d'abstention, 88 % des inclassables
-correctement renvoyés**.
-
-Il n'y a pas de jeu de contrôle : un lexique ne peut rien mémoriser, donc
-l'écart contrôle/réel qui domine tant de rapports n'existe pas ici.
-
----
-
-## 17. Déploiement
-
-k3s, espace de noms `reclamations`, TLS automatique.
-
-```bash
-export VPS_HOST=root@votre-serveur
-export VPS_KEY=~/.ssh/votre-cle
-export SMTP_SECRET_NS=... SMTP_SECRET_NAME=...
-
-sh deploy/deploy.sh              # build, import k3s, applique, vérifie
-sh deploy/deploy.sh --skip-build # manifestes seulement
-```
-
-| Service | Rôle |
-|---|---|
-| `api` | FastAPI et flux SSE |
-| `worker` | Analyse de fond, balayage SLA (5 min) |
-| `notifier` | Consommateur du flux, envoi des courriels |
-| `web` | React servi par nginx |
-| `mongo` · `redis` · `minio` | Données, files, pièces jointes |
-
-### L'image
-
-Build multi-étapes : le toolchain d'installation n'atteint jamais l'image
-finale. **469 Mo**, contre 800 visés. `PIP_ONLY_BINARY=:all:` fait échouer le
-build au grand jour si une dépendance cessait de publier une wheel, plutôt que
-de réintroduire un compilateur en silence. Le conteneur tourne sous un
-utilisateur non privilégié.
-
----
-
-## 18. Exploitation
-
-### Peuplement
-
-```bash
-python -m scripts.seed --force --count 60
-python -m scripts.seed --no-triage      # sans exécuter le pipeline
-```
-
-### Charge
-
-```bash
-python3 deploy/benchmark.py [requêtes] [concurrence]
-python3 deploy/benchmark.py 300 1 --keep   # conserve les lignes créées
-```
-
-> **Le benchmark écrit dans la vraie base.** Ses requêtes créent de *vraies*
-> réclamations : catégorisées, comptées, et intégrées à la déclaration destinée
-> au régulateur. Elles portent une adresse dédiée et sont supprimées par défaut
-> en fin de mesure. `--keep` existe, mais il faut le demander : le mode d'échec
-> est silencieux et ne se manifeste que comme un chiffre faux dans un rapport
-> réglementaire.
-
-### Vérification visuelle
-
-```bash
-node deploy/visual_check.mjs      # 11 captures + erreurs console
-```
-
-Playwright parcourt portail, RTL arabe, file, détail, simulateur, statistiques
-et mobile. Plusieurs des défauts les plus sérieux du projet n'ont été trouvés
-que par ce script — aucun outil statique ne les voyait.
-
-### Santé
-
-```bash
-curl https://votre-instance/health/ready
-```
-
-```json
-{"status":"ready",
- "checks":{"mongo":true,"redis":true},
- "sse_clients":0,
- "engine":{"active_engine":"lexicon",
-           "engine_version":"lexicon-v1",
-           "degraded":false}}
+docker compose -f docker-compose.test.yml run --rm tests python -m scripts.evaluate
 ```
 
 ---
 
-## 19. Problèmes connus
+## 14. Déploiement
 
-| Sujet | Détail |
-|---|---|
-| **Performance sous concurrence** | 58 ms p95 à un client (cible tenue), 196 ms à cinq, 501 ms à vingt. L'hôte partagé explique une part de l'écart ; le débit plafonne vers 60 req/s, ce qui désigne une contention interne. La cause exacte demande un profilage. |
-| **Généralisation nulle hors vocabulaire** | 37 % d'abstention sur le jeu de référence. Corrigeable par un administrateur qui élargit le lexique, pas par le système lui-même. |
-| **La déclaration ne sait pas dire « fraude »** | Aucune entrée correspondante dans la nomenclature du régulateur. |
-| **Marque officielle non fournie** | `Brandmark` charge `public/brand/uib.svg` dès qu'il est déposé. |
-| **Audit interne non outillé** | L'intervalle de trois ans de l'article 12 est défini mais aucun compte à rebours n'est affiché. |
-| **401 au rechargement** | Le jeton d'accès n'existe qu'en mémoire, par choix de sécurité ; le premier appel après rechargement échoue avant la reprise automatique. Sans effet fonctionnel, mais visible en console. |
-| **Console peu visible depuis le portail** | Un visiteur arrivant sur le portail ne devine pas qu'une console existe : l'entrée est un simple lien « Connexion » sans identifiants de démonstration. |
+L'environnement reproductible est `docker-compose.yml` — six conteneurs, aucun
+accès réseau au-delà du téléchargement des images de base.
+
+L'image serveur est construite en plusieurs étapes, n'installe que des roues
+précompilées (`PIP_ONLY_BINARY=:all:`) et tourne sous un utilisateur non
+privilégié. `deploy/k8s/rakib.yaml` décrit le même système sur k3s, derrière
+Traefik et cert-manager ; `deploy/deploy.sh` construit, importe, applique et
+vérifie.
+
+L'API est plafonnée à 2 vCPU / 4 Go dans les deux environnements : la contrainte
+matérielle annoncée est appliquée, pas seulement affirmée.
+
+---
+
+## 15. Limites connues
+
+Ce que le système ne fait pas, et qu'il ne faut pas lui prêter :
+
+- **Il s'abstient sur 55 % des cas du jeu de référence.** Le vocabulaire compte
+  133 termes ; une tournure inhabituelle ne déclenche rien. C'est assumé (§4),
+  pas contourné.
+- **Aucune notification n'est envoyée sans SMTP.** `SMTP_HOST` vide fait tourner
+  le système normalement, sans courriel — pratique en démonstration, à ne pas
+  confondre avec un envoi réussi.
+- **Pas de pièces jointes.** Un réclamant décrit son problème en texte.
+- **Pas de délais réglementaires ni d'échéancier.** Les statuts changent parce
+  qu'une personne les change.
+- **Pas de tableau de bord ni de statistiques.** La file, ses filtres et la
+  recherche plein texte sont les seuls outils de lecture.
+- **Pas de détection de doublons.** Deux réclamations identiques du même client
+  sont deux réclamations.
+- **401 au premier appel après un rechargement de page.** Le jeton d'accès n'est
+  gardé qu'en mémoire, par choix de sécurité ; seul le jeton de rafraîchissement
+  survit. La session se rétablit toute seule, mais le 401 reste visible dans la
+  console du navigateur.
+- **La marque officielle n'est pas versionnée.** `Brandmark` charge
+  `public/brand/uib.svg` dès que le fichier y est déposé, et se rabat sur un
+  monogramme sinon.
+- **Un seul exemplaire de chaque service.** Le dimensionnement n'a pas été
+  éprouvé au-delà de l'enveloppe 2 vCPU / 4 Go.
 
 ---
 
 ## Licence et mentions
 
-Projet de fin d'études. **Projet académique, sans affiliation officielle avec
-l'établissement dont l'identité visuelle est utilisée.** L'artwork de marque
-n'est pas versionné. Les identifiants de démonstration n'ont cours que sur
-l'environnement de démonstration.
+Projet de fin d'études. **Plateforme de démonstration, sans affiliation
+officielle avec l'établissement dont l'identité visuelle est utilisée.** Aucune
+réclamation déposée ici n'est traitée par une banque ; les noms, comptes et
+réclamations de démonstration sont fictifs, et les identifiants n'ont cours que
+sur cet environnement.

@@ -74,12 +74,11 @@ class TextFeatures:
     arabic_ratio: float
     latin_ratio: float
     arabizi_token_ratio: float
-    has_attachment: bool = False
 
 
 @dataclass(frozen=True)
 class NormalizedText:
-    #: Canonical form fed to the classifier and to dedup.
+    #: Canonical form fed to the classifier and to the department router.
     text: str
     #: Arabic-script transliteration of arabizi tokens; empty when there are none.
     transliterated: str
@@ -203,7 +202,7 @@ def transliterate_arabizi(text: str) -> str:
     return " ".join(output)
 
 
-def extract_features(raw: str, has_attachment: bool = False) -> TextFeatures:
+def extract_features(raw: str) -> TextFeatures:
     """Measured on the RAW text — uppercase ratio is meaningless after lowercasing."""
     letters = [ch for ch in raw if ch.isalpha()]
     arabic = len(ARABIC_CHAR_RE.findall(raw))
@@ -229,20 +228,17 @@ def extract_features(raw: str, has_attachment: bool = False) -> TextFeatures:
         arabic_ratio=arabic / len(letters) if letters else 0.0,
         latin_ratio=latin / len(letters) if letters else 0.0,
         arabizi_token_ratio=arabizi_tokens / len(word_tokens) if word_tokens else 0.0,
-        has_attachment=has_attachment,
     )
 
 
-def normalize(
-    subject: str = "", body: str = "", *, has_attachment: bool = False
-) -> NormalizedText:
+def normalize(subject: str = "", body: str = "") -> NormalizedText:
     """Full pipeline: subject + body in, canonical text and features out.
 
-    The subject is repeated once. That doubles its weight when terms are matched
-    for free, without a custom feature (spec 5.3).
+    The subject is repeated once. That doubles its weight when terms are matched,
+    for free, without a custom feature.
     """
     raw = f"{subject} {subject} {body}".strip() if subject else body.strip()
-    features = extract_features(raw, has_attachment=has_attachment)
+    features = extract_features(raw)
 
     text = strip_signatures(raw)
     text = unicodedata.normalize("NFKC", text)

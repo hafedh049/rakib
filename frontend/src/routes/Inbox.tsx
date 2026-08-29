@@ -21,21 +21,9 @@ import {
 import { useT } from '@/i18n'
 import { api } from '@/lib/api'
 import { formatRelative } from '@/lib/format'
+import { CATEGORIES } from '@/lib/types'
 import type { ComplaintListItem, Page } from '@/lib/types'
 
-const CATEGORIES = [
-  'FACTURATION',
-  'PAIEMENT_RECHARGE',
-  'RESEAU_MOBILE',
-  'INTERNET_FIXE',
-  'INTERVENTION_TECHNIQUE',
-  'OFFRES_ABONNEMENT',
-  'RESILIATION_PORTABILITE',
-  'SERVICE_CLIENT_AGENCE',
-  'EQUIPEMENT',
-  'ROAMING_INTERNATIONAL',
-  'APPLICATION_MOBILE',
-]
 
 const STATUSES = [
   'new',
@@ -56,9 +44,7 @@ export function Inbox() {
   const filters = {
     q: params.get('q') ?? '',
     status: params.get('status') ?? '',
-    priority: params.get('priority') ?? '',
     category: params.get('category') ?? '',
-    sla_breached: params.get('sla_breached') === '1',
     needs_human_triage: params.get('needs_human_triage') === '1',
     unassigned: params.get('unassigned') === '1',
   }
@@ -78,9 +64,7 @@ export function Inbox() {
       api.get<Page<ComplaintListItem>>('/complaints', {
         q: filters.q || undefined,
         status: filters.status || undefined,
-        priority: filters.priority || undefined,
         category: filters.category || undefined,
-        sla_breached: filters.sla_breached || undefined,
         needs_human_triage: filters.needs_human_triage || undefined,
         unassigned: filters.unassigned || undefined,
         cursor: pageParam || undefined,
@@ -134,19 +118,6 @@ export function Inbox() {
           </Select>
 
           <Select
-            aria-label={t('inbox.priority')}
-            value={filters.priority}
-            onChange={(event) => setFilter('priority', event.target.value)}
-          >
-            <option value="">{t('inbox.priority')} — {t('inbox.all')}</option>
-            {[1, 2, 3, 4].map((priority) => (
-              <option key={priority} value={priority}>
-                P{priority} · {t(`priority.${priority}` as never)}
-              </option>
-            ))}
-          </Select>
-
-          <Select
             aria-label={t('inbox.category')}
             value={filters.category}
             onChange={(event) => setFilter('category', event.target.value)}
@@ -161,11 +132,6 @@ export function Inbox() {
         </div>
 
         <div className="flex flex-wrap items-center gap-1">
-          <Toggle
-            checked={filters.sla_breached}
-            onChange={(value) => setFilter('sla_breached', value)}
-            label={t('inbox.onlyBreached')}
-          />
           <Toggle
             checked={filters.needs_human_triage}
             onChange={(value) => setFilter('needs_human_triage', value)}

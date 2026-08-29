@@ -20,21 +20,20 @@ in French, on a desktop, with a target on their handling time. Their job: unders
 complaint in seconds, know why it landed on their desk, answer, and move on. Density is a
 feature. Every extra click is paid a hundred times a day.
 
-**Supervisors and admins** — Watching SLA breaches, triage quality and the model itself. Their
-job: see what is about to breach, correct what the engine got wrong, and tune the rules that
-decide priority. They need to argue with the system, which means the system must show its work.
+**Supervisors and admins** — Watching the queues and the quality of the categorisation. Their
+job: hand a complaint to the right agent, and correct what the engine got wrong. They need to
+argue with the system, which means the system must show its work.
 
 ## Product Purpose
 
-Rakib (رقيب) receives complaints, classifies and prioritises them, routes them to the right
-team, flags duplicates, and drafts replies — entirely on local hardware, with no external
-inference service.
+Rakib (رقيب) receives complaints, suggests a category, routes them to the right team, and
+gives staff one place to answer the claimant — entirely on local hardware, with no external
+service and no trained model.
 
-Success is measured three ways: a complaint is triaged, routed and visible in an agent's queue
-in under a second; an agent can see *why* it was prioritised, in tokens they can read; and a
-supervisor who disagrees can correct it in one click, with that correction becoming training
-data. The system is not trying to be right unsupervised — it is trying to be fast, legible,
-and correctable.
+Success is measured three ways: a complaint is categorised, routed and visible in a queue in
+under a second; an agent can see *why*, in terms they can read; and anyone who disagrees can
+correct it in one click. The system is not trying to be right unsupervised — it is trying to
+be fast, legible, and correctable.
 
 ## Brand Personality
 
@@ -50,32 +49,31 @@ marks, no "Oops!", no apologising for the customer's problem in the UI chrome.
 
 ## Anti-references
 
-- **The three Tunisian operators' identities.** Not Ooredoo red, not Orange orange, not
-  The mark is the bank's own; the interface around it is deliberately restrained so the
-  red reads as identity, never as alarm.
+- **Telecom-operator identity.** An earlier revision of this project served a telecom
+  operator, and none of that palette survives. The mark is the bank's own; the interface
+  around it is deliberately restrained so the red reads as identity, never as alarm.
 - **shadcn/ui straight out of the box.** Slate-and-blue defaults, uniform card grids, the same
   rounded rectangle for everything. Competent and completely forgettable.
 - **The dashboard-hero template.** Four big gradient stat tiles above the fold with no
   supporting context. If a number is on screen it must be actionable.
 - **Government-portal brutalism.** Tunisian public-sector web has a real aesthetic — dense
   tables, tiny type, no states. Familiar is not an excuse for illegible.
-- **AI mysticism.** No sparkle icons, no "AI-powered" badges, no glow. The intelligence here is
-  TF-IDF and weighted rules; the UI should describe it as plainly as that.
+- **AI mysticism.** No sparkle icons, no "AI-powered" badges, no glow. There is no AI here at
+  all: it is a weighted word list, and the UI should describe it as plainly as that.
 
 ## Design Principles
 
-1. **Show the work.** Every automated decision carries its evidence: which rules fired, on
-   which tokens, with what weight, from which model version. An unexplained priority badge is
-   a bug.
+1. **Show the work.** Every automated decision carries its evidence: which terms matched, with
+   what weight, and which engine version decided. An unexplained category is a bug.
 2. **Two registers, one system.** The public portal is calm and generous because the person
    using it is stressed and infrequent. The console is dense and keyboard-first because the
    person using it lives there. Same tokens, deliberately different feel.
 3. **Uncertainty is a designed state, not an error.** `needs_human_triage` gets a real
    treatment — amber, named reason, one-click correction — because it is the system working
    correctly, not failing.
-4. **Arabic is not an afterthought.** RTL, Arabic typography and Arabic drafts are built from
-   the first component, not retrofitted. A platform for Tunisia that renders Arabic badly has
-   failed at its stated purpose.
+4. **Arabic is not an afterthought.** RTL and Arabic typography are built into the first
+   component, not retrofitted. A platform for Tunisia that renders Arabic badly has failed at
+   its stated purpose.
 5. **Density where it is earned.** The console shows a lot at once because agents need it. The
    portal shows one thing at a time because claimants do not.
 
@@ -86,8 +84,8 @@ marks, no "Oops!", no apologising for the customer's problem in the UI chrome.
 - **Full RTL** on the claimant portal: logical properties throughout, `dir` on the document,
   mirrored chevrons, Arabic face bundled and self-hosted (no CDN — the system must run with no
   internet).
-- **Never colour alone.** Priority, SLA state and triage state each carry a shape, a label or
-  an icon in addition to hue. Amber SLA warnings must be distinguishable without colour vision.
+- **Never colour alone.** Status and triage state each carry a label in addition to hue. The
+  amber "à trier" state must be distinguishable without colour vision.
 - **Keyboard-complete console.** Every agent action reachable without a mouse; visible focus
   rings that survive both themes.
 - **`prefers-reduced-motion`** honoured on every transition, with a crossfade or instant

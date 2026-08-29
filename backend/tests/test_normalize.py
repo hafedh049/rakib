@@ -1,6 +1,6 @@
 """Normalisation is pure and load-bearing, so it is tested hard.
 
-Everything downstream — classifier features, dedup similarity, rule matching —
+Everything downstream — the classifier, the department router, search —
 reads the output of this module.
 """
 
@@ -189,10 +189,6 @@ def test_pipeline_is_idempotent_on_already_clean_text():
     once = normalize(body="mes agios sont trop eleves ce mois ci").text
     twice = normalize(body=once).text
     assert once == twice
-
-
-def test_attachment_flag_reaches_the_features():
-    assert normalize(body="voir piece jointe", has_attachment=True).features.has_attachment
 
 
 # ------------------------------------------------------------- accent folding

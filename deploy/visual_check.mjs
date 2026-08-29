@@ -100,32 +100,19 @@ const browser = await chromium.launch()
     problems.push('[console] inbox had no rows to open')
   }
 
-  await page.goto(`${BASE}/admin/rules`, { waitUntil: 'domcontentloaded' })
-  await page.waitForTimeout(800)
-  const run = page.getByRole('button', { name: /^Analyser$/ })
-  if (await run.count()) {
-    await run.click()
-    await page.waitForTimeout(1800)
-  }
-  await shoot(page, '06-rule-simulator')
+  await page.goto(`${BASE}/admin/departments`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(1000)
+  await shoot(page, '06-admin-departments')
 
-  await page.goto(`${BASE}/analytics`, { waitUntil: 'domcontentloaded' })
-  await page.waitForTimeout(2000)
-  await shoot(page, '07-analytics')
-
-  await page.goto(`${BASE}/admin/ml`, { waitUntil: 'domcontentloaded' })
-  await page.waitForTimeout(1500)
-  await shoot(page, '08-model-health')
-
-  await page.goto(`${BASE}/supervision`, { waitUntil: 'domcontentloaded' })
-  await page.waitForTimeout(1200)
-  await shoot(page, '09-supervision')
+  await page.goto(`${BASE}/admin/users`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(1000)
+  await shoot(page, '07-admin-users')
 
   // Light theme, since the console defaults to dark.
   await page.evaluate(() => localStorage.setItem('rakib.theme', 'light'))
   await page.goto(`${BASE}/inbox`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(1200)
-  await shoot(page, '10-inbox-light')
+  await shoot(page, '08-inbox-light')
 
   await context.close()
 }
@@ -140,7 +127,7 @@ const browser = await chromium.launch()
   const page = await context.newPage()
   watch(page, 'mobile')
   await page.goto(`${BASE}/portal`, { waitUntil: 'domcontentloaded' })
-  await shoot(page, '11-portal-mobile')
+  await shoot(page, '09-portal-mobile')
 
   // Horizontal overflow is the classic responsive failure.
   const overflow = await page.evaluate(

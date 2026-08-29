@@ -1,11 +1,9 @@
 # Multi-stage: the toolchain that installs the dependencies never reaches the
 # runtime image.
 #
-# The single-stage version carried build-essential and g++ because scikit-learn
-# and fastText had to be compiled. Neither is a dependency any more, and every
-# remaining package ships a manylinux wheel, so nothing needs a compiler at all.
-# The builder stage exists only to keep pip's working files out of the final
-# layers.
+# Every remaining dependency ships a manylinux wheel, so the runtime needs no
+# compiler at all. The builder stage exists only to keep pip's working files out
+# of the final layers.
 
 FROM python:3.12-slim AS builder
 
@@ -48,8 +46,8 @@ COPY app ./app
 # to evaluate the lexicon, only to apply it.
 COPY scripts/__init__.py scripts/seed.py scripts/seed_data.py ./scripts/
 
-# Run as a non-root user. The image handles complaint text and attachments from
-# the public, so a container escape should not start as root.
+# Run as a non-root user. The image handles complaint text submitted by the
+# public, so a container escape should not start as root.
 RUN useradd --system --uid 10001 --no-create-home rakib \
     && chown -R rakib:rakib /app
 USER rakib

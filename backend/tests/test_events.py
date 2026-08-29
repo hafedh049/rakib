@@ -78,7 +78,7 @@ async def test_publish_never_raises_when_redis_is_down(monkeypatch):
 
 
 async def test_event_survives_the_stream_roundtrip():
-    original = Event(name=EventName.SLA_BREACHED, payload={"ref": "REC-2026-00042"})
+    original = Event(name=EventName.COMPLAINT_TRIAGED, payload={"ref": "REC-2026-00042"})
     restored = Event.from_stream(original.to_stream())
     assert restored.name == original.name
     assert restored.payload == original.payload
@@ -121,8 +121,8 @@ async def test_one_broken_channel_does_not_stop_the_others(route_to):
 
 
 async def test_dispatch_of_an_unsubscribed_event_is_a_no_op(route_to):
-    route_to(EventName.MODEL_PROMOTED, [])
-    assert await dispatch(EventName.MODEL_PROMOTED, {}) == 0
+    route_to(EventName.TRIAGE_CORRECTED, [])
+    assert await dispatch(EventName.TRIAGE_CORRECTED, {}) == 0
 
 
 def test_every_event_has_a_subscription_entry():
@@ -144,23 +144,22 @@ def test_broker_delivers_to_a_permitted_subscriber():
 
 
 def test_broker_withholds_supervisor_events_from_agents():
-    """An agent must not see SLA breaches or model promotions."""
+    """A correction is a supervision signal — an agent has no business seeing it."""
     broker = SSEBroker()
     agent = broker.subscribe(role=Role.AGENT)
     supervisor = broker.subscribe(role=Role.SUPERVISOR)
 
-    broker.publish(Event(name=EventName.SLA_BREACHED, payload={}))
+    broker.publish(Event(name=EventName.TRIAGE_CORRECTED, payload={}))
     assert agent.queue.qsize() == 0
     assert supervisor.queue.qsize() == 1
 
 
-def test_broker_withholds_admin_events_from_supervisors():
+def test_broker_passes_supervisor_events_up_to_admins():
+    """The role gate is a floor, not an exact match: an admin outranks it."""
     broker = SSEBroker()
-    supervisor = broker.subscribe(role=Role.SUPERVISOR)
     admin = broker.subscribe(role=Role.ADMIN)
 
-    broker.publish(Event(name=EventName.MODEL_PROMOTED, payload={}))
-    assert supervisor.queue.qsize() == 0
+    broker.publish(Event(name=EventName.TRIAGE_CORRECTED, payload={}))
     assert admin.queue.qsize() == 1
 
 
@@ -183,7 +182,7 @@ def test_unsubscribe_removes_the_client():
 @pytest.mark.parametrize(
     "event",
     [EventName.COMPLAINT_CREATED, EventName.COMPLAINT_REPLIED,
-     EventName.COMPLAINT_RESOLVED, EventName.SLA_BREACHED, EventName.ESCALATED],
+     EventName.COMPLAINT_RESOLVED, EventName.COMPLAINT_ASSIGNED],
 )
 def test_templates_render_and_mention_the_ref(event):
     rendered = render(event, {"ref": "REC-2026-00412", "claimant_name": "Fatma"})
@@ -211,7 +210,7 @@ def test_claimant_events_go_to_the_claimant():
 
 def test_staff_events_go_to_staff():
     recipients = EmailNotifier._recipients(
-        EventName.SLA_BREACHED,
+        EventName.COMPLAINT_ASSIGNED,
         {"claimant_email": "fatma@example.tn", "agent_email": "agent@rakib.tn"},
     )
     assert recipients == ["agent@rakib.tn"]

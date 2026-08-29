@@ -23,28 +23,7 @@ import { useT } from '@/i18n'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { formatDateTime, formatRelative } from '@/lib/format'
-import type { User,
-  Complaint,
-  Status,
-  SuggestionResponse,
-  TimelineEntry,
-} from '@/lib/types'
-
-interface AnalysisResponse {
-  ref: string
-  triage_state: string
-  analysis: Complaint['analysis']
-  related: { id: string; ref: string; subject: string }[]
-  traces: {
-    engine: string
-    engine_version: string
-    outcome: string
-    error: string | null
-    total_latency_ms: number
-    created_at: string
-    stages: { name: string; latency_ms: number; output_summary: Record<string, unknown> }[]
-  }[]
-}
+import type { User, Complaint, Status, TimelineEntry } from '@/lib/types'
 
 const STATUSES: Status[] = [
   'new',
@@ -68,12 +47,6 @@ export function ComplaintDetail() {
     queryKey: ['complaint', id],
     queryFn: () => api.get<Complaint>(`/complaints/${id}`),
   })
-  const analysis = useQuery({
-    queryKey: ['complaint', id, 'analysis'],
-    queryFn: () => api.get<AnalysisResponse>(`/complaints/${id}/analysis`),
-    enabled: Boolean(id),
-  })
-
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ['complaint', id] })
     void queryClient.invalidateQueries({ queryKey: ['complaints'] })
@@ -265,28 +238,6 @@ export function ComplaintDetail() {
               can('agent') ? (category) => correct.mutate(category) : undefined
             }
           />
-
-          {analysis.data?.traces?.[0] && (
-            <Panel title={t('analysis.stages')}>
-              <ul className="flex flex-col gap-1.5">
-                {analysis.data.traces[0].stages.map((stage) => (
-                  <li
-                    key={stage.name}
-                    className="flex items-center justify-between gap-3 text-2xs"
-                  >
-                    <span className="text-ink-muted">{stage.name}</span>
-                    <span className="tabular">{stage.latency_ms} ms</span>
-                  </li>
-                ))}
-                <li className="mt-1 flex items-center justify-between gap-3 border-t border-line pt-1.5 text-2xs font-medium">
-                  <span>{t('analysis.latency')}</span>
-                  <span className="tabular">
-                    {analysis.data.traces[0].total_latency_ms} ms
-                  </span>
-                </li>
-              </ul>
-            </Panel>
-          )}
         </aside>
       </div>
     </div>
@@ -304,28 +255,12 @@ function Composer({
   const { t } = useT()
   const [body, setBody] = useState('')
   const [internal, setInternal] = useState(false)
-  const [usedArticle, setUsedArticle] = useState<string | null>(null)
-
-  const suggestions = useMutation({
-    mutationFn: () =>
-      api.get<SuggestionResponse>(`/complaints/${complaintId}/suggest`),
-  })
 
   const send = useMutation({
-    mutationFn: async () => {
-      await api.post(`/complaints/${complaintId}/messages`, { body, internal })
-      // Usage is only meaningful once the reply is actually sent.
-      if (usedArticle && !internal) {
-        await api.post(`/complaints/${complaintId}/suggest/used`, {
-          article_id: usedArticle,
-          outcome: 'edited',
-        })
-      }
-    },
+    mutationFn: () =>
+      api.post(`/complaints/${complaintId}/messages`, { body, internal }),
     onSuccess: () => {
       setBody('')
-      setUsedArticle(null)
-      suggestions.reset()
       onSent()
     },
   })
@@ -372,17 +307,6 @@ function Composer({
 
         {!internal && (
           <Button
-            onClick={() => suggestions.mutate()}
-            loading={suggestions.isPending}
-          >
-            {suggestions.isPending
-              ? t('complaint.suggesting')
-              : t('complaint.suggest')}
-          </Button>
-        )}
-
-        {!internal && (
-          <Button
             variant="secondary"
             className="ms-auto"
             disabled={!body.trim()}
@@ -393,45 +317,6 @@ function Composer({
           </Button>
         )}
       </div>
-
-      {suggestions.data && (
-        <div className="flex flex-col gap-2 border-t border-line pt-3">
-          <p className="text-2xs tracking-wide text-ink-muted uppercase">
-            {t('complaint.suggestions')}
-          </p>
-
-          {suggestions.data.missing_slots.length > 0 && (
-            <p className="text-2xs text-amber">
-              {t('complaint.missingSlots')} :{' '}
-              {suggestions.data.missing_slots.join(', ')}
-            </p>
-          )}
-
-          {suggestions.data.drafts.map((draft) => (
-            <article
-              key={draft.source_article_id}
-              className="rounded-[var(--radius-control)] border border-line p-3"
-            >
-              <p className="mb-2 max-h-40 overflow-y-auto text-xs whitespace-pre-wrap text-ink-muted">
-                {draft.text}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    setBody(draft.text)
-                    setUsedArticle(draft.source_article_id)
-                  }}
-                >
-                  {t('complaint.useDraft')}
-                </Button>
-                <span className="text-2xs tabular text-ink-muted">
-                  {t('rules.resultScore')} {draft.score.toFixed(2)}
-                </span>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
     </Panel>
   )
 }

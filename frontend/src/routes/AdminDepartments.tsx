@@ -1,28 +1,24 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
-import { Badge, Input, Panel, Select, Skeleton } from '@/components/ui'
+import { Badge, Panel, Skeleton } from '@/components/ui'
 import { useT } from '@/i18n'
 import { api } from '@/lib/api'
-import type { Department, User } from '@/lib/types'
+import type { Department } from '@/lib/types'
 
+/**
+ * The routing catalogue, read-only.
+ *
+ * A department owns a set of categories and a set of keywords: the first routes
+ * a complaint the classifier could name, the second catches the ones it could
+ * not. Both are seeded from `domain/taxonomy.py`, which is what makes the whole
+ * routing table reviewable in one file rather than spread across a database.
+ */
 export function AdminDepartments() {
   const { t } = useT()
-  const queryClient = useQueryClient()
 
   const departments = useQuery({
     queryKey: ['departments'],
     queryFn: () => api.get<Department[]>('/departments'),
-  })
-  const supervisors = useQuery({
-    queryKey: ['users', 'supervisors'],
-    queryFn: () => api.get<User[]>('/users', { role: 'supervisor' }),
-  })
-
-  const update = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: Partial<Department> }) =>
-      api.patch(`/departments/${id}`, patch),
-    onSuccess: () =>
-      void queryClient.invalidateQueries({ queryKey: ['departments'] }),
   })
 
   if (departments.isLoading) return <Skeleton className="m-5 h-96" />
@@ -32,8 +28,9 @@ export function AdminDepartments() {
       <header className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold">{t('nav.departments')}</h1>
         <p className="max-w-[70ch] text-sm text-ink-muted">
-          Les mots-cles servent au routage quand aucun modele n est charge. Le
-          contact d escalade recoit les alertes de depassement de delai.
+          Chaque service couvre des catégories et des mots-clés. La catégorie
+          route la réclamation quand elle a pu être déterminée ; les mots-clés
+          prennent le relais quand elle ne l’a pas été.
         </p>
       </header>
 
@@ -58,51 +55,9 @@ export function AdminDepartments() {
               ))}
             </div>
 
-            <label className="flex flex-col gap-1 text-2xs text-ink-muted">
-              Contact d escalade
-              <Select
-                value={department.escalation_to ?? ''}
-                onChange={(event) =>
-                  update.mutate({
-                    id: department.id,
-                    patch: {
-                      escalation_to: event.target.value || null,
-                    } as Partial<Department>,
-                  })
-                }
-              >
-                <option value="">{t('common.none')}</option>
-                {supervisors.data?.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.full_name}
-                  </option>
-                ))}
-              </Select>
-            </label>
-
-            <label className="flex flex-col gap-1 text-2xs text-ink-muted">
-              Delai specifique (heures) — vide = delai par priorite
-              <Input
-                type="number"
-                min={1}
-                className="h-9"
-                defaultValue={department.default_sla_hours ?? ''}
-                onBlur={(event) => {
-                  const raw = event.target.value
-                  const hours = raw ? Number(raw) : null
-                  if (hours !== department.default_sla_hours) {
-                    update.mutate({
-                      id: department.id,
-                      patch: { default_sla_hours: hours } as Partial<Department>,
-                    })
-                  }
-                }}
-              />
-            </label>
-
             <details className="text-2xs text-ink-muted">
               <summary className="cursor-pointer select-none">
-                {department.keywords.length} mots-cles de routage
+                {department.keywords.length} mots-clés de routage
               </summary>
               <p className="mt-2 flex flex-wrap gap-1">
                 {department.keywords.map((keyword) => (

@@ -68,7 +68,7 @@ log "rolling out"
 kubectl -n "$NS" rollout restart deploy/api deploy/worker deploy/notifier deploy/web \
   >/dev/null 2>&1 || true
 
-for deployment in mongo redis minio api worker notifier web; do
+for deployment in mongo redis api worker notifier web; do
   kubectl -n "$NS" rollout status "deploy/$deployment" --timeout=180s
 done
 

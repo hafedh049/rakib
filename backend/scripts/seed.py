@@ -89,12 +89,12 @@ async def main(force: bool = False, count: int = 60, triage: bool = True) -> Non
     now = datetime.now(UTC)
     for index in range(count):
         category, subject, body = COMPLAINTS[index % len(COMPLAINTS)]
-        name, email, phone, is_vip = CLAIMANTS[index % len(CLAIMANTS)][:4]
+        name, email, phone, is_vip = CLAIMANTS[index % len(CLAIMANTS)]
         status = STATUS_MIX[index % len(STATUS_MIX)]
 
         # Age follows the status. Spreading every complaint evenly over 30 days
-        # left the whole board breached and red, which demonstrates nothing:
-        # open work is recent, closed work is older.
+        # made the board read as if nothing ever moved: open work is recent,
+        # closed work is older.
         if status in (Status.RESOLVED, Status.CLOSED, Status.REJECTED):
             age_hours = random.randint(48, 30 * 24)
         elif status in (Status.NEW, Status.TRIAGED):
@@ -121,8 +121,8 @@ async def main(force: bool = False, count: int = 60, triage: bool = True) -> Non
     print(f"complaints: {count} created")
 
     # Run the pipeline over the seeded rows. Without this the demo opens on 60
-    # complaints that all say "analysis pending": no categories, no priorities,
-    # no SLA spread and empty analytics.
+    # complaints that all say "analyse en attente" — no categories, no routing,
+    # nothing to filter on.
     if triage:
         from app.services import triage_service
 

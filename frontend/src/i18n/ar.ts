@@ -25,7 +25,7 @@ export const ar: Partial<Record<TranslationKey, string>> = {
   'portal.phone': 'رقم الهاتف',
   'portal.contactHint':
     'يكفي بريد إلكتروني أو رقم هاتف. إذا لم يكن لديك بريد، احتفظ برابط المتابعة الذي سيظهر بعد الإرسال.',
-  'portal.externalId': 'رقم الخط أو المرجع',
+  'portal.externalId': 'رقم الحساب أو المرجع',
   'portal.optional': 'اختياري',
   'portal.submit': 'إرسال الشكوى',
   'portal.submitting': 'جاري الإرسال...',
@@ -38,41 +38,22 @@ export const ar: Partial<Record<TranslationKey, string>> = {
     'هذا الرابط هو الوسيلة الوحيدة لمتابعة ملفكم دون إنشاء حساب. أضيفوه إلى المفضلة.',
   'portal.copyLink': 'نسخ الرابط',
   'portal.copied': 'تم نسخ الرابط',
-  'portal.emailSent': 'تم إرسال الرابط أيضا إلى بريدكم الإلكتروني.',
   'portal.openTracking': 'فتح المتابعة',
   'portal.newComplaint': 'تقديم شكوى أخرى',
-  'portal.trackTitle': 'متابعة شكواكم',
   'portal.trackInvalid': 'رابط المتابعة غير صالح أو منتهي الصلاحية',
   'portal.trackInvalidHelp':
     'تأكدوا من الرابط المرسل إليكم. إذا استمر المشكل، اتصلوا بخدمة الحرفاء مع ذكر المرجع.',
   'portal.exchanges': 'المراسلات',
   'portal.noExchanges': 'لا توجد رسائل حاليا.',
   'portal.noExchangesHelp': 'سيرد عليكم أحد المستشارين هنا بمجرد دراسة ملفكم.',
-  'portal.rate': 'تقييم المعالجة',
-  'portal.rateLead': 'تمت معالجة شكواكم. كيف كانت التجربة؟',
-  'portal.rateComment': 'ملاحظة',
-  'portal.rateSubmit': 'إرسال التقييم',
-  'portal.rateThanks': 'شكرا على ملاحظاتكم.',
   'portal.deposited': 'قُدّمت في',
-  'portal.dueBy': 'الرد متوقع قبل',
   'portal.myComplaints': 'شكاواي',
   'portal.myComplaintsLead': 'كل الشكاوى المقدمة من هذا الحساب.',
   'portal.noComplaints': 'لا توجد شكاوى حاليا',
   'portal.noComplaintsHelp':
     'الشكاوى التي تقدمونها وأنتم متصلون تظهر هنا. أما المقدمة دون حساب فتبقى متاحة عبر رابط المتابعة.',
   'portal.newOne': 'تقديم شكوى',
-  'portal.account': 'حسابي',
   'portal.backToList': 'العودة إلى شكاواي',
-  'portal.attachments': 'المرفقات',
-  'portal.attachmentsHint':
-    'صورة الفاتورة، لقطة شاشة، وثيقة إثبات. JPG أو PNG أو PDF — 10 ميغا كحد أقصى لكل ملف.',
-  'portal.addFiles': 'إضافة ملفات',
-  'portal.uploading': 'جاري إرسال المرفقات...',
-  'portal.removeFile': 'حذف',
-  'portal.attachmentTooBig': 'الملف كبير جدا (10 ميغا كحد أقصى)',
-  'portal.attachmentBadType': 'نوع الملف غير مقبول',
-  'portal.attachmentsFailed':
-    'تم تسجيل الشكوى، لكن تعذّر إرسال بعض المرفقات.',
   'auth.signOut': 'تسجيل الخروج',
 
   'auth.signIn': 'تسجيل الدخول',
@@ -87,10 +68,8 @@ export const ar: Partial<Record<TranslationKey, string>> = {
   'common.save': 'حفظ',
   'common.cancel': 'إلغاء',
   'common.close': 'إغلاق',
-  'common.loading': 'جاري التحميل',
   'common.error': 'حدث خطأ',
   'common.retry': 'إعادة المحاولة',
-  'common.required': 'هذا الحقل إجباري',
 
   'complaint.reassign': 'إعادة الإسناد إلى عون',
   'complaint.unassigned': 'غير مسندة',
@@ -129,5 +108,6 @@ export const ar: Partial<Record<TranslationKey, string>> = {
   'channel.phone': 'الهاتف',
   'channel.agence': 'الوكالة',
   'channel.email': 'البريد',
+  'channel.courrier': 'البريد العادي',
 
 }

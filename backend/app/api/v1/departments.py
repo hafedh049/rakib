@@ -19,8 +19,6 @@ class DepartmentIn(BaseModel):
     description: str = ""
     keywords: list[str] = Field(default_factory=list)
     categories: list[str] = Field(default_factory=list)
-    default_sla_hours: int | None = Field(default=None, ge=1, le=8760)
-    escalation_to: PydanticObjectId | None = None
     active: bool = True
 
 
@@ -29,8 +27,6 @@ class DepartmentPatch(BaseModel):
     description: str | None = None
     keywords: list[str] | None = None
     categories: list[str] | None = None
-    default_sla_hours: int | None = Field(default=None, ge=1, le=8760)
-    escalation_to: PydanticObjectId | None = None
     active: bool | None = None
 
 
@@ -43,8 +39,6 @@ class DepartmentOut(BaseModel):
     description: str
     keywords: list[str]
     categories: list[str]
-    default_sla_hours: int | None
-    escalation_to: PydanticObjectId | None
     active: bool
 
 

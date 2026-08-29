@@ -76,16 +76,6 @@ class ResolveRequest(BaseModel):
     notify_claimant: bool = True
 
 
-class SuggestionUsage(BaseModel):
-    article_id: str
-    outcome: Literal["verbatim", "edited", "discarded"]
-
-
-class SatisfactionIn(BaseModel):
-    score: int = Field(ge=1, le=5)
-    comment: str | None = Field(default=None, max_length=2000)
-
-
 class ComplaintListItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -98,9 +88,6 @@ class ComplaintListItem(BaseModel):
     claimant: Claimant
     analysis: Analysis
     assignment: Assignment | None = None
-    sla_due_at: datetime | None = None
-    sla_breached: bool = False
-    sla_warned: bool = False
     created_at: datetime
     updated_at: datetime
 
@@ -138,8 +125,8 @@ class PublicMessage(BaseModel):
 class ComplaintPublicOut(BaseModel):
     """What a token-bearing claimant sees. Deliberately narrow.
 
-    No internal notes, no rule hits, no agent identities, no model internals —
-    a tracking link is not a window into the operator's triage decisions.
+    No internal notes, no agent identities, no triage internals — a tracking
+    link is not a window into the bank's own handling of the file.
     """
 
     ref: str
@@ -150,6 +137,4 @@ class ComplaintPublicOut(BaseModel):
     department: str | None = None
     created_at: datetime
     updated_at: datetime
-    sla_due_at: datetime | None = None
     messages: list[PublicMessage]
-    satisfaction_submitted: bool = False

@@ -22,10 +22,10 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        // Recharts is only needed on /analytics; splitting it keeps the
-        // complaint-submission path small on a poor mobile connection.
+        // The portal is the page a claimant reaches on a phone, often on a poor
+        // connection. Pinning the framework into its own chunk keeps it cached
+        // across visits instead of being re-fetched with every app change.
         manualChunks: {
-          charts: ['recharts'],
           vendor: ['react', 'react-dom', 'react-router-dom'],
         },
       },

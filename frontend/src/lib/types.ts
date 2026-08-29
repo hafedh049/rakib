@@ -81,6 +81,32 @@ export interface TimelineEntry {
   meta: Record<string, unknown>
 }
 
+/**
+ * The bank's categories, in the order they are declared in
+ * `backend/app/domain/taxonomy.py`. Kept here rather than fetched: it is a
+ * closed set that changes only with a deployment, and a filter that has to wait
+ * on a request is a filter that flickers.
+ *
+ * The previous revision of this file still listed the telecom categories the
+ * project started with, so the console offered eleven filters that matched
+ * nothing. If this list and the backend enum ever disagree again, the symptom
+ * is the same: a filter that silently returns an empty page.
+ */
+export const CATEGORIES = [
+  'CARTE_BANCAIRE',
+  'DAB_GAB',
+  'PAIEMENT_TPE_ECOMMERCE',
+  'VIREMENT_PRELEVEMENT',
+  'CHEQUE_EFFET',
+  'COMPTE_GESTION',
+  'CREDIT_FINANCEMENT',
+  'FRAIS_COMMISSIONS',
+  'BANQUE_DIGITALE',
+  'OPERATIONS_INTERNATIONALES',
+  'FRAUDE_OPERATION_NON_AUTORISEE',
+  'AGENCE_QUALITE_SERVICE',
+] as const
+
 export interface ComplaintListItem {
   id: string
   ref: string
@@ -91,9 +117,6 @@ export interface ComplaintListItem {
   claimant: Claimant
   analysis: Analysis
   assignment: Assignment | null
-  sla_due_at: string | null
-  sla_breached: boolean
-  sla_warned: boolean
   created_at: string
   updated_at: string
 }
@@ -130,23 +153,7 @@ export interface Department {
   description: string
   keywords: string[]
   categories: string[]
-  default_sla_hours: number | null
-  escalation_to: string | null
   active: boolean
-}
-
-export interface Draft {
-  text: string
-  source_article_id: string
-  score: number
-  filled_slots: Record<string, string>
-}
-
-export interface SuggestionResponse {
-  language: string
-  drafts: Draft[]
-  cited_articles: string[]
-  missing_slots: string[]
 }
 
 export interface PublicComplaint {
@@ -158,7 +165,6 @@ export interface PublicComplaint {
   department: string | null
   created_at: string
   updated_at: string
-  sla_due_at: string | null
   messages: {
     at: string
     author_type: 'agent' | 'claimant' | 'system'

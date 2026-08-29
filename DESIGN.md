@@ -59,11 +59,11 @@ light, 4.8:1 in dark. Placeholders use `--ink-muted`, not a lighter step.
 
 ### Semantic — rationed on purpose
 
-- `--amber` `oklch(0.76 0.14 75)` — **reserved.** SLA warning and `needs_human_triage`. It
-  appears nowhere else, so an amber pixel always means "a human needs to look at this".
-- `--danger` `oklch(0.44 0.16 25)` light / `oklch(0.66 0.17 25)` dark — SLA breach, P1,
+- `--amber` `oklch(0.76 0.14 75)` — **reserved** for `needs_human_triage`. It appears nowhere
+  else, so an amber pixel always means "a human needs to look at this".
+- `--danger` `oklch(0.44 0.16 25)` light / `oklch(0.66 0.17 25)` dark — rejection and
   destructive actions. Oxblood, deliberately not the brand red.
-- `--success` `oklch(0.50 0.12 155)` — resolved, within deadline.
+- `--success` `oklch(0.50 0.12 155)` — resolved and closed.
 - `--info` = `--primary`.
 
 ### Arabic type
@@ -91,13 +91,6 @@ without that line a visitor arriving from a search engine cannot tell it from th
 official form. It is not dismissible on purpose — a notice you can close is a notice
 nobody reads.
 
-### Priority is an intensity ramp, not a rainbow
-
-P1 → P4 walks one hue from saturated red to neutral: `danger` → `danger` at 55% → `ink-muted`
-→ `ink-muted` at 60%. Four arbitrary hues would collide with the semantic set and fail for
-colour-blind users. Every badge also carries its literal label (`P1 CRITIQUE`), so hue is
-reinforcement, never the signal.
-
 ## Typography
 
 **One family per script.** No display/body pairing — this is product UI.
@@ -120,8 +113,8 @@ tabular-nums`) on every number that appears in a column: refs, amounts, counts, 
 ## Layout
 
 - Portal: single column, `max-width: 34rem` for forms, `65ch` for prose.
-- Console: fixed 15rem sidebar, fluid content, optional 22rem analysis rail. Collapses to a
-  drawer under 1024px; the rail moves below the thread under 1280px.
+- Console: fixed 15rem sidebar, fluid content, 22rem analysis rail. Collapses to a drawer
+  under 1024px; the rail moves below the thread under 1280px.
 - Spacing scale `4 · 8 · 12 · 16 · 24 · 32 · 48 · 64`. Rhythm varies by register: the portal
   uses 24–48, the console 8–16.
 - Radii: `6px` controls, `10px` panels, `999px` pills only.
@@ -137,12 +130,11 @@ loading + error where it applies.
 
 - **Buttons** — one shape. Primary (filled teal), secondary (outlined), ghost, danger. 32px
   console, 40px portal.
-- **Badges** — small caps off; sentence-case labels. Priority, status, SLA and language each
-  have a fixed vocabulary.
-- **AnalysisPanel** — confidence bar, clickable top-3 alternatives, rule hits as rows of
-  `label · matched tokens · weight`, engine + model version in the footer. Amber banner when
-  `needs_human_triage`, naming the reason.
-- **SLABadge** — green / amber >80% / red breached, with a live countdown and a text state.
+- **Badges** — small caps off; sentence-case labels. Status, channel and language each have a
+  fixed vocabulary.
+- **AnalysisPanel** — evidence bar, the terms that actually fired, clickable top-3
+  alternatives, engine and engine version in the footer. Amber line naming the reason when the
+  engine abstained.
 - **Skeletons** for loading, never a centred spinner inside content.
 - **Empty states teach**: what this queue is, why it is empty, what to do next.
 

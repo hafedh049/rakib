@@ -39,7 +39,6 @@ async def ready(response: Response) -> dict[str, Any]:
         "checks": {**checks, **optional},
         "sse_clients": broker.subscriber_count,
         "engine": {
-            "configured_backend": settings.triage_backend,
             "active_engine": engine.name,
             "engine_version": engine.engine_version,
             "degraded": engine.degraded,

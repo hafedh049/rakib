@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 import pymongo
-from beanie import Document, PydanticObjectId
+from beanie import Document
 from pydantic import Field
 
 
@@ -11,9 +11,7 @@ class Department(Document):
     description: str = ""
     keywords: list[str] = Field(default_factory=list)
     categories: list[str] = Field(default_factory=list)
-    #: Overrides the priority-derived SLA when set (spec 5.6).
-    default_sla_hours: int | None = None
-    escalation_to: PydanticObjectId | None = None
+    #: Deactivated departments keep their history but take no new complaints.
     active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

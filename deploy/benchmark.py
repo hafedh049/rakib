@@ -2,9 +2,9 @@
 
     python3 /root/rakib/src/deploy/benchmark.py [requests] [concurrency]
 
-Measures POST /complaints, which spec section 9 requires to return in under
-100 ms at p95. Triage itself runs in the worker, so this measures the path a
-claimant actually waits on.
+Measures POST /complaints, the only request a claimant actually waits on:
+categorisation runs in the worker, after the response has been sent. The target
+is under 100 ms at p95.
 
 Run against the ClusterIP rather than the public host so the numbers describe
 the application, not the round trip to Let's Encrypt's TLS and back.
@@ -20,8 +20,8 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 #: Every row the benchmark creates carries this address so it can be removed
-#: again. A load test that leaves a thousand complaints behind does not just
-#: clutter the demo — it inflates the annual declaration to the regulator.
+#: again. An earlier run left roughly a thousand real complaints behind, which
+#: is why the cleanup below exists and why it matches on something exact.
 BENCH_EMAIL = "benchmark@rakib.invalid"
 
 BODY = {
@@ -32,9 +32,8 @@ BODY = {
         "J ai deja appele le service client deux fois sans resultat."
     ),
     "channel": "web",
-    # Recognisable on purpose: these rows are real complaints in the real
-    # database and they land in the BCT declaration. Marking them makes the
-    # cleanup below exact rather than approximate.
+    # Recognisable on purpose: these are real rows in the real database.
+    # Marking them makes the cleanup exact rather than approximate.
     "claimant": {"full_name": "Charge de test", "email": BENCH_EMAIL},
 }
 
@@ -162,7 +161,7 @@ def main() -> None:
     if "--keep" not in sys.argv:
         cleanup()
 
-    print("target: POST /complaints under 100 ms p95 (spec section 9)")
+    print("target: POST /complaints under 100 ms p95")
     # A pass requires the requests to have worked. Timing failures fast is not
     # a performance result.
     passed = percentile(0.95) < 100 and ok == total

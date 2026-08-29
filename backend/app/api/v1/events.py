@@ -31,7 +31,7 @@ async def stream(request: Request, user: AgentUser) -> StreamingResponse:
     """Role-scoped server-sent events.
 
     Events carry a minimum role (events/types.EVENT_MIN_ROLE): an agent never
-    receives supervisor-only traffic such as SLA breaches or model promotions.
+    receives supervisor-only traffic such as triage corrections.
     """
     subscriber = broker.subscribe(
         role=str(user.role),

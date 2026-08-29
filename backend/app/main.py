@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await db.init_db()
     await seed_service.seed_departments()
     await sse_consumer.start()
-    log.info("app.started", env=settings.environment, backend=settings.triage_backend)
+    log.info("app.started", env=settings.environment)
     yield
     await background.drain()
     await sse_consumer.stop()

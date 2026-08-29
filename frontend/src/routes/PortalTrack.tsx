@@ -59,11 +59,6 @@ export function PortalTrack() {
             <span className="text-2xs text-ink-muted">
               {t('portal.deposited')} {formatDate(complaint.created_at, locale)}
             </span>
-            {complaint.sla_due_at && (
-              <span className="text-2xs text-ink-muted">
-                · {t('portal.dueBy')} {formatDate(complaint.sla_due_at, locale)}
-              </span>
-            )}
           </div>
         </header>
 

@@ -1,11 +1,14 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install --no-audit --no-fund
+# The lockfile is committed and `npm ci` installs from it exactly. `npm install`
+# without it re-resolves every caret range at build time, so two builds of the
+# same commit could ship different dependency versions.
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
 
 COPY . .
-RUN npx tsc -b --noEmit && npx vite build
+RUN npx tsc --noEmit && npx vite build
 
 FROM nginx:1.27-alpine
 COPY --from=build /app/dist /usr/share/nginx/html

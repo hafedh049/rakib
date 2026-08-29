@@ -36,5 +36,8 @@ services:
       - ./backend/app:/app/app
       - ./backend/tests:/app/tests
       - ./backend/scripts:/app/scripts
-      - ./backend/ml_artifacts:/app/ml_artifacts
+      # Read-only, and only so one test can compare the console's hardcoded
+      # category list against the backend enum. They drifted apart once already,
+      # across the telecom-to-bank pivot, and nothing caught it.
+      - ./frontend/src:/frontend/src:ro
     command: ["pytest", "-q"]

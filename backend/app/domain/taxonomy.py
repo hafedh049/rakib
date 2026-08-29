@@ -1,25 +1,12 @@
 """The complaint taxonomy for a Tunisian bank.
 
-This module is the single source of truth for categories, regulatory objects and
-departments. It is seeded into Mongo on first boot; after that Mongo is
-authoritative and this file only bootstraps a fresh install (spec section 9).
+This module is the single source of truth for categories and departments. It is
+seeded into Mongo on first boot; after that Mongo is authoritative and this file
+only bootstraps a fresh install.
 
 Swapping sector = replacing this file. Nothing above it hardcodes banking — the
-previous revision of this same file described a telecom operator, and the six
-pipeline stages, the rules engine, RBAC, the SLA calendar and the deployment
-were untouched by the change.
-
-Two levels of classification, and they must never drift apart:
-
-*   `Category` is what the **bank** routes on — fine-grained, what an agent
-    actually works with, what the classifier predicts.
-*   `ObjetBCT` is what the **regulator** counts. Circulaire BCT n°2022-08,
-    Annexe 3, section IV ventilates complaints across exactly eight objects, and
-    that annual declaration is a legal obligation (code ROGS760, annual,
-    DR+45 days, XML).
-
-`OBJET_FOR_CATEGORY` derives the second from the first, so a new category cannot
-be added without deciding how the regulator will see it.
+previous revision described a telecom operator, and the pipeline, the routing,
+RBAC and the deployment were untouched by the change.
 """
 
 from enum import StrEnum
@@ -43,26 +30,10 @@ class Category(StrEnum):
     AGENCE_QUALITE_SERVICE = "AGENCE_QUALITE_SERVICE"
 
 
-class ObjetBCT(StrEnum):
-    """The eight objects of Annexe 3-IV. Not ours to rename — the regulator's."""
-
-    FINANCEMENT = "FINANCEMENT"
-    PAIEMENT_HORS_MONETIQUE = "PAIEMENT_HORS_MONETIQUE"
-    MONETIQUE = "MONETIQUE"
-    FONCTIONNEMENT_COMPTES = "FONCTIONNEMENT_COMPTES"
-    OPERATIONS_INTERNATIONALES = "OPERATIONS_INTERNATIONALES"
-    TARIFICATION = "TARIFICATION"
-    SERVICES_A_DISTANCE = "SERVICES_A_DISTANCE"
-    AUTRES_SERVICES = "AUTRES_SERVICES"
-
-
-#: Deliberately no "AUTRE" class. A garbage class absorbs every hard example and
+#: Deliberately no "AUTRE" class. A catch-all absorbs every hard example and
 #: destroys its own precision; an unclassifiable complaint instead falls through
-#: the confidence threshold into needs_human_triage (spec 5.6). Note that the
-#: regulator's own "Autres services" is an *objet*, not a category — it is the
-#: bucket for agency-quality complaints, not for the classifier's failures.
+#: the abstention thresholds into needs_human_triage, where a person decides.
 ALL_CATEGORIES: list[str] = [c.value for c in Category]
-ALL_OBJETS: list[str] = [o.value for o in ObjetBCT]
 
 CATEGORY_LABELS_FR: dict[str, str] = {
     Category.CARTE_BANCAIRE: "Carte bancaire",
@@ -94,52 +65,6 @@ CATEGORY_LABELS_AR: dict[str, str] = {
     Category.AGENCE_QUALITE_SERVICE: "الوكالة وجودة الخدمة",
 }
 
-#: Annexe 3-IV wording, verbatim. These strings appear in the declaration filed
-#: with the BCT, so they are not ours to prettify.
-OBJET_LABELS_FR: dict[str, str] = {
-    ObjetBCT.FINANCEMENT: "Financement",
-    ObjetBCT.PAIEMENT_HORS_MONETIQUE: "Paiement hors monétique",
-    ObjetBCT.MONETIQUE: "Monétique",
-    ObjetBCT.FONCTIONNEMENT_COMPTES: "Fonctionnement des comptes",
-    ObjetBCT.OPERATIONS_INTERNATIONALES: "Opérations bancaires internationales",
-    ObjetBCT.TARIFICATION: "Tarification",
-    ObjetBCT.SERVICES_A_DISTANCE: "Services bancaires à distance",
-    ObjetBCT.AUTRES_SERVICES: "Autres services",
-}
-
-#: category -> regulatory object. Every category must appear here; the module
-#: asserts totality at import time rather than discovering a hole at reporting
-#: time, forty-five days after the close of the financial year.
-OBJET_FOR_CATEGORY: dict[str, str] = {
-    Category.CARTE_BANCAIRE: ObjetBCT.MONETIQUE,
-    Category.DAB_GAB: ObjetBCT.MONETIQUE,
-    Category.PAIEMENT_TPE_ECOMMERCE: ObjetBCT.MONETIQUE,
-    # A disputed debit is overwhelmingly a card debit; the regulator has no
-    # "fraud" object, so it is counted as monétique and carries its weight
-    # through the FRAUDE_SUSPECTEE rule instead.
-    Category.FRAUDE_OPERATION_NON_AUTORISEE: ObjetBCT.MONETIQUE,
-    Category.VIREMENT_PRELEVEMENT: ObjetBCT.PAIEMENT_HORS_MONETIQUE,
-    Category.CHEQUE_EFFET: ObjetBCT.PAIEMENT_HORS_MONETIQUE,
-    Category.COMPTE_GESTION: ObjetBCT.FONCTIONNEMENT_COMPTES,
-    Category.CREDIT_FINANCEMENT: ObjetBCT.FINANCEMENT,
-    Category.FRAIS_COMMISSIONS: ObjetBCT.TARIFICATION,
-    Category.BANQUE_DIGITALE: ObjetBCT.SERVICES_A_DISTANCE,
-    Category.OPERATIONS_INTERNATIONALES: ObjetBCT.OPERATIONS_INTERNATIONALES,
-    Category.AGENCE_QUALITE_SERVICE: ObjetBCT.AUTRES_SERVICES,
-}
-
-assert set(OBJET_FOR_CATEGORY) == set(Category), (
-    "every category must map to a BCT object — the annual declaration has no "
-    "'unmapped' column"
-)
-
-
-def objet_for_category(category: str | None) -> str | None:
-    """Regulatory object for a category, or None while triage is undecided."""
-    if category is None:
-        return None
-    return OBJET_FOR_CATEGORY.get(category)
-
 
 class DepartmentSeed(NamedTuple):
     code: str
@@ -147,10 +72,9 @@ class DepartmentSeed(NamedTuple):
     description: str
     categories: list[str]
     keywords: list[str]
-    default_sla_hours: int | None
 
 
-#: The fallback department for anything unroutable (spec 5.6).
+#: The fallback department for anything the router cannot place.
 GENERAL_DEPARTMENT_CODE = "GENERAL"
 
 DEPARTMENT_SEED: list[DepartmentSeed] = [
@@ -172,7 +96,6 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
             "بطاقة", "الموزع الآلي", "سحب", "رمز سري", "معاملة",
             "karta", "distributeur", "code",
         ],
-        default_sla_hours=None,
     ),
     DepartmentSeed(
         code="OPERATIONS",
@@ -188,7 +111,6 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
             "تحويل", "شيك", "دفتر شيكات", "كمبيالة", "اقتطاع", "رصيد غير كاف",
             "virement", "chek", "chekat",
         ],
-        default_sla_hours=None,
     ),
     DepartmentSeed(
         code="CREDITS",
@@ -204,7 +126,6 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
             "قرض", "تمويل", "قسط", "نسبة الفائدة", "رفع اليد", "جدول التسديد",
             "credit", "9ist", "9ard",
         ],
-        default_sla_hours=None,
     ),
     DepartmentSeed(
         code="RELATION_CLIENT",
@@ -226,7 +147,6 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
             "وكالة", "انتظار", "موظف", "استقبال",
             "sahb", "frais", "agence", "wakala",
         ],
-        default_sla_hours=None,
     ),
     DepartmentSeed(
         code="DIGITAL",
@@ -241,7 +161,6 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
             "تطبيق", "الموقع", "كلمة السر", "تسجيل الدخول", "رمز",
             "application", "site",
         ],
-        default_sla_hours=None,
     ),
     DepartmentSeed(
         code="INTERNATIONAL",
@@ -257,7 +176,6 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
             "صرف", "عملة", "منحة سياحية", "تحويل خارجي", "عملة صعبة",
             "devise", "change",
         ],
-        default_sla_hours=None,
     ),
     DepartmentSeed(
         code="CONFORMITE_FRAUDE",
@@ -273,7 +191,6 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
             "احتيال", "عملية غير مصرح بها", "قرصنة", "سرقة", "نصب", "بدون علمي",
             "fraude", "sr9ou", "piratage",
         ],
-        default_sla_hours=None,
     ),
     DepartmentSeed(
         code=GENERAL_DEPARTMENT_CODE,
@@ -281,7 +198,6 @@ DEPARTMENT_SEED: list[DepartmentSeed] = [
         description="File d’attente de secours : réclamations non routables automatiquement.",
         categories=[],
         keywords=[],
-        default_sla_hours=None,
     ),
 ]
 
@@ -296,7 +212,7 @@ assert set(CATEGORY_TO_DEPARTMENT) == set(Category), (
 
 
 def department_for_category(category: str | None) -> str:
-    """Route a category to its department, falling back to GENERAL (spec 5.6)."""
+    """Route a category to its department, falling back to GENERAL."""
     if category is None:
         return GENERAL_DEPARTMENT_CODE
     return CATEGORY_TO_DEPARTMENT.get(category, GENERAL_DEPARTMENT_CODE)

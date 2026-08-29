@@ -2,6 +2,7 @@
 
 import pytest
 
+from app.domain.taxonomy import ALL_CATEGORIES
 from app.intelligence.engines.lexicon import (
     LexiconTriageEngine,
     route_by_keywords,
@@ -195,3 +196,30 @@ def test_engine_health_is_not_degraded():
     health = LexiconTriageEngine().health()
     assert health.ready is True
     assert health.degraded is False
+
+
+# ------------------------------------------------------------- cross-language drift
+def test_console_category_filter_matches_the_backend_enum():
+    """The console hardcodes the category list; it must be the same list.
+
+    It was not, for the whole of the telecom-to-bank pivot: `Inbox.tsx` kept
+    offering FACTURATION, RESEAU_MOBILE and nine other categories that no longer
+    existed, so every one of those filters returned an empty page in silence.
+    Types cannot see across the language boundary, so a test does it instead.
+    """
+    import re
+    from pathlib import Path
+
+    source = Path("/frontend/src/lib/types.ts")
+    if not source.exists():  # pragma: no cover — running without the mount
+        pytest.skip("frontend source not mounted")
+
+    block = re.search(
+        r"export const CATEGORIES = \[(.*?)\] as const", source.read_text("utf-8"), re.S
+    )
+    assert block, "CATEGORIES is no longer declared where this test looks for it"
+    console = re.findall(r"'([A-Z_]+)'", block.group(1))
+
+    assert console == ALL_CATEGORIES, (
+        "the console's category filter has drifted from app/domain/taxonomy.py"
+    )

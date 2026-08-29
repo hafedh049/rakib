@@ -1,9 +1,9 @@
 """arq worker configuration.
 
-Background jobs and cron live here: triage (phase 6), SLA sweeps (phase 7) and
-categorisation is deterministic, so nothing is ever retrained. The event-stream consumer is a
-separate process (workers/notify_worker.py) because it is a stream consumer, not
-a job queue.
+One background job: triage. It runs off the queue so that submitting a complaint
+returns immediately instead of waiting on categorisation. The event-stream
+consumer is a separate process (workers/notify_worker.py) because it consumes a
+stream rather than a job queue.
 """
 
 from typing import Any

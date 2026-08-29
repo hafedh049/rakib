@@ -1,9 +1,9 @@
 """First-boot seeding.
 
-Lexicons, rules and the department catalogue live in Python (domain/) but are
-seeded into Mongo on first boot; after that Mongo is the source of truth and the
-admin UI edits it (spec section 9). Re-running is safe: existing rows are left
-alone unless they are missing fields a newer version added.
+The department catalogue lives in Python (domain/taxonomy.py) but is seeded into
+Mongo on first boot; after that Mongo is the source of truth and the admin screen
+edits it. Re-running is safe: catalogue fields are refreshed, admin-owned ones
+are left alone.
 """
 
 from app.core.logging import get_logger
@@ -17,8 +17,8 @@ async def seed_departments() -> int:
     """Insert missing departments; refresh catalogue fields on existing ones.
 
     Name, description, keywords and categories come from the catalogue and are
-    kept in step. `escalation_to`, `default_sla_hours` and `active` belong to
-    the admin and are never touched by a redeploy.
+    kept in step. `active` belongs to the admin and is never touched by a
+    redeploy.
     """
     created = refreshed = 0
     for seed in DEPARTMENT_SEED:
@@ -33,7 +33,6 @@ async def seed_departments() -> int:
                 description=seed.description,
                 keywords=list(seed.keywords),
                 categories=list(seed.categories),
-                default_sla_hours=seed.default_sla_hours,
             ).model_dump(by_alias=True, exclude={"id"})
             result = await Department.get_motor_collection().update_one(
                 {"code": seed.code}, {"$setOnInsert": document}, upsert=True

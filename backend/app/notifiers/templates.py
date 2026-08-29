@@ -1,8 +1,7 @@
 """Notification copy, in French.
 
-The system drafts and notifies; it never answers a complaint on the merits
-(spec 0). Everything here is transactional: a receipt, a status change, an
-escalation warning to staff.
+The system notifies; it never answers a complaint on the merits. Everything
+here is transactional: a receipt, a reply notice, a status change.
 """
 
 from typing import Any
@@ -50,37 +49,8 @@ def render(event: EventName, payload: dict[str, Any]) -> tuple[str, str] | None:
                 f"Bonjour {payload.get('claimant_name', '')},\n\n"
                 f"Votre reclamation {ref} vient d'etre marquee comme resolue.\n\n"
                 f"{payload.get('resolution', '')}\n\n"
-                f"Votre avis nous interesse — evaluez le traitement de votre "
-                f"dossier :\n{payload.get('satisfaction_url', '')}" + SIGNATURE,
-            )
-
-        case EventName.SLA_WARNING:
-            return (
-                f"[SLA 80%] {ref} — echeance proche",
-                f"La reclamation {ref} ({payload.get('subject', '')}) a consomme "
-                f"80% de son delai de traitement.\n"
-                f"Echeance : {payload.get('due_at', '')}\n"
-                f"Priorite : P{payload.get('priority', '?')}\n"
-                f"Departement : {payload.get('department', '-')}",
-            )
-
-        case EventName.SLA_BREACHED:
-            return (
-                f"[SLA DEPASSE] {ref}",
-                f"La reclamation {ref} ({payload.get('subject', '')}) a depasse "
-                f"son delai de traitement.\n"
-                f"Echeance : {payload.get('due_at', '')}\n"
-                f"Priorite : P{payload.get('priority', '?')}\n"
-                f"Departement : {payload.get('department', '-')}\n"
-                f"Agent : {payload.get('agent_name', 'non affectee')}",
-            )
-
-        case EventName.ESCALATED:
-            return (
-                f"[ESCALADE niveau {payload.get('level', 1)}] {ref}",
-                f"La reclamation {ref} a ete escaladee.\n"
-                f"Motif : {payload.get('reason', 'delai depasse')}\n"
-                f"Departement : {payload.get('department', '-')}",
+                f"Consulter le dossier :\n{payload.get('tracking_url', '')}"
+                + SIGNATURE,
             )
 
         case EventName.COMPLAINT_ASSIGNED:
@@ -88,8 +58,7 @@ def render(event: EventName, payload: dict[str, Any]) -> tuple[str, str] | None:
                 f"Nouvelle reclamation affectee : {ref}",
                 f"La reclamation {ref} vous a ete affectee.\n\n"
                 f"Objet : {payload.get('subject', '')}\n"
-                f"Priorite : P{payload.get('priority', '?')}\n"
-                f"Echeance : {payload.get('due_at', '-')}",
+                f"Departement : {payload.get('department', '-')}",
             )
 
         case _:

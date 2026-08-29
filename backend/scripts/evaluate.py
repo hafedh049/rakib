@@ -6,10 +6,14 @@ Measures the classifier against the hand-written gold set in scripts/gold.py —
 independent of the lexicon, and deliberately including cases that have no single
 correct answer, where abstaining is the right behaviour.
 
-Reported: macro-F1, accuracy, and the abstention rate. The last of those is the
-one to watch. Abstention is not failure — an uncategorised complaint still gets
-routed and still gets its deadline — but a rising rate means the vocabulary is
-drifting away from how people actually write.
+Reported: macro-F1, accuracy, the abstention rate, and precision on the subset
+where the classifier actually committed to a category.
+
+That last number is the one that matters operationally. Abstention is not
+failure — an uncategorised complaint is still routed by keyword and still
+reaches an agent — but a wrong category shown confidently costs an agent more
+time than no category at all. A rising abstention rate means the vocabulary is
+drifting away from how people write; a falling precision means it is guessing.
 """
 
 from app.intelligence.lexicon.classifier import classify
@@ -47,9 +51,17 @@ def evaluate_gold() -> None:
     f1, accuracy = macro_f1(pairs)
     abstained = sum(1 for _, p in pairs if p is None)
 
+    committed = [(e, p) for e, p in pairs if p is not None]
+    correct = sum(1 for e, p in committed if e == p)
+
     print(f"\n=== GOLD (authored, independent)  (n={len(pairs)}) ===")
     print(f"macro-F1 {f1:.3f}   accuracy {accuracy:.3f}")
     print(f"abstained on {abstained}/{len(pairs)} ({abstained / len(pairs):.0%})")
+    if committed:
+        print(
+            f"when it committed: {correct}/{len(committed)} correct "
+            f"({correct / len(committed):.0%})"
+        )
 
     if unlabelled:
         routed = sum(1 for s, b in unlabelled if predict(s, b) is None)
@@ -69,9 +81,8 @@ def main() -> None:
         "\n"
         "Abstention is where the vocabulary shows its edges: text phrased\n"
         "outside the lexicon scores zero and goes to an agent. That is the\n"
-        "designed behaviour, and what the circulaire assumes anyway —\n"
-        "Article 9 asks for routing, alerting and KPIs, never for\n"
-        "automatic classification.\n"
+        "designed behaviour — the suggestion exists to save an agent time,\n"
+        "never to decide in their place.\n"
         "=============================================================="
     )
 

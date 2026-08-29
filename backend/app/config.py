@@ -22,31 +22,10 @@ class Settings(BaseSettings):
     jwt_access_ttl_min: int = 15
     jwt_refresh_ttl_days: int = 7
 
-    # Signs public complaint-tracking + satisfaction links. Deliberately a different
-    # secret from jwt_secret: a leaked tracking link must never become a session.
+    # Signs the public complaint-tracking links. Deliberately a different secret
+    # from jwt_secret: a leaked tracking link must never become a session.
     tracking_token_secret: str = "change-me-too"
     tracking_token_ttl_days: int = 365
-
-    triage_backend: Literal["lexicon", "rules"] = "lexicon"
-    category_confidence_threshold: float = 0.55
-    ambiguity_margin: float = 0.15
-    dedup_auto_threshold: float = 0.82
-    dedup_suggest_threshold: float = 0.65
-    dedup_cross_claimant_threshold: float = 0.90
-
-    sla_business_hours: bool = False
-    sla_timezone: str = "Africa/Tunis"
-    sla_hours_p1: int = 4
-    sla_hours_p2: int = 24
-    sla_hours_p3: int = 72
-    sla_hours_p4: int = 168
-
-    s3_endpoint: str = "http://localhost:9000"
-    s3_bucket: str = "reclamations"
-    s3_access_key: str = "rakib"
-    s3_secret_key: str = "rakib-dev-secret"
-    s3_region: str = "us-east-1"
-    max_attachment_mb: int = 10
 
     smtp_host: str = ""
     smtp_port: int = 587
@@ -57,16 +36,6 @@ class Settings(BaseSettings):
 
     frontend_url: str = "http://localhost:5173"
     public_url: str = "http://localhost:5173"
-
-
-    @property
-    def sla_hours_by_priority(self) -> dict[int, int]:
-        return {
-            1: self.sla_hours_p1,
-            2: self.sla_hours_p2,
-            3: self.sla_hours_p3,
-            4: self.sla_hours_p4,
-        }
 
     @property
     def mail_enabled(self) -> bool:

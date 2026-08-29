@@ -75,10 +75,10 @@ def test_tracking_token_is_bound_to_one_complaint():
 
 
 def test_tracking_token_is_bound_to_its_scope():
-    """A 'track' link must not double as a 'satisfaction' link."""
+    """A token minted for one purpose must not be accepted for another."""
     token = create_tracking_token("507f1f77bcf86cd799439011", scope="track")
     with pytest.raises(TokenError):
-        verify_tracking_token(token, scope="satisfaction")
+        verify_tracking_token(token, scope="autre-usage")
 
 
 def test_tracking_token_expires():

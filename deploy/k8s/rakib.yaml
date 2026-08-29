@@ -1,8 +1,8 @@
 # Rakib — namespace `reclamations`, fully self-contained.
 #
 # Nothing here is shared with any other project on the cluster: its own Mongo,
-# Redis and MinIO, its own secrets, its own ingress host. The only borrowed
-# thing is the SMTP relay credential, copied in by deploy/deploy.sh.
+# its own Redis, its own secrets, its own ingress host. The only borrowed thing
+# is the SMTP relay credential, copied in by deploy/deploy.sh.
 #
 # The API is pinned to 2 vCPU / 4 GB so the project's headline constraint is
 # enforced rather than asserted.
@@ -22,20 +22,6 @@ data:
   LOG_LEVEL: INFO
   MONGO_URI: mongodb://mongo:27017/reclamations
   REDIS_URL: redis://redis:6379/0
-  S3_ENDPOINT: http://minio:9000
-  S3_BUCKET: reclamations
-  TRIAGE_BACKEND: lexicon
-  CATEGORY_CONFIDENCE_THRESHOLD: '0.55'
-  AMBIGUITY_MARGIN: '0.15'
-  DEDUP_AUTO_THRESHOLD: '0.82'
-  DEDUP_SUGGEST_THRESHOLD: '0.65'
-  DEDUP_CROSS_CLAIMANT_THRESHOLD: '0.90'
-  SLA_BUSINESS_HOURS: 'false'
-  SLA_TIMEZONE: Africa/Tunis
-  SLA_HOURS_P1: '4'
-  SLA_HOURS_P2: '24'
-  SLA_HOURS_P3: '72'
-  SLA_HOURS_P4: '168'
   SMTP_PORT: '587'
   SMTP_STARTTLS: 'true'
   FRONTEND_URL: https://reclamations.activiity.com
@@ -51,17 +37,6 @@ spec:
   resources:
     requests:
       storage: 8Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: minio-data
-  namespace: reclamations
-spec:
-  accessModes: [ReadWriteOnce]
-  resources:
-    requests:
-      storage: 5Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -152,49 +127,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: minio
-  namespace: reclamations
-spec:
-  replicas: 1
-  strategy: { type: Recreate }
-  selector: { matchLabels: { app: minio } }
-  template:
-    metadata: { labels: { app: minio } }
-    spec:
-      containers:
-        - name: minio
-          image: minio/minio:RELEASE.2024-10-13T13-34-11Z
-          args: ['server', '/data']
-          env:
-            - name: MINIO_ROOT_USER
-              valueFrom: { secretKeyRef: { name: rakib-secret, key: S3_ACCESS_KEY } }
-            - name: MINIO_ROOT_PASSWORD
-              valueFrom: { secretKeyRef: { name: rakib-secret, key: S3_SECRET_KEY } }
-          ports: [{ containerPort: 9000 }]
-          volumeMounts:
-            - { name: data, mountPath: /data }
-          resources:
-            requests: { cpu: 50m, memory: 128Mi }
-            limits: { cpu: 500m, memory: 512Mi }
-      volumes:
-        - name: data
-          persistentVolumeClaim: { claimName: minio-data }
----
-apiVersion: v1
-kind: Service
-metadata: { name: minio, namespace: reclamations }
-spec:
-  selector: { app: minio }
-  ports: [{ port: 9000, targetPort: 9000 }]
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: api
   namespace: reclamations
 spec:
-  # One replica on purpose: the classifier is swapped in memory on promotion,
-  # and a second replica would keep serving the old model until it restarted.
+  # One replica: the workload is a PFE demonstrator, and a single pod keeps the
+  # 2 vCPU / 4 GB envelope honest rather than hiding it behind horizontal scale.
   replicas: 1
   strategy: { type: Recreate }
   selector: { matchLabels: { app: api } }

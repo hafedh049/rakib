@@ -32,7 +32,6 @@ from app.models.complaint import (
     Message,
     Status,
     TimelineEntry,
-    TriageState,
 )
 from app.models.counter import next_complaint_ref
 from app.models.department import Department
@@ -41,15 +40,6 @@ from app.schemas.complaint import ComplaintCreate, ComplaintPatch
 from app.workers import queue
 
 log = get_logger(__name__)
-
-#: Until triage runs, a complaint gets the "normal" budget so it can never sit
-#: on the SLA board with no clock at all. Triage overwrites this (spec 5.6).
-PROVISIONAL_PRIORITY = 3
-
-#: Article 8 requires a rejection to be reasoned. A one-word refusal is not
-#: a reason, so the service sets a floor low enough never to block a genuine
-#: explanation and high enough to stop \"non\" being recorded as one.
-MOTIVATION_MIN_CHARS = 40
 
 
 def event_payload(complaint: Complaint, **extra: Any) -> dict[str, Any]:
@@ -92,10 +82,9 @@ async def create_complaint(
         body=payload.body.strip(),
     )
 
-    # Article 8: the acknowledgement carries a registration date and a reference
-    # number, and the fifteen-working-day clock runs from it. We issue it on
-    # receipt — the reference exists, the record exists, so there is nothing to
-    # wait for, and any delay here would eat into the customer's legal window.
+    # The acknowledgement is issued on receipt, before triage: the reference and
+    # the record both exist at this point, so there is nothing to wait for, and a
+    # claimant who closes the tab still holds a working tracking link.
 
     complaint.log(
         "complaint.created",
@@ -135,7 +124,6 @@ async def list_complaints(
     *,
     status: list[Status] | None = None,
     category: str | None = None,
-    priority: int | None = None,
     department_code: str | None = None,
     agent_id: PydanticObjectId | None = None,
     q: str | None = None,
@@ -158,8 +146,6 @@ async def list_complaints(
         conditions.append({"status": {"$in": [str(s) for s in status]}})
     if category:
         conditions.append({"analysis.category": category})
-    if priority is not None:
-        conditions.append({"analysis.priority": priority})
     if department_code:
         conditions.append({"assignment.department_code": department_code})
     if agent_id is not None:
@@ -226,7 +212,7 @@ async def get_by_ref(ref: str) -> Complaint:
 async def patch_complaint(
     complaint: Complaint, payload: ComplaintPatch, actor: User
 ) -> Complaint:
-    """Apply a staff edit. Category/department changes emit a training signal."""
+    """Apply a staff edit: status, category, department, agent, VIP flag."""
     changed: dict[str, Any] = {}
 
     if payload.status is not None and payload.status != complaint.status:
@@ -267,7 +253,15 @@ async def patch_complaint(
         complaint.assignment.agent_id = agent.id
         complaint.assignment.assigned_at = datetime.now(UTC)
         complaint.assignment.method = AssignmentMethod.MANUAL
-        if complaint.status is Status.NEW:
+        # Naming an agent IS the assignment. Triage has already moved the
+        # complaint to TRIAGED by the time an admin gets to it, so testing for
+        # NEW alone left it displaying "triage termine" after it had been handed
+        # to someone. An explicit status in the same payload still wins.
+        if payload.status is None and complaint.status in (
+            Status.NEW,
+            Status.TRIAGED,
+        ):
+            changed["status"] = (str(complaint.status), str(Status.ASSIGNED))
             complaint.status = Status.ASSIGNED
 
     if payload.is_vip is not None and payload.is_vip != complaint.claimant.is_vip:
@@ -291,8 +285,8 @@ async def patch_complaint(
         event_payload(complaint, changed=list(changed), actor_id=str(actor.id)),
     )
     if "category" in changed or "department" in changed:
-        # A human disagreed with the engine. The `corrected` flag drives the
-        # correction rate in the KPI report; the event lets the console react.
+        # A human disagreed with the engine. The `corrected` flag records that
+        # on the complaint; the event lets a supervisor's console react live.
         await publish(
             EventName.TRIAGE_CORRECTED,
             event_payload(
@@ -329,7 +323,7 @@ async def _assign_department(
 
 
 async def route_to_category_department(complaint: Complaint, category: str | None) -> None:
-    """Route by category, falling back to GENERAL when unknown (spec 5.6)."""
+    """Route by category, falling back to GENERAL when unknown."""
     code = department_for_category(category)
     department = await Department.find_one(Department.code == code)
     if department is None:
@@ -348,8 +342,8 @@ async def _append(
 
     Beanie's `save()` replaces the entire document with the in-memory copy. A
     worker that fetched the complaint a second earlier will therefore wipe
-    anything appended in between — messages and attachments both went missing
-    this way while triage was in flight. `$push` touches only the array.
+    anything appended in between — messages went missing this way while triage
+    was in flight. `$push` touches only the array.
     """
     now = datetime.now(UTC)
     complaint.updated_at = now
@@ -367,8 +361,8 @@ async def persist_fields(
     """Write only the fields the caller owns, and append timeline entries.
 
     Used by triage, which runs concurrently with whatever a claimant or agent is
-    doing. A whole-document save here silently discarded attachments and
-    messages added while the pipeline was running.
+    doing. A whole-document save here silently discarded messages added while
+    the pipeline was running.
     """
     now = datetime.now(UTC)
     complaint.updated_at = now
@@ -428,7 +422,7 @@ async def resolve(complaint: Complaint, resolution: str, actor: User) -> Complai
     complaint.log("complaint.resolved", actor_type="agent", actor_id=str(actor.id))
     # Targeted write, not save(): add_message above has already written to this
     # document, and a whole-document save from the stale in-memory copy would
-    # drop it — the same lost-update the attachment path had.
+    # silently drop the message that was just appended.
     await persist_fields(
         complaint,
         {"status": str(Status.RESOLVED)},
@@ -439,15 +433,7 @@ async def resolve(complaint: Complaint, resolution: str, actor: User) -> Complai
         event_payload(
             complaint,
             resolution=resolution,
+            tracking_url=tracking_url(complaint),
         ),
     )
     return complaint
-
-
-async def mark_triage_failed(complaint: Complaint, reason: str) -> None:
-    complaint.triage_state = TriageState.FAILED
-    complaint.analysis.needs_human_triage = True
-    complaint.analysis.triage_reason = reason
-    complaint.log("triage.failed", actor_type="engine", reason=reason)
-    complaint.touch()
-    await complaint.save()
