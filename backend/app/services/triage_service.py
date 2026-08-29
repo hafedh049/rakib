@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from app.core.logging import get_logger
 from app.events.bus import publish
 from app.events.types import EventName
+from app.intelligence.ports import DepartmentInfo, TriageInput
 from app.models.complaint import (
     CLOSED_STATUSES,
     Analysis,
@@ -23,7 +24,6 @@ from app.models.complaint import (
     TriageState,
 )
 from app.models.department import Department
-from app.intelligence.ports import DepartmentInfo, TriageInput
 from app.services import complaint_service, triage
 
 log = get_logger(__name__)

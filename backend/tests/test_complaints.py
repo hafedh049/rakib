@@ -89,13 +89,6 @@ async def test_creation_writes_a_timeline_entry(client):
     assert [entry.action for entry in complaint.timeline] == ["complaint.created"]
 
 
-async def test_creation_sets_a_provisional_sla(client):
-    response = await client.post(COMPLAINTS, json=payload())
-    complaint = await Complaint.find_one(Complaint.ref == response.json()["ref"])
-    assert complaint.sla.due_at is not None
-    assert complaint.triage_state == "pending"
-
-
 # ----------------------------------------------------------- anti-enumeration story
 async def test_tracking_token_grants_access_to_its_own_complaint(client):
     created = (await client.post(COMPLAINTS, json=payload())).json()
@@ -266,29 +259,6 @@ async def test_unknown_category_is_rejected(client, routed_complaint, agent_head
     assert response.status_code == 422
 
 
-async def test_agent_cannot_change_priority(client, routed_complaint, agent_headers):
-    created = await routed_complaint()
-    response = await client.patch(
-        f"{COMPLAINTS}/{created['id']}", json={"priority": 1}, headers=agent_headers
-    )
-    assert response.status_code == 403
-
-
-async def test_supervisor_changing_priority_recomputes_the_sla(
-    client, make_user, login
-):
-    created = (await client.post(COMPLAINTS, json=payload())).json()
-    await make_user(email="sup@rakib.tn", password="Password123!", role=Role.SUPERVISOR)
-    headers = await login(client, "sup@rakib.tn", "Password123!")
-
-    await client.patch(
-        f"{COMPLAINTS}/{created['id']}", json={"priority": 1}, headers=headers
-    )
-    complaint = await Complaint.get(created["id"])
-    assert complaint.analysis.priority == 1
-    assert complaint.sla.hours == 4  # SLA_HOURS_P1
-
-
 async def test_claimant_cannot_patch_a_complaint(client, make_user, login):
     await make_user(email="c@example.tn", password="Password123!", role=Role.CLAIMANT)
     headers = await login(client, "c@example.tn", "Password123!")
@@ -324,57 +294,5 @@ async def test_out_of_scope_complaint_is_404_not_403(client, make_user, login):
 
 
 # ---------------------------------------------------------- resolution/satisfaction
-async def test_resolve_then_satisfaction(client, routed_complaint, agent_headers):
-    created = await routed_complaint()
-    resolved = await client.post(
-        f"{COMPLAINTS}/{created['id']}/resolve",
-        json={"resolution": "Remboursement de 142 dinars credite sur le compte."},
-        headers=agent_headers,
-    )
-    assert resolved.status_code == 200
-    assert resolved.json()["status"] == Status.RESOLVED
-
-    from app.core.security import create_tracking_token
-
-    token = create_tracking_token(created["id"], scope="satisfaction")
-    response = await client.post(
-        "/api/v1/complaints/satisfaction",
-        params={"token": token},
-        json={"score": 4, "comment": "Reglé rapidement"},
-    )
-    assert response.status_code == 200
-    assert response.json()["satisfaction_submitted"] is True
 
 
-async def test_satisfaction_is_refused_before_resolution(client):
-    created = (await client.post(COMPLAINTS, json=payload())).json()
-    from app.core.security import create_tracking_token
-
-    token = create_tracking_token(created["id"], scope="satisfaction")
-    response = await client.post(
-        "/api/v1/complaints/satisfaction", params={"token": token}, json={"score": 5}
-    )
-    assert response.status_code == 409
-
-
-async def test_satisfaction_cannot_be_submitted_twice(
-    client, routed_complaint, agent_headers
-):
-    created = await routed_complaint()
-    await client.post(
-        f"{COMPLAINTS}/{created['id']}/resolve",
-        json={"resolution": "Traite."},
-        headers=agent_headers,
-    )
-
-    from app.core.security import create_tracking_token
-
-    token = create_tracking_token(created["id"], scope="satisfaction")
-    first = await client.post(
-        "/api/v1/complaints/satisfaction", params={"token": token}, json={"score": 5}
-    )
-    second = await client.post(
-        "/api/v1/complaints/satisfaction", params={"token": token}, json={"score": 1}
-    )
-    assert first.status_code == 200
-    assert second.status_code == 409

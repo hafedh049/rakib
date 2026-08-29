@@ -8,13 +8,12 @@ a job queue.
 
 from typing import Any
 
-from arq import cron
 from arq.connections import RedisSettings
 
 from app.config import settings
 from app.core.logging import configure_logging, get_logger
 from app.db import close_db, init_db
-from app.services import rules_service, seed_service, triage
+from app.services import seed_service, triage
 from app.workers.triage_worker import triage_complaint
 
 log = get_logger(__name__)
@@ -24,7 +23,6 @@ async def startup(ctx: dict[str, Any]) -> None:
     configure_logging()
     await init_db()
     await seed_service.seed_departments()
-    await rules_service.seed_rules()
     log.info("worker.started", engine=triage.get_engine().name)
 
 

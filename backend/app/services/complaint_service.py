@@ -4,7 +4,7 @@ The triage decision rules of spec 5.6 live here rather than in the engine, so th
 engine stays a pure function of text and the policy stays where policy belongs.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import Any
 
 from beanie import PydanticObjectId
@@ -30,7 +30,6 @@ from app.models.complaint import (
     Claimant,
     Complaint,
     Message,
-    Satisfaction,
     Status,
     TimelineEntry,
     TriageState,
@@ -61,7 +60,6 @@ def event_payload(complaint: Complaint, **extra: Any) -> dict[str, Any]:
         "subject": complaint.subject,
         "status": str(complaint.status),
         "channel": str(complaint.channel),
-        "priority": complaint.analysis.priority,
         "category": complaint.analysis.category,
         "claimant_name": complaint.claimant.full_name,
         "claimant_email": complaint.claimant.email,

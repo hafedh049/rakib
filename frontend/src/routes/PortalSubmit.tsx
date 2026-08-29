@@ -15,17 +15,6 @@ interface Created {
   created_at: string
 }
 
-// Mirrors storage.ALLOWED_CONTENT_TYPES and MAX_ATTACHMENT_MB on the server;
-// checking here too turns a 422 round trip into instant feedback.
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/heic',
-  'application/pdf',
-  'text/plain',
-]
-const MAX_FILES = 5
-
 export function PortalSubmit() {
   const { t } = useT()
   const ids = {

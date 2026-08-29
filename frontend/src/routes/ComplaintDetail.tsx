@@ -261,12 +261,9 @@ export function ComplaintDetail() {
         <aside className="flex flex-col gap-5">
           <AnalysisPanel
             analysis={data.analysis}
-            triageState={data.triage_state}
-            corrected={data.corrected}
-            related={analysis.data?.related}
-            canCorrect={can('agent')}
-            correcting={correct.isPending}
-            onCorrect={(category) => correct.mutate(category)}
+            onCorrect={
+              can('agent') ? (category) => correct.mutate(category) : undefined
+            }
           />
 
           {analysis.data?.traces?.[0] && (

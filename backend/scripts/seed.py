@@ -19,7 +19,6 @@ from app.models.complaint import (
     Channel,
     Claimant,
     Complaint,
-    Satisfaction,
     Status,
 )
 from app.models.counter import Counter, next_complaint_ref
@@ -90,8 +89,7 @@ async def main(force: bool = False, count: int = 60, triage: bool = True) -> Non
     now = datetime.now(UTC)
     for index in range(count):
         category, subject, body = COMPLAINTS[index % len(COMPLAINTS)]
-        (name, email, phone, is_vip, nature, genre, tranche,
-         rne) = CLAIMANTS[index % len(CLAIMANTS)]
+        name, email, phone, is_vip = CLAIMANTS[index % len(CLAIMANTS)][:4]
         status = STATUS_MIX[index % len(STATUS_MIX)]
 
         # Age follows the status. Spreading every complaint evenly over 30 days
@@ -109,9 +107,7 @@ async def main(force: bool = False, count: int = 60, triage: bool = True) -> Non
             ref=await next_complaint_ref(created_at),
             channel=random.choice(CHANNEL_MIX),
             claimant=Claimant(
-                full_name=name, email=email, phone=phone, is_vip=is_vip,
-                nature=nature, genre=genre, tranche_age=tranche,
-                identifiant_rne=rne,
+                full_name=name, email=email, phone=phone, is_vip=is_vip
             ),
             subject=subject,
             body=body,
@@ -119,18 +115,6 @@ async def main(force: bool = False, count: int = 60, triage: bool = True) -> Non
             created_at=created_at,
             updated_at=created_at,
         )
-        complaint.sla.hours = settings.sla_hours_p3
-        complaint.sla.due_at = created_at + timedelta(hours=settings.sla_hours_p3)
-        if status in (Status.RESOLVED, Status.CLOSED):
-            # Closed within its window, so resolution-time analytics are real.
-            complaint.sla.resolved_at = created_at + timedelta(
-                hours=random.randint(2, 40)
-            )
-            complaint.satisfaction = (
-                Satisfaction(score=random.choice([3, 4, 4, 5, 5, 2]))
-                if random.random() < 0.6
-                else None
-            )
         complaint.log("complaint.created", channel=str(complaint.channel))
         await complaint.insert()
 
@@ -140,11 +124,8 @@ async def main(force: bool = False, count: int = 60, triage: bool = True) -> Non
     # complaints that all say "analysis pending": no categories, no priorities,
     # no SLA spread and empty analytics.
     if triage:
-        from app.services import rules_service, triage_service
-        from app.services import triage as triage_engine
+        from app.services import triage_service
 
-        await rules_service.seed_rules()
-        await triage_engine.refresh_rules()
 
         done = 0
         for complaint in await Complaint.find_all().to_list():

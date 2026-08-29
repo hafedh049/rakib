@@ -16,12 +16,8 @@ from app.core.errors import AppError, app_error_handler
 from app.core.logging import configure_logging, get_logger, request_context_middleware
 from app.events import bus
 from app.services import (
-    kb_service,
-    rules_service,
     seed_service,
     sse_consumer,
-    storage,
-    triage,
 )
 from app.workers import queue
 
@@ -33,14 +29,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     configure_logging()
     await db.init_db()
     await seed_service.seed_departments()
-    await rules_service.seed_rules()
-    await kb_service.seed_articles()
-    await kb_service.rebuild_index()
-    await triage.refresh_rules()
-    try:
-        await storage.ensure_bucket()
-    except Exception as exc:  # noqa: BLE001 — object storage must not block startup
-        log.warning("storage.unavailable_at_boot", error=str(exc))
     await sse_consumer.start()
     log.info("app.started", env=settings.environment, backend=settings.triage_backend)
     yield

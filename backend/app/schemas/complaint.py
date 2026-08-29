@@ -7,11 +7,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from app.models.complaint import (
     Analysis,
     Assignment,
-    Attachment,
     Channel,
     Claimant,
     Message,
-    Satisfaction,
     Status,
     TimelineEntry,
     TriageState,

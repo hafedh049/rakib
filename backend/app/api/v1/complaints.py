@@ -1,24 +1,18 @@
 from datetime import datetime
 from typing import Annotated, Any
-from uuid import uuid4
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, File, Query, UploadFile, status
+from fastapi import APIRouter, Query, status
 
-from app.config import settings
 from app.core.errors import (
-    AuthenticationError,
     NotFound,
     PermissionDenied,
-    ValidationError,
 )
 from app.core.ids import doc_id
 from app.core.pagination import Page
 from app.core.security import verify_tracking_token
 from app.deps import AgentUser, CurrentUser, OptionalUser, SupervisorUser
-from app.models.analysis_trace import AnalysisTrace
-from app.models.complaint import Attachment, Complaint, Status
-from app.models.user import User
+from app.models.complaint import Complaint, Status
 from app.schemas.complaint import (
     ComplaintCreate,
     ComplaintCreated,
@@ -28,12 +22,9 @@ from app.schemas.complaint import (
     ComplaintPublicOut,
     MessageCreate,
     PublicMessage,
-    RejectRequest,
     ResolveRequest,
-    SatisfactionIn,
-    SuggestionUsage,
 )
-from app.services import complaint_service, kb_service, storage, triage_service
+from app.services import complaint_service, triage_service
 
 router = APIRouter(prefix="/complaints", tags=["complaints"])
 
@@ -57,6 +48,19 @@ async def create_complaint(
     )
 
 
+async def _complaint_from_token(token: str, scope: str) -> Complaint:
+    """Resolve a signed tracking token to its complaint, or refuse.
+
+    The token is complaint-scoped and signed, so it grants access to exactly
+    one record and nothing else — an anonymous claimant has no session.
+    """
+    complaint_id = verify_tracking_token(token, scope=scope)
+    complaint = await Complaint.get(complaint_id)
+    if complaint is None:
+        raise NotFound("Reclamation introuvable")
+    return complaint
+
+
 @router.get("/track", response_model=ComplaintPublicOut)
 async def track(token: Annotated[str, Query()]) -> ComplaintPublicOut:
     """Public tracking via a signed, complaint-scoped token.
@@ -68,30 +72,16 @@ async def track(token: Annotated[str, Query()]) -> ComplaintPublicOut:
     return _to_public(complaint)
 
 
-@router.post("/satisfaction", response_model=ComplaintPublicOut)
-async def submit_satisfaction(
-    payload: SatisfactionIn, token: Annotated[str, Query()]
-) -> ComplaintPublicOut:
-    complaint = await _complaint_from_token(token, scope="satisfaction")
-    complaint = await complaint_service.submit_satisfaction(
-        complaint, payload.score, payload.comment
-    )
-    return _to_public(complaint)
-
-
-# ---------------------------------------------------------------------------- staff
 @router.get("", response_model=Page[ComplaintListItem])
 async def list_complaints(
     user: CurrentUser,
     status_filter: Annotated[list[Status] | None, Query(alias="status")] = None,
     category: Annotated[str | None, Query()] = None,
-    priority: Annotated[int | None, Query(ge=1, le=4)] = None,
     department: Annotated[str | None, Query()] = None,
     agent_id: Annotated[PydanticObjectId | None, Query()] = None,
     q: Annotated[str | None, Query(max_length=200)] = None,
     date_from: Annotated[datetime | None, Query()] = None,
     date_to: Annotated[datetime | None, Query()] = None,
-    sla_breached: Annotated[bool | None, Query()] = None,
     needs_human_triage: Annotated[bool | None, Query()] = None,
     unassigned: Annotated[bool | None, Query()] = None,
     cursor: Annotated[str | None, Query()] = None,
@@ -101,13 +91,11 @@ async def list_complaints(
         user,
         status=status_filter,
         category=category,
-        priority=priority,
         department_code=department,
         agent_id=agent_id,
         q=q,
         date_from=date_from,
         date_to=date_to,
-        sla_breached=sla_breached,
         needs_human_triage=needs_human_triage,
         unassigned=unassigned,
         cursor=cursor,
@@ -160,101 +148,6 @@ async def resolve_complaint(
     return await complaint_service.resolve(complaint, payload.resolution, user)
 
 
-@router.post("/{complaint_id}/reject", response_model=ComplaintOut)
-async def reject_complaint(
-    complaint_id: PydanticObjectId, payload: RejectRequest, user: AgentUser
-) -> Complaint:
-    """Reject a claim. Article 8 makes the reasoning mandatory, not optional."""
-    complaint = await complaint_service.get_for_user(complaint_id, user)
-    return await complaint_service.reject(complaint, payload.motivation, user)
-
-
-@router.post(
-    "/{complaint_id}/attachments", response_model=ComplaintOut, status_code=201
-)
-async def upload_attachment(
-    complaint_id: PydanticObjectId,
-    user: OptionalUser,
-    file: Annotated[UploadFile, File()],
-    token: Annotated[str | None, Query()] = None,
-) -> Complaint:
-    """Attach a file, either as a signed-in user or with a tracking token.
-
-    Anonymous submission is the common case in Tunisia, and a photo of the
-    disputed bill is the most useful thing a claimant can send — so requiring an
-    account here would block the evidence that makes a complaint actionable.
-    """
-    complaint = await _complaint_for_actor(complaint_id, user, token)
-
-    content_type = file.content_type or "application/octet-stream"
-    if content_type not in storage.ALLOWED_CONTENT_TYPES:
-        raise ValidationError(f"Type de fichier non autorise: {content_type}")
-
-    data = await file.read()
-    max_bytes = settings.max_attachment_mb * 1024 * 1024
-    if len(data) > max_bytes:
-        raise ValidationError(
-            f"Fichier trop volumineux (maximum {settings.max_attachment_mb} Mo)"
-        )
-
-    key = f"{complaint.ref}/{uuid4().hex}-{file.filename}"
-    await storage.put_object(key, data, content_type)
-    await complaint_service.add_attachment(
-        complaint,
-        Attachment(
-            filename=file.filename or "piece-jointe",
-            content_type=content_type,
-            size=len(data),
-            s3_key=key,
-            # None on the anonymous path: the token identifies the complaint,
-            # not a person.
-            uploaded_by=user.id if user else None,
-        ),
-    )
-    return complaint
-
-
-@router.get("/{complaint_id}/suggest")
-async def suggest_reply(
-    complaint_id: PydanticObjectId,
-    user: AgentUser,
-    limit: Annotated[int, Query(ge=1, le=5)] = 3,
-) -> dict[str, Any]:
-    """Top drafts from the knowledge base. Retrieval and slot filling only —
-    nothing is generated, and nothing is sent."""
-    complaint = await complaint_service.get_for_user(complaint_id, user)
-    result = await kb_service.suggest(complaint, limit=limit)
-    return {
-        "language": kb_service.draft_language(complaint),
-        "drafts": [
-            {
-                "text": draft.text,
-                "source_article_id": draft.source_article_id,
-                "score": draft.score,
-                "filled_slots": draft.filled_slots,
-            }
-            for draft in result.drafts
-        ],
-        "cited_articles": result.cited_articles,
-        "missing_slots": result.missing_slots,
-    }
-
-
-@router.post("/{complaint_id}/suggest/used", status_code=204)
-async def record_suggestion_usage(
-    complaint_id: PydanticObjectId, payload: SuggestionUsage, user: AgentUser
-) -> None:
-    """Record whether the agent sent the draft verbatim, edited it, or dropped it."""
-    complaint = await complaint_service.get_for_user(complaint_id, user)
-    if await kb_service.record_usage(payload.article_id, payload.outcome) is None:
-        raise NotFound("Article introuvable")
-    complaint.log(
-        "suggestion.used", actor_type="agent", actor_id=str(user.id),
-        article_id=payload.article_id, outcome=payload.outcome,
-    )
-    await complaint.save()
-
-
 @router.post("/{complaint_id}/retriage", response_model=ComplaintOut)
 async def retriage(complaint_id: PydanticObjectId, user: SupervisorUser) -> Complaint:
     """Re-run the whole pipeline. Synchronous so the caller sees the result."""
@@ -265,99 +158,24 @@ async def retriage(complaint_id: PydanticObjectId, user: SupervisorUser) -> Comp
 
 @router.get("/{complaint_id}/analysis")
 async def analysis(complaint_id: PydanticObjectId, user: AgentUser) -> dict[str, Any]:
-    """Everything behind the decision: stages, timings, rule hits, alternatives.
+    """Everything behind the decision: the category, the terms that produced it,
+    and the alternatives.
 
     This is the explainability surface — the panel an agent opens to ask why a
-    complaint was given priority 1 and sent to their queue.
+    complaint was routed to their queue, and the reason a lexicon was chosen
+    over a model in the first place.
     """
     complaint = await complaint_service.get_for_user(complaint_id, user)
-    traces = (
-        await AnalysisTrace.find(AnalysisTrace.complaint_id == complaint.id)
-        .sort("-created_at")
-        .limit(5)
-        .to_list()
-    )
-    duplicate = (
-        await Complaint.get(complaint.analysis.duplicate_of)
-        if complaint.analysis.duplicate_of
-        else None
-    )
-    related = await Complaint.find(
-        {"_id": {"$in": complaint.analysis.related_ids}}
-    ).to_list()
-
     return {
         "ref": complaint.ref,
         "triage_state": str(complaint.triage_state),
+        "category": complaint.analysis.category,
         "analysis": complaint.analysis.model_dump(mode="json"),
-        "duplicate_of": (
-            {"id": str(duplicate.id), "ref": duplicate.ref, "subject": duplicate.subject}
-            if duplicate
-            else None
-        ),
-        "related": [
-            {"id": str(r.id), "ref": r.ref, "subject": r.subject} for r in related
-        ],
-        "traces": [
-            {
-                "engine": t.engine,
-                "engine_version": t.engine_version,
-                "outcome": t.outcome,
-                "error": t.error,
-                "total_latency_ms": t.total_latency_ms,
-                "created_at": t.created_at,
-                "stages": [s.model_dump() for s in t.stages],
-            }
-            for t in traces
-        ],
     }
 
 
-@router.get("/{complaint_id}/attachments/{attachment_id}")
-async def attachment_url(
-    complaint_id: PydanticObjectId,
-    attachment_id: str,
-    user: OptionalUser,
-    token: Annotated[str | None, Query()] = None,
-) -> dict[str, str]:
-    """Hand out a short-lived presigned URL rather than proxying the bytes."""
-    complaint = await _complaint_for_actor(complaint_id, user, token)
-    attachment = next(
-        (a for a in complaint.attachments if a.id == attachment_id), None
-    )
-    if attachment is None:
-        raise NotFound("Piece jointe introuvable")
-    return {"url": await storage.presigned_url(attachment.s3_key)}
-
-
-# ------------------------------------------------------------------------- helpers
-async def _complaint_for_actor(
-    complaint_id: PydanticObjectId, user: User | None, token: str | None
-) -> Complaint:
-    """Resolve a complaint for either an authenticated caller or a token holder.
-
-    The token path is checked first and is strictly scoped to one complaint, so
-    it grants nothing beyond the document it was minted for.
-    """
-    if token:
-        complaint = await _complaint_from_token(token, scope="track")
-        if complaint.id != complaint_id:
-            raise NotFound("Reclamation introuvable")
-        return complaint
-    if user is None:
-        raise AuthenticationError()
-    return await complaint_service.get_for_user(complaint_id, user)
-
-
-async def _complaint_from_token(token: str, scope: str) -> Complaint:
-    complaint_id = verify_tracking_token(token, scope=scope)
-    complaint = await Complaint.get(PydanticObjectId(complaint_id))
-    if complaint is None:
-        raise NotFound("Reclamation introuvable")
-    return complaint
-
-
 def _to_public(complaint: Complaint) -> ComplaintPublicOut:
+    """The claimant's view. Internal notes never cross this boundary."""
     return ComplaintPublicOut(
         ref=complaint.ref,
         subject=complaint.subject,
@@ -367,18 +185,18 @@ def _to_public(complaint: Complaint) -> ComplaintPublicOut:
         department=complaint.assignment.department_code if complaint.assignment else None,
         created_at=complaint.created_at,
         updated_at=complaint.updated_at,
-        sla_due_at=complaint.sla.due_at,
         messages=[
             PublicMessage(
                 at=m.at,
                 author_type=m.author_type,
+                # The bank answers as the bank; naming the individual agent
+                # invites a claimant to address them personally.
                 author_name=m.author_name if m.author_type != "agent" else None,
                 body=m.body,
             )
             for m in complaint.messages
             if not m.internal
         ],
-        satisfaction_submitted=complaint.satisfaction is not None,
     )
 
 
@@ -393,9 +211,6 @@ def _to_list_item(complaint: Complaint) -> ComplaintListItem:
         claimant=complaint.claimant,
         analysis=complaint.analysis,
         assignment=complaint.assignment,
-        sla_due_at=complaint.sla.due_at,
-        sla_breached=complaint.sla.breached,
-        sla_warned=complaint.sla.warned,
         created_at=complaint.created_at,
         updated_at=complaint.updated_at,
     )

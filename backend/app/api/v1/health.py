@@ -24,7 +24,7 @@ async def ready(response: Response) -> dict[str, Any]:
     The engine loads no artifact, so readiness is about Mongo and Redis —
     and that state has to be visible here rather than inferred.
     """
-    engine = triage.health()
+    engine = triage.engine_health()
 
     # Redis backs notifications, not the request path — it is reported but does
     # not make the service unready.

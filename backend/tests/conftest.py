@@ -21,9 +21,6 @@ from app.main import app
 from app.models import ALL_DOCUMENTS
 from app.models.department import Department
 from app.models.user import Role, User
-from app.services import triage
-from app.services.kb_service import rebuild_index, seed_articles
-from app.services.rules_service import seed_rules
 from app.services.seed_service import seed_departments
 
 
@@ -46,10 +43,6 @@ async def _clean_collections() -> AsyncIterator[None]:
     for document in ALL_DOCUMENTS:
         await document.get_motor_collection().delete_many({})
     await seed_departments()
-    await seed_rules()
-    await seed_articles()
-    await rebuild_index()
-    await triage.refresh_rules()
     try:
         await bus.get_redis().delete(STREAM_KEY)
     except Exception:  # noqa: BLE001 — Redis is optional for most tests

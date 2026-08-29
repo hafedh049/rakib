@@ -135,42 +135,6 @@ export interface Department {
   active: boolean
 }
 
-export interface Rule {
-  id: string
-  code: string
-  label: string
-  kind: string
-  config: Record<string, unknown>
-  weight: number
-  active: boolean
-  order: number
-  builtin: boolean
-}
-
-export interface SimulationResult {
-  language: string
-  language_source: string
-  normalized_text: string
-  transliterated: string
-  hits: RuleHit[]
-  features: Record<string, number | boolean>
-}
-
-export interface KBArticle {
-  id: string
-  title: string
-  content: string
-  category: string | null
-  language: string
-  tags: string[]
-  template: string | null
-  slots: string[]
-  usage_count: number
-  usage_breakdown: Record<string, number>
-  active: boolean
-  updated_at: string
-}
-
 export interface Draft {
   text: string
   source_article_id: string
@@ -203,14 +167,3 @@ export interface PublicComplaint {
   }[]
 }
 
-export interface Overview {
-  window_days: number
-  total: number
-  open: number
-  closed: number
-  by_status: Record<string, number>
-  by_  avg_resolution_hours: number | null
-  resolved_count: number
-  needs_human_triage: number
-  duplicates_detected: number
-}

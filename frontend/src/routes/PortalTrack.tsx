@@ -1,16 +1,15 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 
 import { StatusBadge } from '@/components/badges'
 import { PortalLayout } from '@/components/PortalLayout'
-import { Button, EmptyState, Panel, Skeleton, Textarea, cx } from '@/components/ui'
+import { EmptyState, Panel, Skeleton, cx } from '@/components/ui'
 import { useT } from '@/i18n'
 import { api } from '@/lib/api'
 import { formatDate, formatDateTime } from '@/lib/format'
 import type { PublicComplaint } from '@/lib/types'
 
-export function PortalTrack({ satisfaction = false }: { satisfaction?: boolean }) {
+export function PortalTrack() {
   const { t, locale } = useT()
   const [params] = useSearchParams()
   const token = params.get('token') ?? ''
@@ -102,92 +101,8 @@ export function PortalTrack({ satisfaction = false }: { satisfaction?: boolean }
             </ul>
           )}
         </section>
-
-        {satisfaction && !complaint.satisfaction_submitted && (
-          <SatisfactionForm token={token} onDone={() => query.refetch()} />
-        )}
-
-        {complaint.satisfaction_submitted && (
-          <Panel className="border-success/30 bg-success-soft">
-            <p className="text-sm font-medium text-success">
-              {t('portal.rateThanks')}
-            </p>
-          </Panel>
-        )}
       </div>
     </PortalLayout>
   )
 }
 
-function SatisfactionForm({
-  token,
-  onDone,
-}: {
-  token: string
-  onDone: () => void
-}) {
-  const { t } = useT()
-  const [score, setScore] = useState<number | null>(null)
-  const [comment, setComment] = useState('')
-
-  const submit = useMutation({
-    mutationFn: () =>
-      api.post('/complaints/satisfaction', { score, comment: comment || null }, { token }),
-    onSuccess: onDone,
-  })
-
-  return (
-    <Panel title={t('portal.rate')}>
-      <p className="mb-4 text-sm text-ink-muted">{t('portal.rateLead')}</p>
-
-      <div
-        role="radiogroup"
-        aria-label={t('portal.rate')}
-        className="flex flex-wrap gap-2"
-      >
-        {[1, 2, 3, 4, 5].map((value) => (
-          <button
-            key={value}
-            type="button"
-            role="radio"
-            aria-checked={score === value}
-            onClick={() => setScore(value)}
-            className={cx(
-              'size-11 rounded-[var(--radius-control)] border text-sm font-semibold',
-              'transition-colors duration-150 tabular',
-              score === value
-                ? 'border-primary bg-primary text-primary-ink'
-                : 'border-line hover:border-primary/40 hover:bg-surface-2',
-            )}
-          >
-            {value}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-4 flex flex-col gap-2">
-        <label htmlFor="satisfaction-comment" className="text-sm font-medium">
-          {t('portal.rateComment')}
-        </label>
-        <Textarea
-          id="satisfaction-comment"
-          rows={3}
-          value={comment}
-          maxLength={2000}
-          onChange={(event) => setComment(event.target.value)}
-        />
-      </div>
-
-      <Button
-        variant="primary"
-        size="md"
-        className="mt-4"
-        disabled={!score}
-        loading={submit.isPending}
-        onClick={() => submit.mutate()}
-      >
-        {t('portal.rateSubmit')}
-      </Button>
-    </Panel>
-  )
-}

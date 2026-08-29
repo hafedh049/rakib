@@ -27,5 +27,4 @@ async def triage_complaint(ctx: dict[str, Any], complaint_id: str) -> dict[str, 
     return {
         "status": str(complaint.triage_state),
         "category": complaint.analysis.category,
-        "priority": complaint.analysis.priority,
     }
